@@ -202,4 +202,42 @@ public class SseReaderTests
         SpeechStreamEvent evt = SpeechStreamEvent.Parse(events[0].Data);
         Assert.Equal(70000, evt.Pcm!.Length);
     }
+
+    [Fact]
+    public async Task TaskBatchResultAndDone()
+    {
+        string sse =
+            "data: {\"type\":\"task.batch.result\",\"index\":0,\"result\":{\"text\":\"Sure!\",\"timing\":{\"ttft_ms\":5.0}}}\n\n" +
+            "data: {\"type\":\"task.batch.done\",\"result_count\":1,\"timing\":{\"wall_ms\":12.0}}\n\n" +
+            "data: [DONE]\n\n";
+        List<SseEvent> events = await ReadAllAsync(sse);
+        TaskBatchEvent first = TaskBatchEvent.Parse(events[0].Data);
+        Assert.Equal(TaskBatchEventKind.Result, first.Kind);
+        Assert.Equal(0, first.Index);
+        Assert.Equal("Sure!", first.Result!.Text);
+        TaskBatchEvent last = TaskBatchEvent.Parse(events[1].Data);
+        Assert.Equal(TaskBatchEventKind.Done, last.Kind);
+        Assert.Equal(1, last.ResultCount);
+        Assert.Equal(12.0, last.Timing!.WallMs);
+        Assert.Throws<System.Text.Json.JsonException>(() => TaskBatchEvent.Parse("{\"type\":\"task.batch.other\"}"));
+    }
+
+    [Fact]
+    public async Task EmptyDataLineIsSkippedPerSpec()
+    {
+        List<SseEvent> events = await ReadAllAsync("data:\n\ndata: hello\n\n");
+        Assert.Single(events);
+        Assert.Equal("hello", events[0].Data);
+    }
+
+    [Fact]
+    public async Task LargeLineUnderDefaultLimitIsRead()
+    {
+        // Pins the raised default: task.stream.done carries the whole run's audio as one
+        // line (~640 KB base64 per 10 s), so the default must cover runs past 30 s.
+        string b64 = new('A', 3 * 1024 * 1024);
+        List<SseEvent> events = await ReadAllAsync("data: " + b64 + "\n\ndata: [DONE]\n\n");
+        Assert.Single(events);
+        Assert.Equal(b64, events[0].Data);
+    }
 }

@@ -54,7 +54,7 @@ conventions rather than inventing a second style:
 
 - New endpoint under speech/transcription/tasks/recipes → a method on the matching sub-client
   (`SpeechClient.cs`, `TranscriptionClient.cs`, `TaskClients.cs`), or a GET endpoint on
-  `AudioCppClient` (reuse `SendJsonAsync`/`PostJsonAsync`/`GetHealthAsync` patterns).
+  `AudioCppClient` (reuse `SendJsonAsync`/`GetHealthAsync` patterns).
 - New request body → a `*Request` class in the right `Models/*.cs` file, following the
   `Validate()` + `WriteTo(Utf8JsonWriter)` shape already used (see `SpeechRequest`,
   `TaskRequestBody`). Match the server's **field order** — tests assert literal goldens.

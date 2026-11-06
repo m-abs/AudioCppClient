@@ -141,7 +141,7 @@ public sealed class SpeechClient
 
         string query = request.BuildQueryString();
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/speech/live", query));
-        httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput);
+        httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput, cancellationToken);
         httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
         using (response)

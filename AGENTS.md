@@ -46,7 +46,7 @@ dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/
 
 `dotnet` is 10.0.401; a .NET 8 runtime lives at `/home/vscode/.dotnet8` (tests set
 `RollForward=LatestMajor`). Expect **0 warnings, 0 errors** — the library builds clean on all
-three TFMs and the suite is 57 tests, no network.
+three TFMs and the suite is 65 tests, no network.
 
 ## Formatting — mandatory (`.editorconfig` is the authority)
 

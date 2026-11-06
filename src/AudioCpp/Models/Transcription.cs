@@ -16,7 +16,7 @@ public class TranscriptionInputBase
     /// <summary>Server-local WAV path (JSON body form).</summary>
     public string? AudioPath { get; set; }
 
-    /// <summary>Audio bytes to upload (multipart form).</summary>
+    /// <summary>Audio bytes to upload (multipart form). The client disposes this stream when the request completes.</summary>
     public Stream? AudioFile { get; set; }
 
     /// <summary>Filename reported for <see cref="AudioFile"/>; must name a WAV for most builds.</summary>
@@ -42,12 +42,12 @@ public class TranscriptionInputBase
             throw new ArgumentException("transcription requires a model id", nameof(Model));
         }
 
-        if (AudioPath != null && AudioFile != null)
+        if (!string.IsNullOrEmpty(AudioPath) && AudioFile != null)
         {
             throw new ArgumentException("provide either AudioPath (server-local) or AudioFile (upload), not both");
         }
 
-        if (AudioPath == null && AudioFile == null)
+        if (string.IsNullOrEmpty(AudioPath) && AudioFile == null)
         {
             throw new ArgumentException("transcription requires AudioPath or AudioFile");
         }

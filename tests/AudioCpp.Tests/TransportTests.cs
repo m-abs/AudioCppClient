@@ -374,6 +374,87 @@ public class TransportTests
         AudioCppClient client = new("http://host:1/path");
         Assert.Equal("http://host:1/path/v1/models", client.BuildUri("v1/models").AbsoluteUri);
     }
+
+    [Fact]
+    public async Task StreamPcmForcesAudioFormatAndReturnsRawBytes()
+    {
+        byte[] pcm = new byte[] { 1, 2, 3, 4 };
+        using FakeHandler handler = new();
+        handler.QueueBytes(pcm, "application/octet-stream");
+        System.IO.Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
+            new SpeechStreamRequest { Request = new SpeechRequest { Model = "m", Input = "hi" } });
+        using (stream)
+        {
+            using System.IO.MemoryStream sink = new();
+            await stream.CopyToAsync(sink);
+            Assert.Equal(pcm, sink.ToArray());
+        }
+        Assert.Contains("\"stream_format\":\"audio\"", handler.Last.ContentText());
+        Assert.Contains("\"response_format\":\"pcm\"", handler.Last.ContentText());
+    }
+
+    [Fact]
+    public async Task SpeakLivePostsChunkedPcmAndParsesEvents()
+    {
+        using FakeHandler handler = new();
+        handler.QueueSse("data: {\"type\":\"speech.text.delta\",\"delta\":\"hi\"}\n\ndata: [DONE]\n\n");
+        using System.IO.MemoryStream pcm = new(new byte[] { 5, 6, 7 });
+        List<SpeechStreamEvent> events = await NewClient(handler).Speech.SpeakLiveAsync(
+            new LiveSpeechRequest { Model = "live-tts" }, pcm).ToListAsync();
+        Assert.Equal(SpeechStreamEventKind.TextDelta, Assert.Single(events).Kind);
+        Assert.Contains("/v1/audio/speech/live", handler.Last.Uri.AbsoluteUri);
+        Assert.Contains("model=live-tts", handler.Last.Uri.Query);
+        Assert.Equal("application/octet-stream", handler.Last.ContentType);
+        Assert.Equal(new byte[] { 5, 6, 7 }, handler.Last.Content);
+    }
+
+    [Fact]
+    public async Task TranscribeStreamParsesEventsOnJsonPath()
+    {
+        using FakeHandler handler = new();
+        handler.QueueSse("data: {\"type\":\"transcript.text.delta\",\"delta\":\"hi\"}\n\ndata: [DONE]\n\n");
+        List<TranscriptEvent> events = await NewClient(handler).Transcriptions.TranscribeStreamAsync(
+            new TranscriptionRequest { Model = "asr", AudioPath = "/srv/a.wav" }).ToListAsync();
+        Assert.Equal("hi", Assert.Single(events).Text);
+        Assert.Contains("\"audio\":\"/srv/a.wav\"", handler.Last.ContentText());
+    }
+
+    [Fact]
+    public void EmptyAudioPathFailsValidation()
+    {
+        Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "asr", AudioPath = "" }.Validate());
+    }
+
+    [Fact]
+    public async Task LiveBodyCopyStopsOnCancellationMidBody()
+    {
+        using CancellationTokenSource cts = new();
+        using CancelAfterFirstRead source = new(cts);
+        AudioCppClient.ChunkedStreamContent content = new(source, cts.Token);
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => content.CopyToAsync(new System.IO.MemoryStream(), cts.Token));
+    }
+
+    private sealed class CancelAfterFirstRead : System.IO.MemoryStream
+    {
+        private readonly CancellationTokenSource _cts;
+        private int _reads;
+
+        public CancelAfterFirstRead(CancellationTokenSource cts) : base(new byte[] { 1, 2, 3 })
+        {
+            _cts = cts;
+        }
+
+        public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
+        {
+            int read = await base.ReadAsync(buffer, cancellationToken);
+            if (++_reads == 1)
+            {
+                _cts.Cancel();
+            }
+
+            return read;
+        }
+    }
 }
 
 internal static class AsyncEnumerableTestExtensions

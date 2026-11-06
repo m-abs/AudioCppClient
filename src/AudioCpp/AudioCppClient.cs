@@ -384,34 +384,6 @@ public sealed class AudioCppClient
         }
     }
 
-    /// <summary>Convenience overload: JSON POST returning a parsed object.</summary>
-    internal Task<T> PostJsonAsync<T>(string path, Action<Utf8JsonWriter> writeBody, Func<JsonElement, T> parse, CancellationToken cancellationToken)
-    {
-        return SendJsonAsync(HttpMethod.Post, path, writeBody, parse, cancellationToken);
-    }
-
-    /// <summary>Same as <see cref="PostJsonAsync{T}"/> but allows a custom path with query already appended.</summary>
-    internal Task<T> PostJsonWithQueryAsync<T>(string pathWithQuery, Action<Utf8JsonWriter> writeBody, Func<JsonElement, T> parse, CancellationToken cancellationToken)
-    {
-        int question = pathWithQuery.IndexOf('?');
-        string path = question < 0 ? pathWithQuery : pathWithQuery.Substring(0, question);
-        string? query = question < 0 ? null : pathWithQuery.Substring(question);
-        using HttpRequestMessage request = new(HttpMethod.Post, BuildUri(path, query));
-        request.Content = CreateJsonContent(writeBody);
-        return FinishAsync(request, HttpCompletionOption.ResponseContentRead, parse, cancellationToken);
-    }
-
-    internal async Task<T> FinishAsync<T>(HttpRequestMessage request, HttpCompletionOption completion, Func<JsonElement, T> parse, CancellationToken cancellationToken)
-    {
-        using HttpResponseMessage response = await SendAsync(request, completion, cancellationToken).ConfigureAwait(false);
-        string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        EnsureSuccess(response, body);
-        using (JsonDocument doc = System.Text.Json.JsonDocument.Parse(body))
-        {
-            return parse(doc.RootElement);
-        }
-    }
-
     internal async Task<string> ReadBodyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         using (request)
@@ -549,17 +521,19 @@ public sealed class AudioCppClient
     internal sealed class ChunkedStreamContent : HttpContent
     {
         private readonly Stream _source;
+        private readonly CancellationToken _cancellationToken;
 
-        internal ChunkedStreamContent(Stream source)
+        internal ChunkedStreamContent(Stream source, CancellationToken cancellationToken)
         {
             _source = source ?? throw new ArgumentNullException(nameof(source));
+            _cancellationToken = cancellationToken;
         }
 
         protected override async Task SerializeToStreamAsync(Stream stream, TransportContext? context)
         {
             try
             {
-                await _source.CopyToAsync(stream, 81920, CancellationToken.None).ConfigureAwait(false);
+                await _source.CopyToAsync(stream, 81920, _cancellationToken).ConfigureAwait(false);
             }
             catch (PlatformNotSupportedException ex)
             {

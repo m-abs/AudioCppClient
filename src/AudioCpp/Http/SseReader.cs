@@ -46,7 +46,7 @@ public readonly struct SseEvent
 /// per spec even though the server never emits them.
 /// </para>
 /// <para>
-/// Size limit: a single line may be at most the configured maximum (2 MiB by default).
+/// Size limit: a single line may be at most the configured maximum (16 MiB by default).
 /// The server documents that <c>task.stream.done</c> carries the whole result audio on
 /// one line, about 640 KB of Base64 per 10 s of 24 kHz audio, so callers reading long
 /// spoken replies should size this via the constructor.
@@ -54,8 +54,8 @@ public readonly struct SseEvent
 /// </remarks>
 public sealed class SseReader
 {
-    /// <summary>Default maximum size of one line: 2 MiB.</summary>
-    public const int DefaultMaxLineBytes = 2 * 1024 * 1024;
+    /// <summary>Default maximum size of one line: 16 MiB.</summary>
+    public const int DefaultMaxLineBytes = 16 * 1024 * 1024;
 
     /// <summary>The literal the server writes to terminate a healthy stream.</summary>
     public const string DoneSentinel = "[DONE]";
@@ -150,12 +150,13 @@ public sealed class SseReader
 
             if (line.Length == 0)
             {
-                if (data != null)
+                if (!string.IsNullOrEmpty(data))
                 {
                     done = data == DoneSentinel;
                     break; // blank line terminates the event
                 }
 
+                data = null; // spec: an empty data buffer is not dispatched; reset it
                 continue; // keep-alive / leading separator
             }
 
@@ -195,7 +196,7 @@ public sealed class SseReader
             }
         }
 
-        if (done || data == null || data == DoneSentinel)
+        if (done || data == null || data.Length == 0 || data == DoneSentinel)
         {
             return null;
         }

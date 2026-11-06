@@ -143,7 +143,7 @@ public sealed class TranscriptionClient
 
         string query = request.BuildQueryString();
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/transcriptions/live", query));
-        httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput);
+        httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput, cancellationToken);
         httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
         await foreach (TranscriptEvent evt in EnumerateTranscriptEventsAsync(httpRequest, cancellationToken).ConfigureAwait(false))
         {

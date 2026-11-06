@@ -51,14 +51,17 @@ TranscriptionResult uploaded = await client.Transcriptions.TranscribeAsync(new T
 Streaming (C# 8+ / .NET targets — `IAsyncEnumerable`):
 
 ```csharp
-await foreach (SpeechStreamEvent evt in client.Speech.StreamAsync(new SpeechStreamRequest
+using (Stream out = File.OpenWrite("out.pcm"))
 {
-    Request = new SpeechRequest { Model = "stream-tts", Input = "Tell me a story" },
-    ReturnText = true,
-}))
-{
-    if (evt.Kind == SpeechStreamEventKind.AudioDelta) File.OpenWrite("out.pcm").Write(evt.Pcm!);
-    if (evt.Kind == SpeechStreamEventKind.TextDelta) Console.Write(evt.Text);
+    await foreach (SpeechStreamEvent evt in client.Speech.StreamAsync(new SpeechStreamRequest
+    {
+        Request = new SpeechRequest { Model = "stream-tts", Input = "Tell me a story" },
+        ReturnText = true,
+    }))
+    {
+        if (evt.Kind == SpeechStreamEventKind.AudioDelta) out.Write(evt.Pcm!);
+        if (evt.Kind == SpeechStreamEventKind.TextDelta) Console.Write(evt.Text);
+    }
 }
 ```
 
@@ -74,16 +77,16 @@ callers without `await foreach` language support.
 | Models | GET | `/v1/models` | `ListModelsAsync(includeParams, includeSessionOptions)` |
 | Model load | POST | `/v1/models/load` | `LoadModelAsync(ModelLoadRequest)` (needs `--ui-management`) |
 | Model unload | POST | `/v1/tasks/unload_models` | `UnloadModelsAsync(ids)` / `UnloadAllModelsAsync()` |
-| Voices | GET | `/v1/voices` | `ListVoicesAsync(model?)` |
+| Voices | GET | `/v1/audio/voices` | `ListVoicesAsync(model?)` |
 | Recipes | GET | `/v1/recipes` | `ListRecipesAsync()` |
 | Recipe run | POST | `/v1/recipes/run` | `Recipes.RunAsync(...)` / `RunStreamAsync(...)` |
 | Speech | POST | `/v1/audio/speech` | `Speech.SynthesizeAsync(...)` → `SpeechResult` / `SynthesizeJsonAsync` → base64 envelope |
 | Speech stream | POST | `/v1/audio/speech` (SSE) | `Speech.StreamAsync(...)` / `StreamPcmAsync` |
-| Live speech | POST | `/v1/speech/live` (duplex SSE) | `Speech.SpeakLiveAsync(request, pcmStream)` |
+| Live speech | POST | `/v1/audio/speech/live` (duplex SSE) | `Speech.SpeakLiveAsync(request, pcmStream)` |
 | Transcription | POST | `/v1/audio/transcriptions` | `Transcriptions.TranscribeAsync(...)` (JSON path or multipart upload) |
 | Transcription details | POST | `/v1/audio/transcriptions/details` | `TranscribeDetailsAsync(...)` |
 | Transcription stream | POST (SSE) | same | `TranscribeStreamAsync(...)` |
-| Live transcription | POST | `/v1/transcriptions/live` (duplex) | `TranscribeLiveAsync(request, pcmStream)` |
+| Live transcription | POST | `/v1/audio/transcriptions/live` (duplex) | `TranscribeLiveAsync(request, pcmStream)` |
 | Batch transcription | POST (SSE) | `/v1/batches/transcriptions` | `TranscribeBatchAsync(...)` |
 | Alignment | POST (multipart) | `/v1/audio/alignments` | `Alignments.RunAsync(...)` |
 | Task run | POST | `/v1/tasks/run` | `Tasks.RunAsync(...)` |
