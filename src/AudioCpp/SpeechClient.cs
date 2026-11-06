@@ -1,0 +1,204 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Tasks;
+
+using mabs.AudioCpp.Http;
+using mabs.AudioCpp.Models;
+
+namespace mabs.AudioCpp;
+
+/// <summary>
+/// Speech synthesis against <c>POST /v1/audio/speech</c> and <c>/v1/audio/speech/live</c>.
+/// </summary>
+public sealed class SpeechClient
+{
+    private readonly AudioCppClient _client;
+
+    internal SpeechClient(AudioCppClient client)
+    {
+        _client = client;
+    }
+
+    /// <summary>
+    /// Synthesize speech. Returns the raw audio bytes (WAV by default) with the
+    /// <c>X-AudioCPP-*</c> timing headers parsed into <see cref="SpeechResult.Timing"/>.
+    /// </summary>
+    public async Task<SpeechResult> SynthesizeAsync(SpeechRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        request.Validate();
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
+        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+        AudioRawResponse raw = await _client.SendForBytesAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        return new SpeechResult
+        {
+            Audio = raw.Bytes,
+            ContentType = raw.MediaType ?? "audio/wav",
+            Timing = AudioCppClient.ReadTimingHeaders(raw.Headers),
+        };
+    }
+
+    /// <summary>
+    /// Synthesize with <c>response_format=json</c> and parse the JSON envelope
+    /// (<c>audio</c> Base64 WAV, <c>format</c>, <c>timing</c>).
+    /// </summary>
+    public async Task<SpeechJsonResult> SynthesizeJsonAsync(SpeechRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        request.ResponseFormat = ResponseFormat.Json;
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
+        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+        return await _client.ReadJsonAsync(httpRequest, SseParsers.SpeechJson, cancellationToken).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Stream speech as SSE events (requires a model configured with <c>mode: "streaming"</c>).
+    /// Ends after <c>speech.audio.done</c> and <c>[DONE]</c>; throws
+    /// <see cref="AudioCppException"/> on an SSE error event.
+    /// </summary>
+    public async IAsyncEnumerable<SpeechStreamEvent> StreamAsync(SpeechStreamRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        SseReader reader = await OpenSpeechStreamAsync(request, cancellationToken).ConfigureAwait(false);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
+        {
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return SpeechStreamEvent.Parse(evt.Data);
+        }
+    }
+
+    /// <summary>Callback streaming variant.</summary>
+    public async Task StreamAsync(SpeechStreamRequest request, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
+    {
+        if (onEvent == null)
+        {
+            throw new ArgumentNullException(nameof(onEvent));
+        }
+
+        await foreach (SpeechStreamEvent evt in StreamAsync(request, cancellationToken).ConfigureAwait(false))
+        {
+            await onEvent(evt).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Raw PCM streaming: <c>stream_format=audio</c> + <c>response_format=pcm</c> returns
+    /// chunked octet-stream bytes. The caller owns the returned stream; reading it yields
+    /// PCM16 bytes as the server produces them.
+    /// </summary>
+    public async Task<Stream> StreamPcmAsync(SpeechStreamRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        request.StreamFormat = StreamFormat.Audio;
+        request.Request.ResponseFormat = ResponseFormat.Pcm;
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
+        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+        HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// Live speech-to-speech: the request body is raw PCM pulled from
+    /// <paramref name="pcmInput"/> as it produces data (chunked transfer), and the response
+    /// streams events on the same connection. Consuming events before
+    /// <paramref name="pcmInput"/> ends requires full-duplex HTTP; on platforms without it
+    /// (browser/WASM) a <see cref="PlatformNotSupportedException"/> is thrown. The request
+    /// ends — and the model treats it as end-of-speech — when <paramref name="pcmInput"/>
+    /// reaches EOF; closing the connection without that is a server error, by contract.
+    /// </summary>
+    public async IAsyncEnumerable<SpeechStreamEvent> SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, [EnumeratorCancellation] CancellationToken cancellationToken = default)
+    {
+        if (request == null)
+        {
+            throw new ArgumentNullException(nameof(request));
+        }
+
+        if (pcmInput == null)
+        {
+            throw new ArgumentNullException(nameof(pcmInput));
+        }
+
+        string query = request.BuildQueryString();
+        using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/speech/live", query));
+        httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput);
+        httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
+        HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        using (response)
+        {
+            Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            SseReader reader = new(stream);
+            await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
+            {
+                SseReader.ThrowIfErrorEvent(evt.Data);
+                yield return SpeechStreamEvent.Parse(evt.Data);
+            }
+        }
+    }
+
+    /// <summary>Callback variant of <see cref="SpeakLiveAsync(LiveSpeechRequest, Stream, CancellationToken)"/>.</summary>
+    public async Task SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
+    {
+        if (onEvent == null)
+        {
+            throw new ArgumentNullException(nameof(onEvent));
+        }
+
+        await foreach (SpeechStreamEvent evt in SpeakLiveAsync(request, pcmInput, cancellationToken).ConfigureAwait(false))
+        {
+            await onEvent(evt).ConfigureAwait(false);
+        }
+    }
+
+    private async Task<SseReader> OpenSpeechStreamAsync(SpeechStreamRequest request, CancellationToken cancellationToken)
+    {
+        if (request.StreamFormat != StreamFormat.Sse)
+        {
+            throw new ArgumentException("StreamAsync emits SSE events; use StreamPcmAsync for stream_format=audio");
+        }
+
+        if (request.Request.ResponseFormat == null)
+        {
+            // Streaming speech only supports PCM output; set it so the server does not 400.
+            request.Request.ResponseFormat = ResponseFormat.Pcm;
+        }
+        else if (request.Request.ResponseFormat.Value != ResponseFormat.Pcm)
+        {
+            throw new ArgumentException("streaming speech only supports response_format=pcm");
+        }
+
+        HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
+        try
+        {
+            httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+            Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            return new SseReader(stream);
+        }
+        catch
+        {
+            httpRequest.Dispose();
+            throw;
+        }
+    }
+}

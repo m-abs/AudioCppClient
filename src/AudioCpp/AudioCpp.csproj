@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>mabs.AudioCpp</RootNamespace>
+    <AssemblyName>AudioCpp</AssemblyName>
+    <Version>0.0.1</Version>
+    <IsPackable>true</IsPackable>
+    <PackageId>AudioCpp</PackageId>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Description>.NET client for the audio.cpp server protocol (https://github.com/0xShug0/audio.cpp): speech, transcription, alignment, live routes, generic tasks, batches, recipes, voices and model management.</Description>
+    <Authors>Morten Sjøgren</Authors>
+    <PackageTags>audio;cpp;tts;asr;speech;transcription;audio.cpp</PackageTags>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+      <_Parameter1>AudioCpp.Tests</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Bcl.AsyncInterfaces" Version="9.0.8" />
+    <PackageReference Include="System.Text.Json" Version="9.0.8" />
+  </ItemGroup>
+
+</Project>
