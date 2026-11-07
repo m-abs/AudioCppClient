@@ -6,7 +6,7 @@
     <AssemblyName>AudioCpp</AssemblyName>
     <Version>0.0.1</Version>
     <IsPackable>true</IsPackable>
-    <PackageId>AudioCpp</PackageId>
+    <PackageId>Mabs.AudioCppClient</PackageId>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <Description>.NET client for the audio.cpp server protocol (https://github.com/0xShug0/audio.cpp): speech, transcription, alignment, live routes, generic tasks, batches, recipes, voices and model management.</Description>
     <Authors>Morten Sjøgren</Authors>
