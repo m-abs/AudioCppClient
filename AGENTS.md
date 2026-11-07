@@ -11,7 +11,7 @@ directly; there is **no OpenAI dependency**. Namespaces: `MabsDk.AudioCpp`,
 
 Target frameworks: `netstandard2.0;net10.0`. Only library dependencies are
 `System.Text.Json` and (netstandard2.0 only) `Microsoft.Bcl.AsyncInterfaces`, both pinned to
-`9.0.8`. Current package version `0.0.1`.
+`9.0.8`. Current package version `0.0.2`.
 
 ## Layout
 
@@ -41,7 +41,7 @@ internal `SseReader`/`SseParsers` helpers. The test assembly sees `internal`s vi
 dotnet build AudioCpp.slnx -v q --nologo          # library + tests + demo
 dotnet test tests/AudioCpp.Tests -v q --nologo
 bin/coverage.sh                                                              # tests + cobertura + HTML report (needs reportgenerator global tool) -> coverage/report/index.html
-dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/AudioCpp.0.0.1.nupkg
+dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/Mabs.AudioCppClient.0.0.2.nupkg
 ```
 
 `dotnet` is 10.0.401. Expect **0 warnings, 0 errors** — the library builds clean on both
