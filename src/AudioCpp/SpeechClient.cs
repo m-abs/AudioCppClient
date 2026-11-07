@@ -171,16 +171,13 @@ public sealed class SpeechClient
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/speech/live", query));
         httpRequest.Content = new AudioCppClient.ChunkedStreamContent(pcmInput, cancellationToken);
         httpRequest.Content.Headers.ContentType = new MediaTypeHeaderValue("application/octet-stream");
-        HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-        using (response)
+        using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        SseReader reader = new(stream);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
-            Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-            SseReader reader = new(stream);
-            await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-            {
-                SseReader.ThrowIfErrorEvent(evt.Data);
-                yield return SpeechStreamEvent.Parse(evt.Data);
-            }
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return SpeechStreamEvent.Parse(evt.Data);
         }
     }
 

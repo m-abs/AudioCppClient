@@ -214,16 +214,13 @@ public sealed class TranscriptionClient
         request.Validate();
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/batches/transcriptions"));
         httpRequest.Content = Multipart.BuildBatch(request);
-        HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-        using (response)
+        using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        SseReader reader = new(stream);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
-            Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-            SseReader reader = new(stream);
-            await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-            {
-                SseReader.ThrowIfErrorEvent(evt.Data);
-                yield return BatchTranscriptionEvent.Parse(evt.Data);
-            }
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return BatchTranscriptionEvent.Parse(evt.Data);
         }
     }
 
@@ -291,16 +288,13 @@ public sealed class TranscriptionClient
     {
         using (httpRequest)
         {
-            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-            using (response)
+            using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+            Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            SseReader reader = new(stream);
+            await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
             {
-                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                SseReader reader = new(stream);
-                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    SseReader.ThrowIfErrorEvent(evt.Data);
-                    yield return TranscriptEvent.Parse(evt.Data);
-                }
+                SseReader.ThrowIfErrorEvent(evt.Data);
+                yield return TranscriptEvent.Parse(evt.Data);
             }
         }
     }
@@ -327,7 +321,7 @@ internal static class Multipart
     /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildSingle(TranscriptionInputBase request, bool stream)
     {
-        MultipartFormDataContent content = new();
+        MultipartFormDataContent content = [];
         AddFile(content, "file", request.AudioFile!, request.AudioFileName!);
         content.Add(new StringContent(request.Model!), "model");
         if (!string.IsNullOrEmpty(request.Language))
@@ -359,7 +353,7 @@ internal static class Multipart
     /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildBatch(BatchTranscriptionRequest request)
     {
-        MultipartFormDataContent content = new();
+        MultipartFormDataContent content = [];
         foreach (AudioUpload file in request.Files)
         {
             AddFile(content, "file", file.Content, file.FileName);
@@ -394,7 +388,7 @@ internal static class Multipart
     /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildAlignment(AlignmentRequest request)
     {
-        MultipartFormDataContent content = new();
+        MultipartFormDataContent content = [];
         AddFile(content, "file", request.AudioFile!, request.AudioFileName!);
         content.Add(new StringContent(request.Model!, Encoding.UTF8), "model");
         content.Add(new StringContent(request.Text!, Encoding.UTF8), "text");

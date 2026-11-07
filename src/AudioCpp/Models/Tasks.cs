@@ -313,7 +313,7 @@ public sealed class TaskBatchRequest
     public string? Model { get; set; }
 
     /// <summary>One entry per request; results map back by index. At least one entry is required.</summary>
-    public IList<TaskRequestBody> Requests { get; } = new List<TaskRequestBody>();
+    public IList<TaskRequestBody> Requests { get; } = [];
 
     /// <summary>Busy-wait bound for the batch, in milliseconds.</summary>
     public long? BusyTimeoutMs { get; set; }

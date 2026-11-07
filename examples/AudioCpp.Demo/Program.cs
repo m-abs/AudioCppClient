@@ -148,7 +148,7 @@ async Task<int> SpeechAsync()
             {
                 if (request.Options == null)
                 {
-                    request.Options = new Dictionary<string, string>();
+                    request.Options = [];
                 }
 
                 request.Options[pair[0]] = pair[1];

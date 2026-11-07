@@ -454,14 +454,11 @@ public class TransportTests
         byte[] pcm = new byte[] { 1, 2, 3, 4 };
         using FakeHandler handler = new();
         handler.QueueBytes(pcm, "application/octet-stream");
-        System.IO.Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
+        using System.IO.Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
             new SpeechStreamRequest { Request = new SpeechRequest { Model = "m", Input = "hi" } });
-        using (stream)
-        {
-            using System.IO.MemoryStream sink = new();
-            await stream.CopyToAsync(sink);
-            Assert.Equal(pcm, sink.ToArray());
-        }
+        using System.IO.MemoryStream sink = new();
+        await stream.CopyToAsync(sink);
+        Assert.Equal(pcm, sink.ToArray());
 
         Assert.Contains("\"stream_format\":\"audio\"", handler.Last.ContentText());
         Assert.Contains("\"response_format\":\"pcm\"", handler.Last.ContentText());
@@ -558,7 +555,7 @@ internal static class AsyncEnumerableTestExtensions
     /// <returns>A list of all elements in enumeration order.</returns>
     internal static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> source)
     {
-        List<T> items = new();
+        List<T> items = [];
         await foreach (T item in source)
         {
             items.Add(item);

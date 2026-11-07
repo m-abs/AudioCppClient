@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>false</ImplicitUsings>
     <Deterministic>true</Deterministic>
+    <!-- Without this the .editorconfig IDE rules (IDE0001/IDE0063/var) never run in build or CI. -->
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
   </PropertyGroup>
 
 </Project>

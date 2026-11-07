@@ -45,7 +45,7 @@ public sealed class FakeHandler : IDisposable
     /// <summary>Builds the fake and wires every send to dequeue a queued responder.</summary>
     public FakeHandler()
     {
-        Recorded = new List<RecordedRequest>();
+        Recorded = [];
         Fake = A.Fake<PipelineHandler>();
         A.CallTo(() => Fake.OnSendAsync(A<HttpRequestMessage>.Ignored, A<CancellationToken>.Ignored))
             .ReturnsLazily(call => RespondAsync(call.GetArgument<HttpRequestMessage>(0)!));

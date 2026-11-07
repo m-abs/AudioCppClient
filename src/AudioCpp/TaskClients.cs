@@ -111,48 +111,39 @@ public sealed class TaskClient
             throw new ArgumentNullException(nameof(request));
         }
 
-        HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/tasks/stream");
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/tasks/stream");
         httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
         if (request.StreamFormat == null)
         {
             // Buffered JSON response: {"events":[…],"result":{…}}.
-            using (httpRequest)
+            string body = await _client.ReadBodyAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+            using JsonDocument doc = JsonDocument.Parse(body);
+            JsonElement root = doc.RootElement;
+            if (root.TryGetProperty("events", out JsonElement events) &&
+                events.ValueKind == JsonValueKind.Array)
             {
-                string body = await _client.ReadBodyAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-                using JsonDocument doc = JsonDocument.Parse(body);
-                JsonElement root = doc.RootElement;
-                if (root.TryGetProperty("events", out JsonElement events) &&
-                    events.ValueKind == JsonValueKind.Array)
+                foreach (JsonElement evt in events.EnumerateArray())
                 {
-                    foreach (JsonElement evt in events.EnumerateArray())
-                    {
-                        yield return TaskStreamEvent.FromEvent(TaskStreamEventBody.ParseEnvelope(evt));
-                    }
+                    yield return TaskStreamEvent.FromEvent(TaskStreamEventBody.ParseEnvelope(evt));
                 }
+            }
 
-                if (root.TryGetProperty("result", out JsonElement result) &&
-                    result.ValueKind == JsonValueKind.Object)
-                {
-                    yield return TaskStreamEvent.FromDone(SseReader.ReadTaskResult(result));
-                }
+            if (root.TryGetProperty("result", out JsonElement result) &&
+                result.ValueKind == JsonValueKind.Object)
+            {
+                yield return TaskStreamEvent.FromDone(SseReader.ReadTaskResult(result));
             }
 
             yield break;
         }
 
-        using (httpRequest)
+        using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        SseReader reader = new(stream);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
-            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-            using (response)
-            {
-                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                SseReader reader = new(stream);
-                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    SseReader.ThrowIfErrorEvent(evt.Data);
-                    yield return TaskStreamEvent.ParseSse(evt.Data);
-                }
-            }
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return TaskStreamEvent.ParseSse(evt.Data);
         }
     }
 
@@ -190,21 +181,15 @@ public sealed class TaskClient
             throw new ArgumentNullException(nameof(request));
         }
 
-        HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/tasks/batch");
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/tasks/batch");
         httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
-        using (httpRequest)
+        using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        SseReader reader = new(stream);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
-            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-            using (response)
-            {
-                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                SseReader reader = new(stream);
-                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    SseReader.ThrowIfErrorEvent(evt.Data);
-                    yield return TaskBatchEvent.Parse(evt.Data);
-                }
-            }
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return TaskBatchEvent.Parse(evt.Data);
         }
     }
 
@@ -283,21 +268,15 @@ public sealed class RecipeClient
         }
 
         request.Stream = true;
-        HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/recipes/run");
+        using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/recipes/run");
         httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
-        using (httpRequest)
+        using HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+        Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+        SseReader reader = new(stream);
+        await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
-            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-            using (response)
-            {
-                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                SseReader reader = new(stream);
-                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    SseReader.ThrowIfErrorEvent(evt.Data);
-                    yield return TaskStreamEvent.ParseSse(evt.Data);
-                }
-            }
+            SseReader.ThrowIfErrorEvent(evt.Data);
+            yield return TaskStreamEvent.ParseSse(evt.Data);
         }
     }
 

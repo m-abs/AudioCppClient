@@ -65,7 +65,7 @@ public sealed class SseReader
     private readonly Stream _stream;
     private readonly int _maxLineBytes;
     private readonly byte[] _buffer;
-    private readonly List<byte> _line = new();
+    private readonly List<byte> _line = [];
     private int _position;
     private int _bytesFilled;
 
@@ -107,30 +107,28 @@ public sealed class SseReader
             return;
         }
 
-        using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(data))
+        using System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(data);
+        if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
+            doc.RootElement.TryGetProperty("type", out System.Text.Json.JsonElement type) &&
+            type.ValueKind == System.Text.Json.JsonValueKind.String &&
+            type.GetString() == "error")
         {
-            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
-                doc.RootElement.TryGetProperty("type", out System.Text.Json.JsonElement type) &&
-                type.ValueKind == System.Text.Json.JsonValueKind.String &&
-                type.GetString() == "error")
+            string message = "server reported an error over SSE";
+            if (doc.RootElement.TryGetProperty("error", out System.Text.Json.JsonElement error))
             {
-                string message = "server reported an error over SSE";
-                if (doc.RootElement.TryGetProperty("error", out System.Text.Json.JsonElement error))
+                if (error.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                    error.TryGetProperty("message", out System.Text.Json.JsonElement msg) &&
+                    msg.ValueKind == System.Text.Json.JsonValueKind.String)
                 {
-                    if (error.ValueKind == System.Text.Json.JsonValueKind.Object &&
-                        error.TryGetProperty("message", out System.Text.Json.JsonElement msg) &&
-                        msg.ValueKind == System.Text.Json.JsonValueKind.String)
-                    {
-                        message = msg.GetString()!;
-                    }
-                    else if (error.ValueKind == System.Text.Json.JsonValueKind.String)
-                    {
-                        message = error.GetString()!;
-                    }
+                    message = msg.GetString()!;
                 }
-
-                throw new AudioCppException(message, errorType: null, statusCode: null);
+                else if (error.ValueKind == System.Text.Json.JsonValueKind.String)
+                {
+                    message = error.GetString()!;
+                }
             }
+
+            throw new AudioCppException(message, errorType: null, statusCode: null);
         }
     }
 
@@ -383,7 +381,7 @@ public sealed class SseReader
             return null;
         }
 
-        List<AudioCppSpeakerTurn> turns = new();
+        List<AudioCppSpeakerTurn> turns = [];
         foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
         {
             turns.Add(new AudioCppSpeakerTurn
@@ -411,7 +409,7 @@ public sealed class SseReader
             return null;
         }
 
-        List<AudioCppSegment> segments = new();
+        List<AudioCppSegment> segments = [];
         foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
         {
             segments.Add(new AudioCppSegment
@@ -438,7 +436,7 @@ public sealed class SseReader
             return null;
         }
 
-        List<AudioCppWord> words = new();
+        List<AudioCppWord> words = [];
         foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
         {
             words.Add(new AudioCppWord
@@ -467,7 +465,7 @@ public sealed class SseReader
             return null;
         }
 
-        List<AudioArtifact> artifacts = new();
+        List<AudioArtifact> artifacts = [];
         foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
         {
             Dictionary<string, string>? meta = null;
@@ -507,7 +505,7 @@ public sealed class SseReader
             return null;
         }
 
-        List<NamedAudioOutput> outputs = new();
+        List<NamedAudioOutput> outputs = [];
         foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
         {
             outputs.Add(new NamedAudioOutput

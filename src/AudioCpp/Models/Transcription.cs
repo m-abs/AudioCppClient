@@ -272,7 +272,7 @@ public sealed class BatchTranscriptionRequest
     public string? Model { get; set; }
 
     /// <summary>(Filename, bytes) per file. At least one entry is required; upload order defines event <c>index</c>.</summary>
-    public IList<AudioUpload> Files { get; } = new List<AudioUpload>();
+    public IList<AudioUpload> Files { get; } = [];
 
     /// <summary>Language applied to every file.</summary>
     public string? Language { get; set; }

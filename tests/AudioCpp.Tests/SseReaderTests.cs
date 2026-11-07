@@ -26,7 +26,7 @@ public class SseReaderTests
     /// <returns>The events delivered before the stream ended.</returns>
     private static async Task<List<SseEvent>> ReadAllAsync(string sse)
     {
-        List<SseEvent> events = new();
+        List<SseEvent> events = [];
         await Reader(sse).ReadEventsAsync(evt =>
         {
             events.Add(evt);

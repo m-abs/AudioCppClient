@@ -131,9 +131,9 @@ public sealed class AudioCppClient
 
         return await SendJsonAsync(HttpMethod.Get, "v1/models" + query, writeBody: null, root =>
         {
-            List<AudioCppModel> models = new();
+            List<AudioCppModel> models = [];
             if (root.TryGetProperty("data", out JsonElement data) &&
-                data.ValueKind == System.Text.Json.JsonValueKind.Array)
+                data.ValueKind == JsonValueKind.Array)
             {
                 foreach (JsonElement element in data.EnumerateArray())
                 {
@@ -160,13 +160,13 @@ public sealed class AudioCppClient
         query.Add("model", model);
         return await SendJsonAsync(HttpMethod.Get, "v1/audio/voices" + query, writeBody: null, root =>
         {
-            List<string> voices = new();
+            List<string> voices = [];
             if (root.TryGetProperty("voices", out JsonElement array) &&
-                array.ValueKind == System.Text.Json.JsonValueKind.Array)
+                array.ValueKind == JsonValueKind.Array)
             {
                 foreach (JsonElement element in array.EnumerateArray())
                 {
-                    if (element.ValueKind == System.Text.Json.JsonValueKind.String)
+                    if (element.ValueKind == JsonValueKind.String)
                     {
                         voices.Add(element.GetString()!);
                     }
@@ -245,15 +245,15 @@ public sealed class AudioCppClient
     {
         return await SendJsonAsync(HttpMethod.Get, "v1/recipes", writeBody: null, root =>
         {
-            List<RecipeEntry> recipes = new();
+            List<RecipeEntry> recipes = [];
             if (root.TryGetProperty("data", out JsonElement data) &&
-                data.ValueKind == System.Text.Json.JsonValueKind.Array)
+                data.ValueKind == JsonValueKind.Array)
             {
                 foreach (JsonElement element in data.EnumerateArray())
                 {
-                    List<RecipeRole> roles = new();
+                    List<RecipeRole> roles = [];
                     if (element.TryGetProperty("roles", out JsonElement roleArray) &&
-                        roleArray.ValueKind == System.Text.Json.JsonValueKind.Array)
+                        roleArray.ValueKind == JsonValueKind.Array)
                     {
                         foreach (JsonElement role in roleArray.EnumerateArray())
                         {
@@ -286,12 +286,12 @@ public sealed class AudioCppClient
     {
         Dictionary<string, string>? sessionOptions = null;
         if (element.TryGetProperty("session_options", out JsonElement options) &&
-            options.ValueKind == System.Text.Json.JsonValueKind.Object)
+            options.ValueKind == JsonValueKind.Object)
         {
             sessionOptions = new Dictionary<string, string>(StringComparer.Ordinal);
             foreach (JsonProperty property in options.EnumerateObject())
             {
-                sessionOptions[property.Name] = property.Value.ValueKind == System.Text.Json.JsonValueKind.String
+                sessionOptions[property.Name] = property.Value.ValueKind == JsonValueKind.String
                     ? property.Value.GetString()!
                     : property.Value.GetRawText();
             }
@@ -299,19 +299,19 @@ public sealed class AudioCppClient
 
         List<AudioCppModelParam>? @params = null;
         if (element.TryGetProperty("params", out JsonElement paramsElement) &&
-            paramsElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+            paramsElement.ValueKind == JsonValueKind.Array)
         {
-            @params = new List<AudioCppModelParam>();
+            @params = [];
             foreach (JsonElement row in paramsElement.EnumerateArray())
             {
                 List<string>? values = null;
                 if (row.TryGetProperty("values", out JsonElement valuesElement) &&
-                    valuesElement.ValueKind == System.Text.Json.JsonValueKind.Array)
+                    valuesElement.ValueKind == JsonValueKind.Array)
                 {
-                    values = new List<string>();
+                    values = [];
                     foreach (JsonElement value in valuesElement.EnumerateArray())
                     {
-                        values.Add(value.ValueKind == System.Text.Json.JsonValueKind.String
+                        values.Add(value.ValueKind == JsonValueKind.String
                             ? value.GetString()!
                             : value.GetRawText());
                     }
@@ -347,15 +347,13 @@ public sealed class AudioCppClient
     /// <returns>The <c>application/json</c> content.</returns>
     internal static StringContent CreateJsonContent(Action<Utf8JsonWriter> writeBody)
     {
-        using (MemoryStream stream = new())
+        using MemoryStream stream = new();
+        using (Utf8JsonWriter writer = new(stream))
         {
-            using (Utf8JsonWriter writer = new(stream))
-            {
-                writeBody(writer);
-            }
-
-            return new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+            writeBody(writer);
         }
+
+        return new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
     }
 
     /// <summary>
@@ -380,16 +378,16 @@ public sealed class AudioCppClient
         {
             try
             {
-                using JsonDocument doc = System.Text.Json.JsonDocument.Parse(body);
-                if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                using JsonDocument doc = JsonDocument.Parse(body);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object &&
                     doc.RootElement.TryGetProperty("error", out JsonElement error) &&
-                    error.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                    error.ValueKind == JsonValueKind.Object &&
                     error.TryGetProperty("message", out JsonElement messageElement) &&
-                    messageElement.ValueKind == System.Text.Json.JsonValueKind.String)
+                    messageElement.ValueKind == JsonValueKind.String)
                 {
                     message = messageElement.GetString()!;
                     if (error.TryGetProperty("type", out JsonElement type) &&
-                        type.ValueKind == System.Text.Json.JsonValueKind.String)
+                        type.ValueKind == JsonValueKind.String)
                     {
                         errorType = type.GetString();
                     }
@@ -431,7 +429,7 @@ public sealed class AudioCppClient
     private static JsonElement? ElementOrNull(JsonElement obj, string property)
     {
         if (!obj.TryGetProperty(property, out JsonElement value) ||
-            value.ValueKind == System.Text.Json.JsonValueKind.Null)
+            value.ValueKind == JsonValueKind.Null)
         {
             return null;
         }
@@ -520,10 +518,8 @@ public sealed class AudioCppClient
         using HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken).ConfigureAwait(false);
         string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
         EnsureSuccess(response, body);
-        using (JsonDocument doc = System.Text.Json.JsonDocument.Parse(body))
-        {
-            return parse(doc.RootElement);
-        }
+        using JsonDocument doc = JsonDocument.Parse(body);
+        return parse(doc.RootElement);
     }
 
     /// <summary>Sends a request and returns the response body text (throws on failure).</summary>
@@ -552,10 +548,8 @@ public sealed class AudioCppClient
     internal async Task<T> ReadJsonAsync<T>(HttpRequestMessage request, Func<JsonElement, T> parse, CancellationToken cancellationToken)
     {
         string body = await ReadBodyAsync(request, cancellationToken).ConfigureAwait(false);
-        using (JsonDocument doc = System.Text.Json.JsonDocument.Parse(body))
-        {
-            return parse(doc.RootElement);
-        }
+        using JsonDocument doc = JsonDocument.Parse(body);
+        return parse(doc.RootElement);
     }
 
     /// <summary>

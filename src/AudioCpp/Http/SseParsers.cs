@@ -79,7 +79,7 @@ internal static class SseParsers
             return Array.Empty<string>();
         }
 
-        List<string> values = new();
+        List<string> values = [];
         foreach (JsonElement element in array.EnumerateArray())
         {
             if (element.ValueKind == JsonValueKind.String)

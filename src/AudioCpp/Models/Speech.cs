@@ -697,7 +697,7 @@ public enum SpeechStreamEventKind
     /// <summary>Text written since the previous event (live streams with <c>return_text</c>).</summary>
     TextDelta,
 
-    /// <summary>The whole text, before <see cref="SpeechStreamEventKind.AudioDone"/>.</summary>
+    /// <summary>The whole text, before <see cref="AudioDone"/>.</summary>
     TextDone,
 }
 
