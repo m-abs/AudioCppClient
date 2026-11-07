@@ -180,11 +180,10 @@ public sealed class TaskResult
 
     /// <summary>Parses a cached response JSON (a disk cache hit rebuilds the result).</summary>
     /// <param name="json">The raw JSON response body.</param>
-    /// <returns>The parsed result; throws <see cref="JsonException"/> on invalid JSON.</returns>
-    public static TaskResult Parse(string json)
+    /// <returns>The parsed result; throws <see cref="JsonException"/> on null, invalid JSON, or a non-object root.</returns>
+    public static TaskResult Parse(string? json)
     {
-        using JsonDocument doc = JsonDocument.Parse(json);
-        return Http.SseParsers.TaskResult(doc.RootElement);
+        return Http.SseParsers.ParseRoot(json, Http.SseParsers.TaskResult);
     }
 }
 
@@ -265,7 +264,7 @@ public sealed class AudioCppModel
     /// <summary>Model family, e.g. <c>kokoro</c> or <c>parakeet</c>.</summary>
     public string? Family { get; internal set; }
 
-    /// <summary>Path or package id the server resolves the model from.</summary>
+    /// <summary>Path the server resolves the model from; the registry always reports <c>path</c>, even for package-configured models.</summary>
     public string? Path { get; internal set; }
 
     /// <summary>Task the model serves, e.g. <c>tts</c> or <c>asr</c>.</summary>

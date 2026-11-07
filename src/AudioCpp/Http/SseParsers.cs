@@ -9,6 +9,28 @@ namespace Mabs.AudioCpp.Http;
 /// <summary>Shared JSON response parsers.</summary>
 internal static class SseParsers
 {
+    /// <summary>Parses a cached response body and builds a result from its object root.</summary>
+    /// <typeparam name="T">The result type.</typeparam>
+    /// <param name="json">The raw JSON response body.</param>
+    /// <param name="parse">Parser applied to the object root.</param>
+    /// <returns>The parsed result.</returns>
+    /// <exception cref="JsonException">The body is null, invalid JSON, or not a JSON object.</exception>
+    internal static T ParseRoot<T>(string? json, Func<JsonElement, T> parse)
+    {
+        if (json == null)
+        {
+            throw new JsonException("The cached JSON body is null.");
+        }
+
+        using JsonDocument doc = JsonDocument.Parse(json);
+        if (doc.RootElement.ValueKind != JsonValueKind.Object)
+        {
+            throw new JsonException("The cached JSON body is not a JSON object.");
+        }
+
+        return parse(doc.RootElement);
+    }
+
     /// <summary>Parses the unload response (<c>unloaded</c> and <c>not_found</c> id lists).</summary>
     /// <param name="root">The JSON response root.</param>
     /// <returns>The unload result; both lists are empty when absent.</returns>

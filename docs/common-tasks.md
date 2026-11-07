@@ -16,8 +16,9 @@ server-configured; substitute yours (`GET /v1/models`, `GET /v1/voices`).
 
 Each result type describing one analysis — `TranscriptionResult`,
 `TranscriptionDetailsResult`, `AlignmentResult`, `TaskResult` and `SpeechJsonResult` —
-has a public static `Parse(string json)` that rebuilds it from a stored response body,
-so a sidecar cache keyed by the analyzed audio needs no private JSON parsing:
+has a public static `Parse(string? json)` that rebuilds it from a stored response body,
+throwing `JsonException` on null, invalid JSON, or a non-object root, so a sidecar cache
+keyed by the analyzed audio needs no private JSON parsing:
 
 ```csharp
 AlignmentResult result = AlignmentResult.Parse(File.ReadAllText(sidecarPath));

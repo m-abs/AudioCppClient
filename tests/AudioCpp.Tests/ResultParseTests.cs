@@ -69,4 +69,12 @@ public class ResultParseTests
     {
         Assert.ThrowsAny<JsonException>(() => AlignmentResult.Parse("not json"));
     }
+
+    /// <summary>A null body or valid-but-not-object JSON throws a JsonException instead of returning an empty result.</summary>
+    [Fact]
+    public void NullAndNonObjectRootThrow()
+    {
+        Assert.Throws<JsonException>(() => TaskResult.Parse("[1,2]"));
+        Assert.Throws<JsonException>(() => AlignmentResult.Parse(null));
+    }
 }
