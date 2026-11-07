@@ -177,6 +177,15 @@ public sealed class TaskResult
 
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
+
+    /// <summary>Parses a cached response JSON (a disk cache hit rebuilds the result).</summary>
+    /// <param name="json">The raw JSON response body.</param>
+    /// <returns>The parsed result; throws <see cref="JsonException"/> on invalid JSON.</returns>
+    public static TaskResult Parse(string json)
+    {
+        using JsonDocument doc = JsonDocument.Parse(json);
+        return Http.SseParsers.TaskResult(doc.RootElement);
+    }
 }
 
 /// <summary>Server readiness from <c>GET /health</c>.</summary>

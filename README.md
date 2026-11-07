@@ -118,6 +118,13 @@ callers without `await foreach` language support.
 - **Seed** is a `string` so full uint64 values round-trip without JSON number precision loss.
 - `SseEvent.Data` is exposed as `string` (not `byte[]`): the server always writes UTF-8 JSON
   data lines; decode at use if you need bytes.
+- **Cached results rebuild with `Parse(string json)`.** `TranscriptionResult`,
+  `TranscriptionDetailsResult`, `AlignmentResult`, `TaskResult` and `SpeechJsonResult` each
+  expose a public `Parse` that rebuilds the typed result from a stored response body, so a
+  sidecar cache keyed by the analyzed audio needs no private JSON parsing:
+  `AlignmentResult result = AlignmentResult.Parse(File.ReadAllText(sidecarPath));`.
+  Base64 audio, named outputs and artifacts decode as on the live path. Model load/unload
+  results have no `Parse` — they describe server state, which a cache cannot answer.
 
 ## Demo CLI
 

@@ -78,12 +78,12 @@ public sealed class TranscriptionClient
         if (request.IsMultipart)
         {
             using HttpRequestMessage httpRequest = Multipart.Post(_client.BuildUri("v1/audio/transcriptions/details"), request);
-            return await _client.ReadJsonAsync(httpRequest, TranscriptionDetailsResult.Parse, cancellationToken).ConfigureAwait(false);
+            return await _client.ReadJsonAsync(httpRequest, SseParsers.Details, cancellationToken).ConfigureAwait(false);
         }
 
         using HttpRequestMessage jsonRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/transcriptions/details");
         jsonRequest.Content = AudioCppClient.CreateJsonContent(writer => WriteJsonDetails(request, writer));
-        return await _client.ReadJsonAsync(jsonRequest, TranscriptionDetailsResult.Parse, cancellationToken).ConfigureAwait(false);
+        return await _client.ReadJsonAsync(jsonRequest, SseParsers.Details, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>

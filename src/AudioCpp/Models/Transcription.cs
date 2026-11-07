@@ -87,6 +87,15 @@ public sealed class TranscriptionResult
 
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
+
+    /// <summary>Parses a cached response JSON (a disk cache hit rebuilds the result).</summary>
+    /// <param name="json">The raw JSON response body.</param>
+    /// <returns>The parsed result; throws <see cref="JsonException"/> on invalid JSON.</returns>
+    public static TranscriptionResult Parse(string json)
+    {
+        using JsonDocument doc = JsonDocument.Parse(json);
+        return Http.SseParsers.Transcription(doc.RootElement);
+    }
 }
 
 /// <summary>Rich transcription response with the detail arrays the model produced.</summary>
@@ -113,21 +122,13 @@ public sealed class TranscriptionDetailsResult
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
 
-    /// <summary>Parses the details response root.</summary>
-    /// <param name="root">The JSON response root.</param>
-    /// <returns>The parsed details result; detail arrays are <see langword="null"/> when the model produced none.</returns>
-    internal static TranscriptionDetailsResult Parse(JsonElement root)
+    /// <summary>Parses a cached response JSON (a disk cache hit rebuilds the result).</summary>
+    /// <param name="json">The raw JSON response body.</param>
+    /// <returns>The parsed result; throws <see cref="JsonException"/> on invalid JSON.</returns>
+    public static TranscriptionDetailsResult Parse(string json)
     {
-        return new TranscriptionDetailsResult
-        {
-            Text = Http.SseReader.ReadString(root, "text"),
-            Language = Http.SseReader.ReadString(root, "language"),
-            Segments = Http.SseReader.ReadSegments(root, "segments"),
-            SpeakerTurns = Http.SseReader.ReadSpeakerTurns(root, "speaker_turns"),
-            Words = Http.SseReader.ReadWords(root, "words"),
-            SampleRate = Http.SseReader.ReadInt(root, "sample_rate"),
-            Timing = Http.SseReader.ReadTiming(root, "timing"),
-        };
+        using JsonDocument doc = JsonDocument.Parse(json);
+        return Http.SseParsers.Details(doc.RootElement);
     }
 }
 

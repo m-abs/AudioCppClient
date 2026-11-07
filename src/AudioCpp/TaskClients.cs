@@ -39,7 +39,7 @@ public sealed class AlignmentClient
         request.Validate();
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/alignments"));
         httpRequest.Content = Multipart.BuildAlignment(request);
-        return await _client.ReadJsonAsync(httpRequest, AlignmentResult.Parse, cancellationToken).ConfigureAwait(false);
+        return await _client.ReadJsonAsync(httpRequest, SseParsers.Alignment, cancellationToken).ConfigureAwait(false);
     }
 }
 

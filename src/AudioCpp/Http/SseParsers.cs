@@ -67,6 +67,37 @@ internal static class SseParsers
         };
     }
 
+    /// <summary>Parses the alignment response root.</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The parsed alignment result.</returns>
+    internal static AlignmentResult Alignment(JsonElement root)
+    {
+        return new AlignmentResult
+        {
+            Text = SseReader.ReadString(root, "text"),
+            Language = SseReader.ReadString(root, "language"),
+            Words = SseReader.ReadWords(root, "words") ?? (IReadOnlyList<AudioCppWord>)Array.Empty<AudioCppWord>(),
+            Timing = SseReader.ReadTiming(root, "timing"),
+        };
+    }
+
+    /// <summary>Parses the details response root.</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The parsed details result; detail arrays are <see langword="null"/> when the model produced none.</returns>
+    internal static TranscriptionDetailsResult Details(JsonElement root)
+    {
+        return new TranscriptionDetailsResult
+        {
+            Text = SseReader.ReadString(root, "text"),
+            Language = SseReader.ReadString(root, "language"),
+            Segments = SseReader.ReadSegments(root, "segments"),
+            SpeakerTurns = SseReader.ReadSpeakerTurns(root, "speaker_turns"),
+            Words = SseReader.ReadWords(root, "words"),
+            SampleRate = SseReader.ReadInt(root, "sample_rate"),
+            Timing = SseReader.ReadTiming(root, "timing"),
+        };
+    }
+
     /// <summary>Reads a string array property as a list.</summary>
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>

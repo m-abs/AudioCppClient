@@ -627,18 +627,13 @@ public sealed class AlignmentResult
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
 
-    /// <summary>Parses the alignment response root.</summary>
-    /// <param name="root">The JSON response root.</param>
-    /// <returns>The parsed alignment result.</returns>
-    internal static AlignmentResult Parse(JsonElement root)
+    /// <summary>Parses a cached response JSON (a disk cache hit rebuilds the result).</summary>
+    /// <param name="json">The raw JSON response body.</param>
+    /// <returns>The parsed result; throws <see cref="JsonException"/> on invalid JSON.</returns>
+    public static AlignmentResult Parse(string json)
     {
-        return new AlignmentResult
-        {
-            Text = Http.SseReader.ReadString(root, "text"),
-            Language = Http.SseReader.ReadString(root, "language"),
-            Words = Http.SseReader.ReadWords(root, "words") ?? (IReadOnlyList<AudioCppWord>)Array.Empty<AudioCppWord>(),
-            Timing = Http.SseReader.ReadTiming(root, "timing"),
-        };
+        using JsonDocument doc = JsonDocument.Parse(json);
+        return Http.SseParsers.Alignment(doc.RootElement);
     }
 }
 
