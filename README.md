@@ -8,8 +8,7 @@ batches, recipes, voices, and model management.
 - Target frameworks: `netstandard2.0`, `net10.0`
 - Dependencies: `System.Text.Json` only (`Microsoft.Bcl.AsyncInterfaces` on netstandard2.0)
 - No OpenAI dependency; speaks the audio.cpp wire protocol directly
-- Server default port is `8080` (`--port`); the examples below use `8092`, the local development
-  instance, so they don't collide with an already-running audio.cpp service.
+- Server default port is `8080` (`--port`); the examples below assume a server on that port.
 
 ## Quick start
 
@@ -17,7 +16,7 @@ batches, recipes, voices, and model management.
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Models;
 
-AudioCppClient client = new AudioCppClient("http://127.0.0.1:8092");
+AudioCppClient client = new AudioCppClient("http://127.0.0.1:8080");
 
 // Health
 AudioCppHealth health = await client.GetHealthAsync();
@@ -125,10 +124,10 @@ callers without `await foreach` language support.
 `examples/AudioCpp.Demo` proves each behavior against a live server:
 
 ```
-dotnet run --project examples/AudioCpp.Demo -- health http://127.0.0.1:8092
-dotnet run --project examples/AudioCpp.Demo -- speech http://127.0.0.1:8092 kokoro "Hello from audio.cpp" --out /tmp/speech.wav
-dotnet run --project examples/AudioCpp.Demo -- speech-stream http://127.0.0.1:8092 kokoro "Hello from audio.cpp" --out /tmp/speech.pcm   # SSE; model must be configured mode=streaming
-dotnet run --project examples/AudioCpp.Demo -- transcribe http://127.0.0.1:8092 parakeet /tmp/speech.wav --multipart
+dotnet run --project examples/AudioCpp.Demo -- health http://127.0.0.1:8080
+dotnet run --project examples/AudioCpp.Demo -- speech http://127.0.0.1:8080 kokoro "Hello from audio.cpp" --out /tmp/speech.wav
+dotnet run --project examples/AudioCpp.Demo -- speech-stream http://127.0.0.1:8080 kokoro "Hello from audio.cpp" --out /tmp/speech.pcm   # SSE; model must be configured mode=streaming
+dotnet run --project examples/AudioCpp.Demo -- transcribe http://127.0.0.1:8080 parakeet /tmp/speech.wav --multipart
 ```
 
 Also available: `models`, `voices`, `load`, `unload`, `recipes`, `transcribe-details`, and the

@@ -1,0 +1,20 @@
+- name: Introduction
+  href: introduction.md
+- name: Getting Started
+  href: getting-started.md
+- name: Common Tasks
+  href: common-tasks.md
+- name: Speech Synthesis
+  href: speech-synthesis.md
+- name: Transcription
+  href: transcription.md
+- name: Alignment
+  href: alignment.md
+- name: Tasks
+  href: tasks.md
+- name: Recipes
+  href: recipes.md
+- name: Error Handling
+  href: error-handling.md
+- name: Model Management
+  href: model-management.md

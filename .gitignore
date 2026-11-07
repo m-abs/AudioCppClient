@@ -34,6 +34,9 @@ bld/
 [Oo]bj/
 # ...but keep the repo-root scripts dir
 !/bin/
+# docfx output (deployed to Pages by CI, never committed)
+_site/
+api/
 [Ll]og/
 [Ll]ogs/
 
