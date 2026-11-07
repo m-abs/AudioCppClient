@@ -11,7 +11,7 @@ directly; there is **no OpenAI dependency**. Namespaces: `MabsDk.AudioCpp`,
 
 Target frameworks: `netstandard2.0;net10.0`. Only library dependencies are
 `System.Text.Json` and (netstandard2.0 only) `Microsoft.Bcl.AsyncInterfaces`, both pinned to
-`9.0.8`. Current package version `0.0.2`.
+`9.0.8`. Current package version `0.0.3`.
 
 ## Layout
 
