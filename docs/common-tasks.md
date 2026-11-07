@@ -11,3 +11,18 @@ server-configured; substitute yours (`GET /v1/models`, `GET /v1/voices`).
 - [Recipes](recipes.md) — multi-model runs
 - [Error Handling](error-handling.md) — status codes, error envelopes, SSE errors
 - [Model Management](model-management.md) — health, models, voices, load, unload
+
+## Rebuilding cached results
+
+Each result type describing one analysis — `TranscriptionResult`,
+`TranscriptionDetailsResult`, `AlignmentResult`, `TaskResult` and `SpeechJsonResult` —
+has a public static `Parse(string json)` that rebuilds it from a stored response body,
+so a sidecar cache keyed by the analyzed audio needs no private JSON parsing:
+
+```csharp
+AlignmentResult result = AlignmentResult.Parse(File.ReadAllText(sidecarPath));
+```
+
+Base64 audio, named outputs and artifacts decode as on the live path. Model
+load/unload results have no `Parse` — they describe server state, which a cache
+cannot answer.

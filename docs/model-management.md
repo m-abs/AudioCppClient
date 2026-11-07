@@ -19,7 +19,7 @@ IReadOnlyList<AudioCppModel> models = await client.ListModelsAsync(includeParams
 
 foreach (AudioCppModel model in models)
 {
-    Console.WriteLine($"{model.Id} configured={model.Configured} device={model.Device}");
+    Console.WriteLine($"{model.Id} configured={model.Configured} loaded={model.Loaded} family={model.Family} task={model.Task} path={model.Path} device={model.Device}");
     foreach (AudioCppModelParam param in model.Params ?? Array.Empty<AudioCppModelParam>())
         Console.WriteLine($"  {param.Name} ({param.Type}) required={param.Required} default={param.Default}");
 }
