@@ -7,10 +7,10 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Http;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models;
 
-namespace mabs.AudioCpp;
+namespace Mabs.AudioCpp;
 
 /// <summary>
 /// Speech synthesis against <c>POST /v1/audio/speech</c> and <c>/v1/audio/speech/live</c>.
@@ -28,6 +28,7 @@ public sealed class SpeechClient
     /// Synthesize speech. Returns the raw audio bytes (WAV by default) with the
     /// <c>X-AudioCPP-*</c> timing headers parsed into <see cref="SpeechResult.Timing"/>.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task<SpeechResult> SynthesizeAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -51,6 +52,7 @@ public sealed class SpeechClient
     /// Synthesize with <c>response_format=json</c> and parse the JSON envelope
     /// (<c>audio</c> Base64 WAV, <c>format</c>, <c>timing</c>).
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task<SpeechJsonResult> SynthesizeJsonAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -69,6 +71,7 @@ public sealed class SpeechClient
     /// Ends after <c>speech.audio.done</c> and <c>[DONE]</c>; throws
     /// <see cref="AudioCppException"/> on an SSE error event.
     /// </summary>
+    /// <returns></returns>
     public async IAsyncEnumerable<SpeechStreamEvent> StreamAsync(SpeechStreamRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -85,6 +88,7 @@ public sealed class SpeechClient
     }
 
     /// <summary>Callback streaming variant.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task StreamAsync(SpeechStreamRequest request, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -103,6 +107,7 @@ public sealed class SpeechClient
     /// chunked octet-stream bytes. The caller owns the returned stream; reading it yields
     /// PCM16 bytes as the server produces them.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task<Stream> StreamPcmAsync(SpeechStreamRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -127,6 +132,7 @@ public sealed class SpeechClient
     /// ends — and the model treats it as end-of-speech — when <paramref name="pcmInput"/>
     /// reaches EOF; closing the connection without that is a server error, by contract.
     /// </summary>
+    /// <returns></returns>
     public async IAsyncEnumerable<SpeechStreamEvent> SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -157,6 +163,7 @@ public sealed class SpeechClient
     }
 
     /// <summary>Callback variant of <see cref="SpeakLiveAsync(LiveSpeechRequest, Stream, CancellationToken)"/>.</summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)

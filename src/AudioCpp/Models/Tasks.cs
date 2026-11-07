@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 
-namespace mabs.AudioCpp.Models;
+namespace Mabs.AudioCpp.Models;
 
 /// <summary>
 /// The <c>kind</c> of an artifact. Wire values accepted by the server.
@@ -522,10 +522,7 @@ public readonly struct TaskBatchEvent
         {
             case "task.batch.result":
                 {
-                    TaskResult? result = root.TryGetProperty("result", out JsonElement resultElement) &&
-                        resultElement.ValueKind == JsonValueKind.Object
-                        ? Http.SseReader.ReadTaskResult(resultElement)
-                        : null;
+                    TaskResult? result = root.TryGetProperty("result", out JsonElement resultElement) && resultElement.ValueKind == JsonValueKind.Object ? Http.SseReader.ReadTaskResult(resultElement) : null;
                     return new TaskBatchEvent(TaskBatchEventKind.Result, Http.SseReader.ReadInt(root, "index") ?? -1, result, null, null);
                 }
 

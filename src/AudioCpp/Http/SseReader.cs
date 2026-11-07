@@ -7,9 +7,9 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models;
 
-namespace mabs.AudioCpp.Http;
+namespace Mabs.AudioCpp.Http;
 
 /// <summary>
 /// One parsed server-sent event: the optional <c>event:</c> field name and the
@@ -67,13 +67,13 @@ public sealed class SseReader
     private int _position;
     private int _bytesFilled;
 
-    /// <summary>Creates a reader over <paramref name="stream"/> with the default line limit.</summary>
+    /// <summary>Initializes a new instance of the <see cref="SseReader"/> class.Creates a reader over <paramref name="stream"/> with the default line limit.</summary>
     public SseReader(Stream stream)
         : this(stream, DefaultMaxLineBytes)
     {
     }
 
-    /// <summary>Creates a reader with an explicit maximum line size.</summary>
+    /// <summary>Initializes a new instance of the <see cref="SseReader"/> class.Creates a reader with an explicit maximum line size.</summary>
     /// <exception cref="ArgumentOutOfRangeException">
     /// <paramref name="maxLineBytes"/> is not positive.
     /// </exception>
@@ -90,8 +90,48 @@ public sealed class SseReader
     }
 
     /// <summary>
+    /// Throws <see cref="AudioCppException"/> when <paramref name="data"/> is an SSE
+    /// error event (<c>{"type":"error","error":{"message":…}}</c>). SSE errors carry no
+    /// error type or HTTP status per the server contract.
+    /// </summary>
+    public static void ThrowIfErrorEvent(string data)
+    {
+        if (data.Length == 0 || data[0] != '{')
+        {
+            return;
+        }
+
+        using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(data))
+        {
+            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                doc.RootElement.TryGetProperty("type", out System.Text.Json.JsonElement type) &&
+                type.ValueKind == System.Text.Json.JsonValueKind.String &&
+                type.GetString() == "error")
+            {
+                string message = "server reported an error over SSE";
+                if (doc.RootElement.TryGetProperty("error", out System.Text.Json.JsonElement error))
+                {
+                    if (error.ValueKind == System.Text.Json.JsonValueKind.Object &&
+                        error.TryGetProperty("message", out System.Text.Json.JsonElement msg) &&
+                        msg.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        message = msg.GetString()!;
+                    }
+                    else if (error.ValueKind == System.Text.Json.JsonValueKind.String)
+                    {
+                        message = error.GetString()!;
+                    }
+                }
+
+                throw new AudioCppException(message, errorType: null, statusCode: null);
+            }
+        }
+    }
+
+    /// <summary>
     /// Reads events until <c>data: [DONE]</c>, the stream end, or cancellation.
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task ReadEventsAsync(Func<SseEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -115,6 +155,7 @@ public sealed class SseReader
     /// Enumerates events lazily. Available on all target frameworks because the
     /// library references <c>Microsoft.Bcl.AsyncInterfaces</c> on netstandard2.0.
     /// </summary>
+    /// <returns></returns>
     public async IAsyncEnumerable<SseEvent> EnumerateAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         while (true)
@@ -133,6 +174,7 @@ public sealed class SseReader
     /// Reads the next event, or <see langword="null"/> once the stream terminates
     /// (<c>[DONE]</c> or connection end).
     /// </summary>
+    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
     public async Task<SseEvent?> TryReadEventAsync(CancellationToken cancellationToken = default)
     {
         string? eventType = null;
@@ -204,45 +246,6 @@ public sealed class SseReader
         return new SseEvent(eventType, data);
     }
 
-    /// <summary>
-    /// Throws <see cref="AudioCppException"/> when <paramref name="data"/> is an SSE
-    /// error event (<c>{"type":"error","error":{"message":…}}</c>). SSE errors carry no
-    /// error type or HTTP status per the server contract.
-    /// </summary>
-    public static void ThrowIfErrorEvent(string data)
-    {
-        if (data.Length == 0 || data[0] != '{')
-        {
-            return;
-        }
-
-        using (System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(data))
-        {
-            if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
-                doc.RootElement.TryGetProperty("type", out System.Text.Json.JsonElement type) &&
-                type.ValueKind == System.Text.Json.JsonValueKind.String &&
-                type.GetString() == "error")
-            {
-                string message = "server reported an error over SSE";
-                if (doc.RootElement.TryGetProperty("error", out System.Text.Json.JsonElement error))
-                {
-                    if (error.ValueKind == System.Text.Json.JsonValueKind.Object &&
-                        error.TryGetProperty("message", out System.Text.Json.JsonElement msg) &&
-                        msg.ValueKind == System.Text.Json.JsonValueKind.String)
-                    {
-                        message = msg.GetString()!;
-                    }
-                    else if (error.ValueKind == System.Text.Json.JsonValueKind.String)
-                    {
-                        message = error.GetString()!;
-                    }
-                }
-
-                throw new AudioCppException(message, errorType: null, statusCode: null);
-            }
-        }
-    }
-
     internal static AudioCppTiming? ReadTiming(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement timing) ||
@@ -269,35 +272,22 @@ public sealed class SseReader
 
     internal static double? ReadDouble(System.Text.Json.JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) &&
-            value.ValueKind == System.Text.Json.JsonValueKind.Number
-            ? value.GetDouble()
-            : (double?)null;
+        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetDouble() : (double?)null;
     }
 
     internal static int? ReadInt(System.Text.Json.JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) &&
-            value.ValueKind == System.Text.Json.JsonValueKind.Number
-            ? value.GetInt32()
-            : (int?)null;
+        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetInt32() : (int?)null;
     }
 
     internal static long? ReadLong(System.Text.Json.JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) &&
-            value.ValueKind == System.Text.Json.JsonValueKind.Number &&
-            value.TryGetInt64(out long parsed)
-            ? parsed
-            : (long?)null;
+        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt64(out long parsed) ? parsed : (long?)null;
     }
 
     internal static string? ReadString(System.Text.Json.JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) &&
-            value.ValueKind == System.Text.Json.JsonValueKind.String
-            ? value.GetString()
-            : null;
+        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.String ? value.GetString() : null;
     }
 
     internal static bool? ReadBool(System.Text.Json.JsonElement obj, string property)
@@ -327,6 +317,7 @@ public sealed class SseReader
     }
 
     /// <summary>Decodes a bare Base64 string or a <c>data:…;base64,…</c> URI.</summary>
+    /// <returns></returns>
     internal static byte[] ReadBase64Payload(string text)
     {
         if (text.StartsWith("data:", StringComparison.OrdinalIgnoreCase))

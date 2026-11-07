@@ -12,8 +12,8 @@ batches, recipes, voices, and model management.
 ## Quick start
 
 ```csharp
-using mabs.AudioCpp;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp;
+using Mabs.AudioCpp.Models;
 
 AudioCppClient client = new AudioCppClient("http://127.0.0.1:8092");
 

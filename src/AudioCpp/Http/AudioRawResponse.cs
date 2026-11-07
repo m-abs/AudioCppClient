@@ -1,7 +1,7 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 
-namespace mabs.AudioCpp.Http;
+namespace Mabs.AudioCpp.Http;
 
 /// <summary>Raw audio response bytes with their HTTP headers and media type.</summary>
 internal readonly struct AudioRawResponse

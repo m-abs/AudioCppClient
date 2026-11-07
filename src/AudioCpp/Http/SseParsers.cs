@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models;
 
-namespace mabs.AudioCpp.Http;
+namespace Mabs.AudioCpp.Http;
 
 /// <summary>Shared JSON response parsers.</summary>
 internal static class SseParsers

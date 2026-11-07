@@ -1,6 +1,6 @@
 using System;
 
-namespace mabs.AudioCpp.Http
+namespace Mabs.AudioCpp.Http
 {
     /// <summary>
     /// The exception thrown when an audio.cpp server reports an error, either through a
@@ -9,7 +9,7 @@ namespace mabs.AudioCpp.Http
     /// </summary>
     public class AudioCppException : Exception
     {
-        /// <summary>Initializes a new instance with all wire-reported fields.</summary>
+        /// <summary>Initializes a new instance of the <see cref="AudioCppException"/> class.Initializes a new instance with all wire-reported fields.</summary>
         public AudioCppException(string message, string? errorType, int? statusCode)
             : base(message)
         {
@@ -17,7 +17,7 @@ namespace mabs.AudioCpp.Http
             StatusCode = statusCode;
         }
 
-        /// <summary>Initializes a new instance with a message only.</summary>
+        /// <summary>Initializes a new instance of the <see cref="AudioCppException"/> class.Initializes a new instance with a message only.</summary>
         public AudioCppException(string message)
             : base(message)
         {

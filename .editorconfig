@@ -388,3 +388,24 @@ dotnet_naming_style.s_camelcase.word_separator =
 dotnet_naming_style.s_camelcase.capitalization = camel_case
 
 dotnet_diagnostic.IDE0001.severity = warning
+
+# StyleCop rules
+dotnet_diagnostic.SA0000.severity = warning
+dotnet_diagnostic.SA1101.severity = none
+dotnet_diagnostic.SX1101.severity = error
+dotnet_diagnostic.SA1116.severity = none
+dotnet_diagnostic.SA1117.severity = none
+dotnet_diagnostic.SA1118.severity = warning
+dotnet_diagnostic.SA1119.severity = none
+dotnet_diagnostic.SA1121.severity = none
+dotnet_diagnostic.SA1124.severity = none
+dotnet_diagnostic.SA1125.severity = none
+dotnet_diagnostic.SA1127.severity = none
+dotnet_diagnostic.SA1201.severity = none
+dotnet_diagnostic.SA1202.severity = none
+dotnet_diagnostic.SA1204.severity = warning
+dotnet_diagnostic.SA1623.severity = none
+dotnet_diagnostic.SA1633.severity = none
+dotnet_diagnostic.SA1309.severity = none
+dotnet_diagnostic.SX1309.severity = warning
+dotnet_diagnostic.SX1309S.severity = warning

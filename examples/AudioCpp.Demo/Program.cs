@@ -4,9 +4,9 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp;
-using mabs.AudioCpp.Http;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp;
+using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models;
 
 // Demo CLI proving the client library against a real audio.cpp server.
 // Every command exits non-zero when its expected observable does not hold.
@@ -21,6 +21,7 @@ if (args.Length < 2)
 
 string command = args[0];
 string baseUrl = args[1];
+
 // Cold model loads under emulation can take minutes; give the transport room.
 HttpClient http = new() { Timeout = TimeSpan.FromMinutes(30) };
 AudioCppClient client = new(baseUrl, http);

@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
-namespace mabs.AudioCpp.Models;
+namespace Mabs.AudioCpp.Models;
 
 /// <summary>
 /// A <c>response_format</c> value. The wire type is a string; use the static instances or
@@ -24,7 +24,7 @@ public readonly struct ResponseFormat : IEquatable<ResponseFormat>
     /// <summary>MP3 bytes (only builds with the <c>mp3_encode</c> frontend module).</summary>
     public static readonly ResponseFormat Mp3 = new("mp3");
 
-    /// <summary>Initializes a format from its wire string.</summary>
+    /// <summary>Initializes a new instance of the <see cref="ResponseFormat"/> struct.Initializes a format from its wire string.</summary>
     public ResponseFormat(string value)
     {
         Value = value ?? throw new ArgumentNullException(nameof(value));
@@ -61,7 +61,7 @@ public readonly struct StreamFormat : IEquatable<StreamFormat>
     /// <summary>Chunked raw audio bytes.</summary>
     public static readonly StreamFormat Audio = new("audio");
 
-    /// <summary>Initializes a format from its wire string.</summary>
+    /// <summary>Initializes a new instance of the <see cref="StreamFormat"/> struct.Initializes a format from its wire string.</summary>
     public StreamFormat(string value)
     {
         Value = value ?? throw new ArgumentNullException(nameof(value));
@@ -98,16 +98,19 @@ public readonly struct StreamFormat : IEquatable<StreamFormat>
 public sealed class VoiceRefObject
 {
     /// <summary>Initializes a server-local path reference.</summary>
+    /// <returns></returns>
     public static VoiceRefObject FromPath(string path) =>
         new()
         { Type = "path", Path = path ?? throw new ArgumentNullException(nameof(path)) };
 
     /// <summary>Initializes an inline Base64 WAV reference (bare Base64 or a data-URI; a data-URI is also accepted by the server).</summary>
+    /// <returns></returns>
     public static VoiceRefObject FromBase64(string data) =>
         new()
         { Type = "base64", Data = data ?? throw new ArgumentNullException(nameof(data)) };
 
     /// <summary>Initializes an inline reference from WAV bytes.</summary>
+    /// <returns></returns>
     public static VoiceRefObject FromBytes(byte[] wavBytes) =>
         new()
         { Type = "base64", Data = Convert.ToBase64String(wavBytes ?? throw new ArgumentNullException(nameof(wavBytes))) };
@@ -553,6 +556,7 @@ public sealed class LiveSpeechRequest
     public Dictionary<string, string>? Options { get; set; }
 
     /// <summary>Validates the request and builds the query string.</summary>
+    /// <returns></returns>
     public string BuildQueryString()
     {
         if (string.IsNullOrEmpty(Model))
@@ -710,5 +714,6 @@ internal sealed class QueryBuilder
         _builder.Append(Uri.EscapeDataString(value));
     }
 
+    /// <inheritdoc/>
     public override string ToString() => _builder.ToString();
 }

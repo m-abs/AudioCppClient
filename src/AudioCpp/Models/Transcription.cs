@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
-namespace mabs.AudioCpp.Models;
+namespace Mabs.AudioCpp.Models;
 
 /// <summary>
 /// Input for the transcription routes: either a server-local WAV path
@@ -224,6 +224,7 @@ public sealed class LiveTranscriptionRequest
     public long? BusyTimeoutMs { get; set; }
 
     /// <summary>Validates and builds the query string.</summary>
+    /// <returns></returns>
     public string BuildQueryString()
     {
         if (string.IsNullOrEmpty(Model))
@@ -303,7 +304,7 @@ public sealed class BatchTranscriptionRequest
 /// <summary>One uploaded file (multipart part).</summary>
 public sealed class AudioUpload
 {
-    /// <summary>Initializes an upload part.</summary>
+    /// <summary>Initializes a new instance of the <see cref="AudioUpload"/> class.Initializes an upload part.</summary>
     public AudioUpload(string fileName, byte[] content)
     {
         FileName = fileName ?? throw new ArgumentNullException(nameof(fileName));

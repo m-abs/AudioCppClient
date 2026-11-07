@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-namespace mabs.AudioCpp.Models;
+namespace Mabs.AudioCpp.Models;
 
 /// <summary>
 /// Inference timing. Different endpoints populate different members: non-streaming runs
@@ -185,7 +185,7 @@ public sealed class AudioCppHealth
     /// <summary>Status; <c>ok</c> when the server is up.</summary>
     public string? Status { get; internal set; }
 
-    /// <summary>Active backend: <c>cpu</c>, <c>cuda</c>, <c>hip</c>, …</summary>
+    /// <summary>Active backend: <c>cpu</c>, <c>cuda</c>, <c>hip</c>, ….</summary>
     public string? Backend { get; internal set; }
 
     /// <summary>Number of configured models.</summary>
