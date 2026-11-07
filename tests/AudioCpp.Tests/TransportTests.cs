@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -276,7 +277,7 @@ public class TransportTests
 
         handler.QueueJson("{\"text\":\"uploaded\",\"timing\":{\"wall_ms\":1.0}}");
         TranscriptionResult viaUpload = await NewClient(handler).Transcriptions.TranscribeAsync(
-            new TranscriptionRequest { Model = "asr", AudioFile = new System.IO.MemoryStream(new byte[] { 1, 2, 3 }), AudioFileName = "a.wav" });
+            new TranscriptionRequest { Model = "asr", AudioFile = new MemoryStream(new byte[] { 1, 2, 3 }), AudioFileName = "a.wav" });
         Assert.Equal("uploaded", viaUpload.Text);
         Assert.Contains("multipart/form-data", handler.Last.ContentType);
         string body = handler.Last.ContentText();
@@ -385,7 +386,7 @@ public class TransportTests
             "data: {\"type\":\"transcript.text.delta\",\"delta\":\"hi\"}\n\n" +
             "data: {\"type\":\"transcript.text.done\",\"text\":\"hi\",\"timing\":{\"ttft_ms\":2}}\n\n" +
             "data: [DONE]\n\n");
-        using System.IO.MemoryStream pcm = new(new byte[3200]);
+        using MemoryStream pcm = new(new byte[3200]);
         List<TranscriptEvent> events = await NewClient(handler).Transcriptions.TranscribeLiveAsync(
             new LiveTranscriptionRequest { Model = "stream-asr", SampleRate = 16000, Channels = 1 }, pcm)
             .ToListAsync();
@@ -472,9 +473,9 @@ public class TransportTests
         byte[] pcm = new byte[] { 1, 2, 3, 4 };
         using FakeHandler handler = new();
         handler.QueueBytes(pcm, "application/octet-stream");
-        using System.IO.Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
+        using Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
             new SpeechStreamRequest { Request = new SpeechRequest { Model = "m", Input = "hi" } });
-        using System.IO.MemoryStream sink = new();
+        using MemoryStream sink = new();
         await stream.CopyToAsync(sink);
         Assert.Equal(pcm, sink.ToArray());
 
@@ -489,7 +490,7 @@ public class TransportTests
     {
         using FakeHandler handler = new();
         handler.QueueSse("data: {\"type\":\"speech.text.delta\",\"delta\":\"hi\"}\n\ndata: [DONE]\n\n");
-        using System.IO.MemoryStream pcm = new(new byte[] { 5, 6, 7 });
+        using MemoryStream pcm = new(new byte[] { 5, 6, 7 });
         List<SpeechStreamEvent> events = await NewClient(handler).Speech.SpeakLiveAsync(
             new LiveSpeechRequest { Model = "live-tts" }, pcm).ToListAsync();
         Assert.Equal(SpeechStreamEventKind.TextDelta, Assert.Single(events).Kind);
@@ -527,11 +528,11 @@ public class TransportTests
         using CancellationTokenSource cts = new();
         using CancelAfterFirstRead source = new(cts);
         AudioCppClient.ChunkedStreamContent content = new(source, cts.Token);
-        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => content.CopyToAsync(new System.IO.MemoryStream(), cts.Token));
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => content.CopyToAsync(new MemoryStream(), cts.Token));
     }
 
     /// <summary>Memory stream that cancels the token after its first successful read.</summary>
-    private sealed class CancelAfterFirstRead : System.IO.MemoryStream
+    private sealed class CancelAfterFirstRead : MemoryStream
     {
         /// <summary>The token source cancelled after the first read.</summary>
         private readonly CancellationTokenSource _cts;

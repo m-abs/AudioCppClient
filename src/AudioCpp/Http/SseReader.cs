@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Runtime.CompilerServices;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -107,22 +108,22 @@ public sealed class SseReader
             return;
         }
 
-        using System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(data);
-        if (doc.RootElement.ValueKind == System.Text.Json.JsonValueKind.Object &&
-            doc.RootElement.TryGetProperty("type", out System.Text.Json.JsonElement type) &&
-            type.ValueKind == System.Text.Json.JsonValueKind.String &&
+        using JsonDocument doc = JsonDocument.Parse(data);
+        if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+            doc.RootElement.TryGetProperty("type", out JsonElement type) &&
+            type.ValueKind == JsonValueKind.String &&
             type.GetString() == "error")
         {
             string message = "server reported an error over SSE";
-            if (doc.RootElement.TryGetProperty("error", out System.Text.Json.JsonElement error))
+            if (doc.RootElement.TryGetProperty("error", out JsonElement error))
             {
-                if (error.ValueKind == System.Text.Json.JsonValueKind.Object &&
-                    error.TryGetProperty("message", out System.Text.Json.JsonElement msg) &&
-                    msg.ValueKind == System.Text.Json.JsonValueKind.String)
+                if (error.ValueKind == JsonValueKind.Object &&
+                    error.TryGetProperty("message", out JsonElement msg) &&
+                    msg.ValueKind == JsonValueKind.String)
                 {
                     message = msg.GetString()!;
                 }
-                else if (error.ValueKind == System.Text.Json.JsonValueKind.String)
+                else if (error.ValueKind == JsonValueKind.String)
                 {
                     message = error.GetString()!;
                 }
@@ -258,16 +259,16 @@ public sealed class SseReader
     /// <param name="root">The JSON object carrying the timing property.</param>
     /// <param name="property">The property name, usually <c>timing</c>.</param>
     /// <returns>The parsed timing, or <see langword="null"/>.</returns>
-    internal static AudioCppTiming? ReadTiming(System.Text.Json.JsonElement root, string property)
+    internal static AudioCppTiming? ReadTiming(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement timing) ||
-            timing.ValueKind != System.Text.Json.JsonValueKind.Object)
+        if (!root.TryGetProperty(property, out JsonElement timing) ||
+            timing.ValueKind != JsonValueKind.Object)
         {
             return null;
         }
 
-        bool ttftPresent = timing.TryGetProperty("ttft_ms", out System.Text.Json.JsonElement t) &&
-            t.ValueKind != System.Text.Json.JsonValueKind.Null;
+        bool ttftPresent = timing.TryGetProperty("ttft_ms", out JsonElement t) &&
+            t.ValueKind != JsonValueKind.Null;
         return new AudioCppTiming
         {
             WallMs = ReadDouble(timing, "wall_ms"),
@@ -286,62 +287,62 @@ public sealed class SseReader
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static double? ReadDouble(System.Text.Json.JsonElement obj, string property)
+    internal static double? ReadDouble(JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetDouble() : (double?)null;
+        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number ? value.GetDouble() : (double?)null;
     }
 
     /// <summary>Reads a numeric property as an int, or <see langword="null"/> when absent or not a number.</summary>
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static int? ReadInt(System.Text.Json.JsonElement obj, string property)
+    internal static int? ReadInt(JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetInt32() : (int?)null;
+        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number ? value.GetInt32() : (int?)null;
     }
 
     /// <summary>Reads a numeric property as a long, or <see langword="null"/> when absent, not a number, or outside the int64 range.</summary>
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static long? ReadLong(System.Text.Json.JsonElement obj, string property)
+    internal static long? ReadLong(JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt64(out long parsed) ? parsed : (long?)null;
+        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out long parsed) ? parsed : (long?)null;
     }
 
     /// <summary>Reads a string property, or <see langword="null"/> when absent or not a string.</summary>
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static string? ReadString(System.Text.Json.JsonElement obj, string property)
+    internal static string? ReadString(JsonElement obj, string property)
     {
-        return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.String ? value.GetString() : null;
+        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
     }
 
     /// <summary>Reads a boolean property, or <see langword="null"/> when absent or not a bool.</summary>
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static bool? ReadBool(System.Text.Json.JsonElement obj, string property)
+    internal static bool? ReadBool(JsonElement obj, string property)
     {
-        if (!obj.TryGetProperty(property, out System.Text.Json.JsonElement value))
+        if (!obj.TryGetProperty(property, out JsonElement value))
         {
             return null;
         }
 
-        if (value.ValueKind == System.Text.Json.JsonValueKind.True)
+        if (value.ValueKind == JsonValueKind.True)
         {
             return true;
         }
 
-        return value.ValueKind == System.Text.Json.JsonValueKind.False ? (bool?)false : null;
+        return value.ValueKind == JsonValueKind.False ? (bool?)false : null;
     }
 
     /// <summary>Reads a Base64 string property and decodes it, or <see langword="null"/> when absent or not a string.</summary>
     /// <param name="obj">The JSON object to read from.</param>
     /// <param name="property">The property name.</param>
     /// <returns>The decoded bytes, or <see langword="null"/>.</returns>
-    internal static byte[]? ReadBase64(System.Text.Json.JsonElement obj, string property)
+    internal static byte[]? ReadBase64(JsonElement obj, string property)
     {
         string? text = ReadString(obj, property);
         if (text == null)
@@ -373,16 +374,16 @@ public sealed class SseReader
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name, usually <c>speaker_turns</c>.</param>
     /// <returns>The parsed turns, or <see langword="null"/>.</returns>
-    internal static List<AudioCppSpeakerTurn>? ReadSpeakerTurns(System.Text.Json.JsonElement root, string property)
+    internal static List<AudioCppSpeakerTurn>? ReadSpeakerTurns(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
-            array.ValueKind != System.Text.Json.JsonValueKind.Array)
+        if (!root.TryGetProperty(property, out JsonElement array) ||
+            array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
         List<AudioCppSpeakerTurn> turns = [];
-        foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
+        foreach (JsonElement element in array.EnumerateArray())
         {
             turns.Add(new AudioCppSpeakerTurn
             {
@@ -401,16 +402,16 @@ public sealed class SseReader
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name, usually <c>segments</c>.</param>
     /// <returns>The parsed segments, or <see langword="null"/>.</returns>
-    internal static List<AudioCppSegment>? ReadSegments(System.Text.Json.JsonElement root, string property)
+    internal static List<AudioCppSegment>? ReadSegments(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
-            array.ValueKind != System.Text.Json.JsonValueKind.Array)
+        if (!root.TryGetProperty(property, out JsonElement array) ||
+            array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
         List<AudioCppSegment> segments = [];
-        foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
+        foreach (JsonElement element in array.EnumerateArray())
         {
             segments.Add(new AudioCppSegment
             {
@@ -428,16 +429,16 @@ public sealed class SseReader
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name, usually <c>words</c> or <c>word_timestamps</c>.</param>
     /// <returns>The parsed words, or <see langword="null"/>.</returns>
-    internal static List<AudioCppWord>? ReadWords(System.Text.Json.JsonElement root, string property)
+    internal static List<AudioCppWord>? ReadWords(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
-            array.ValueKind != System.Text.Json.JsonValueKind.Array)
+        if (!root.TryGetProperty(property, out JsonElement array) ||
+            array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
         List<AudioCppWord> words = [];
-        foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
+        foreach (JsonElement element in array.EnumerateArray())
         {
             words.Add(new AudioCppWord
             {
@@ -457,25 +458,25 @@ public sealed class SseReader
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name, usually <c>artifacts</c>.</param>
     /// <returns>The parsed artifacts, or <see langword="null"/>.</returns>
-    internal static List<AudioArtifact>? ReadArtifacts(System.Text.Json.JsonElement root, string property)
+    internal static List<AudioArtifact>? ReadArtifacts(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
-            array.ValueKind != System.Text.Json.JsonValueKind.Array)
+        if (!root.TryGetProperty(property, out JsonElement array) ||
+            array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
         List<AudioArtifact> artifacts = [];
-        foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
+        foreach (JsonElement element in array.EnumerateArray())
         {
             Dictionary<string, string>? meta = null;
-            if (element.TryGetProperty("meta", out System.Text.Json.JsonElement metaElement) &&
-                metaElement.ValueKind == System.Text.Json.JsonValueKind.Object)
+            if (element.TryGetProperty("meta", out JsonElement metaElement) &&
+                metaElement.ValueKind == JsonValueKind.Object)
             {
                 meta = new Dictionary<string, string>(StringComparer.Ordinal);
-                foreach (System.Text.Json.JsonProperty field in metaElement.EnumerateObject())
+                foreach (JsonProperty field in metaElement.EnumerateObject())
                 {
-                    meta[field.Name] = field.Value.ValueKind == System.Text.Json.JsonValueKind.String
+                    meta[field.Name] = field.Value.ValueKind == JsonValueKind.String
                         ? field.Value.GetString()!
                         : field.Value.GetRawText();
                 }
@@ -497,16 +498,16 @@ public sealed class SseReader
     /// <param name="root">The JSON object to read from.</param>
     /// <param name="property">The property name, usually <c>named_audio_outputs</c>.</param>
     /// <returns>The parsed outputs, or <see langword="null"/>.</returns>
-    internal static List<NamedAudioOutput>? ReadNamedAudioOutputs(System.Text.Json.JsonElement root, string property)
+    internal static List<NamedAudioOutput>? ReadNamedAudioOutputs(JsonElement root, string property)
     {
-        if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
-            array.ValueKind != System.Text.Json.JsonValueKind.Array)
+        if (!root.TryGetProperty(property, out JsonElement array) ||
+            array.ValueKind != JsonValueKind.Array)
         {
             return null;
         }
 
         List<NamedAudioOutput> outputs = [];
-        foreach (System.Text.Json.JsonElement element in array.EnumerateArray())
+        foreach (JsonElement element in array.EnumerateArray())
         {
             outputs.Add(new NamedAudioOutput
             {
@@ -524,7 +525,7 @@ public sealed class SseReader
     /// <summary>Parses a task result object (the shape shared by results and stream done events).</summary>
     /// <param name="element">The JSON result object.</param>
     /// <returns>The parsed task result.</returns>
-    internal static TaskResult ReadTaskResult(System.Text.Json.JsonElement element)
+    internal static TaskResult ReadTaskResult(JsonElement element)
     {
         return new TaskResult
         {

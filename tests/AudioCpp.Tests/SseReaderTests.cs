@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -98,7 +99,7 @@ public class SseReaderTests
         Assert.Equal(TranscriptEventKind.DiarizationDone, done.Kind);
 
         // ttft_ms explicit null: present-but-null is distinguishable.
-        using System.Text.Json.JsonDocument doc = System.Text.Json.JsonDocument.Parse(events[1].Data);
+        using JsonDocument doc = JsonDocument.Parse(events[1].Data);
         AudioCppTiming? timing = SseReader.ReadTiming(doc.RootElement, "timing");
         Assert.Null(timing!.TtftMs);
         Assert.False(timing.TtftPresent);
@@ -271,7 +272,7 @@ public class SseReaderTests
         Assert.Equal(TaskBatchEventKind.Done, last.Kind);
         Assert.Equal(1, last.ResultCount);
         Assert.Equal(12.0, last.Timing!.WallMs);
-        Assert.Throws<System.Text.Json.JsonException>(() => TaskBatchEvent.Parse("{\"type\":\"task.batch.other\"}"));
+        Assert.Throws<JsonException>(() => TaskBatchEvent.Parse("{\"type\":\"task.batch.other\"}"));
     }
 
     /// <summary>A bare data line dispatches nothing; the following event is delivered alone.</summary>

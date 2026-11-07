@@ -63,6 +63,10 @@ uploads the cobertura report as an artifact).
 - Private fields `_camelCase`. Usings outside the namespace, `System.*` first, blank line
   between groups (`dotnet_separate_import_directive_groups = true`).
 - Namespace must match folder (`Http/` → `…Http`).
+- **No fully qualified type names in code** (e.g. `System.Text.Json.JsonElement element` is banned):
+  import the namespace with a `using` declaration and write `JsonElement element`. IDE0130
+  (`dotnet_style_qualification_for_type = false`) only fires when the namespace is already imported,
+  so it can't catch this — the rule is enforced by review, not by build/CI.
 
 ## Edit-tool caution (learned this repo)
 

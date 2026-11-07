@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -88,7 +89,7 @@ public sealed class FakeHandler : IDisposable
             {
                 Content = new ByteArrayContent(bytes),
             };
-            response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(mediaType);
+            response.Content.Headers.ContentType = new MediaTypeHeaderValue(mediaType);
             configure?.Invoke(response);
             return response;
         });

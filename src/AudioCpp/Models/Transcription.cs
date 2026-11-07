@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text.Json;
 
@@ -251,12 +252,12 @@ public sealed class LiveTranscriptionRequest
 
         QueryBuilder query = new();
         query.Add("model", Model);
-        query.Add("sample_rate", SampleRate?.ToString(System.Globalization.CultureInfo.InvariantCulture));
-        query.Add("channels", Channels?.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        query.Add("sample_rate", SampleRate?.ToString(CultureInfo.InvariantCulture));
+        query.Add("channels", Channels?.ToString(CultureInfo.InvariantCulture));
         query.Add("sample_format", SampleFormat);
         query.Add("language", Language);
         query.Add("prompt", Prompt);
-        query.Add("busy_timeout_ms", BusyTimeoutMs?.ToString(System.Globalization.CultureInfo.InvariantCulture));
+        query.Add("busy_timeout_ms", BusyTimeoutMs?.ToString(CultureInfo.InvariantCulture));
         return query.ToString();
     }
 }

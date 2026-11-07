@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text;
 using System.Text.Json;
 
 using Mabs.AudioCpp.Models;
@@ -16,13 +18,13 @@ public class SpeechRequestSerializationTests
     /// <returns>The UTF-8 JSON produced by the writer.</returns>
     private static string Serialize(SpeechRequest request)
     {
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream))
         {
             request.WriteTo(writer);
         }
 
-        return System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        return Encoding.UTF8.GetString(stream.ToArray());
     }
 
     /// <summary>A minimal request serializes to exactly model and input.</summary>
@@ -173,7 +175,7 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void StreamRequestAddsStreamFormatAndReturnText()
     {
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream))
         {
             new SpeechStreamRequest
@@ -184,7 +186,7 @@ public class SpeechRequestSerializationTests
             }.WriteTo(writer);
         }
 
-        string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        string json = Encoding.UTF8.GetString(stream.ToArray());
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"response_format\":\"pcm\",\"stream_format\":\"sse\",\"return_text\":true}", json);
     }
 
@@ -198,7 +200,7 @@ public class SpeechRequestSerializationTests
             StreamFormat = StreamFormat.Audio,
             ReturnText = true,
         };
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using Utf8JsonWriter writer = new(stream);
         Assert.Throws<ArgumentException>(() => request.WriteTo(writer));
     }
@@ -247,7 +249,7 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void TaskRequestSerializesArtifacts()
     {
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream))
         {
             new TaskRequestBody
@@ -267,7 +269,7 @@ public class SpeechRequestSerializationTests
             }.WriteTo(writer);
         }
 
-        string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        string json = Encoding.UTF8.GetString(stream.ToArray());
         Assert.Equal(
             "{\"audio\":\"/in.wav\",\"artifacts\":[{\"id\":\"example.state\",\"kind\":\"custom\",\"payload\":\"AQID\",\"meta\":{\"format\":\"example/1\"}}],\"options\":{\"seed\":\"42\"}}",
             json);
@@ -285,7 +287,7 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void RecipeRequestSerializesRolesAndStreamFlags()
     {
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream))
         {
             RecipeRunRequest request = new()
@@ -301,7 +303,7 @@ public class SpeechRequestSerializationTests
             request.WriteTo(writer);
         }
 
-        string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        string json = Encoding.UTF8.GetString(stream.ToArray());
         Assert.Equal(
             "{\"recipe\":\"speaking-avatar\",\"stream\":true,\"include_artifacts\":true,\"models\":{\"tts\":\"chat-voice\",\"avatar\":\"chat-avatar\"},\"request\":{\"text\":\"Hello!\",\"options\":{\"avatar.reference_image_file\":\"/p.png\"}}}",
             json);
@@ -321,14 +323,14 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void ModelLoadRequestSerializesPackageIdGolden()
     {
-        using System.IO.MemoryStream stream = new();
+        using MemoryStream stream = new();
         using (Utf8JsonWriter writer = new(stream))
         {
             ModelLoadRequest request = new() { Id = "sep", PackageId = "htdemucs_q8_0", Task = "sep" };
             request.WriteTo(writer);
         }
 
-        string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        string json = Encoding.UTF8.GetString(stream.ToArray());
         Assert.Equal(
             "{\"id\":\"sep\",\"package_id\":\"htdemucs_q8_0\",\"task\":\"sep\"}",
             json);
@@ -339,7 +341,7 @@ public class SpeechRequestSerializationTests
     public void TranscriptionInputValidatesOneOfForms()
     {
         Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "m" }.Validate());
-        Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "m", AudioPath = "/a.wav", AudioFile = new System.IO.MemoryStream(), AudioFileName = "a.wav" }.Validate());
+        Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "m", AudioPath = "/a.wav", AudioFile = new MemoryStream(), AudioFileName = "a.wav" }.Validate());
         new TranscriptionRequest { Model = "m", AudioPath = "/a.wav" }.Validate();
     }
 
@@ -347,6 +349,6 @@ public class SpeechRequestSerializationTests
     /// <returns>A writer over an unused in-memory stream.</returns>
     private static Utf8JsonWriter NullWriter()
     {
-        return new Utf8JsonWriter(new System.IO.MemoryStream());
+        return new Utf8JsonWriter(new MemoryStream());
     }
 }

@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 
 using Mabs.AudioCpp;
@@ -115,7 +117,7 @@ async Task<int> RecipesAsync()
     Console.WriteLine($"recipes={recipes.Count}");
     foreach (RecipeEntry recipe in recipes)
     {
-        Console.WriteLine($"  id={recipe.Id} roles=[{string.Join(",", System.Linq.Enumerable.Select(recipe.Roles, r => r.Name))}]");
+        Console.WriteLine($"  id={recipe.Id} roles=[{string.Join(",", Enumerable.Select(recipe.Roles, r => r.Name))}]");
     }
 
     return 0;
@@ -158,7 +160,7 @@ async Task<int> SpeechAsync()
 
     SpeechResult result = await client.Speech.SynthesizeAsync(request);
     File.WriteAllBytes(outPath, result.Audio);
-    string magic = result.Audio.Length >= 4 ? System.Text.Encoding.ASCII.GetString(result.Audio, 0, 4) : string.Empty;
+    string magic = result.Audio.Length >= 4 ? Encoding.ASCII.GetString(result.Audio, 0, 4) : string.Empty;
     Console.WriteLine($"wrote {outPath} bytes={result.Audio.Length} content_type={result.ContentType} magic={magic} wall_ms={result.Timing?.WallMs} rtf={result.Timing?.Rtf}");
     return magic == "RIFF" ? 0 : Fail("WAV magic missing");
 }
