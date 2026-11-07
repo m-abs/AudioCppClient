@@ -9,7 +9,8 @@ options key that collide throw locally before sending.
 
 ```csharp
 using Mabs.AudioCpp;
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Transcription;
+using Mabs.AudioCpp.Models.Tasks;
 
 TaskResult result = await client.Tasks.RunAsync(new TaskRunRequest
 {

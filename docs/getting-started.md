@@ -52,6 +52,7 @@ request — the server ignores it today, frontends in front of it may require it
 
 ```csharp
 using Mabs.AudioCpp;
+using Mabs.AudioCpp.Models;
 
 AudioCppClient client = new("http://127.0.0.1:8080");
 

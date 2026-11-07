@@ -7,7 +7,8 @@ using System.Threading;
 using System.Threading.Tasks;
 
 using Mabs.AudioCpp.Http;
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Recipes;
+using Mabs.AudioCpp.Models.Tasks;
 using Mabs.AudioCpp.Utils;
 
 namespace Mabs.AudioCpp;

@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Speech.Live;
 using Mabs.AudioCpp.Utils;
 
 namespace Mabs.AudioCpp;

@@ -1,6 +1,9 @@
 using System.Text.Json;
 
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Alignment;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Tasks;
+using Mabs.AudioCpp.Models.Transcription;
 
 using Xunit;
 

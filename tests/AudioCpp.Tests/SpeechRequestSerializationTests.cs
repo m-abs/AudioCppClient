@@ -3,6 +3,11 @@ using System.Collections.Generic;
 using System.IO;
 
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Recipes;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Speech.Live;
+using Mabs.AudioCpp.Models.Tasks;
+using Mabs.AudioCpp.Models.Transcription;
 using Mabs.AudioCpp.Utils;
 
 using Xunit;

@@ -8,6 +8,8 @@ one of `AudioPath` (server-local) or `AudioFile` (multipart upload) must be set.
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Transcription;
+using Mabs.AudioCpp.Models.Transcription.Batch;
 
 TranscriptionResult result = await client.Transcriptions.TranscribeAsync(new TranscriptionRequest
 {

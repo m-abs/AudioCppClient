@@ -1,6 +1,8 @@
 using System;
 using System.Text.Json.Serialization;
 
+using Mabs.AudioCpp.Utils.Converters;
+
 namespace Mabs.AudioCpp.Models;
 
 /// <summary>A <c>stream_format</c> value: <c>sse</c> events or raw chunked audio.</summary>

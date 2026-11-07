@@ -7,9 +7,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Mabs.AudioCpp;
-using Mabs.AudioCpp.Enums;
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Recipes;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Tasks;
+using Mabs.AudioCpp.Models.Transcription;
 
 // Demo CLI proving the client library against a real audio.cpp server.
 // Every command exits non-zero when its expected observable does not hold.

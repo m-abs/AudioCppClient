@@ -8,6 +8,8 @@ are server-configured; substitute yours (`GET /v1/models`, `GET /v1/voices`).
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Speech.Live;
 
 SpeechResult result = await client.Speech.SynthesizeAsync(new SpeechRequest
 {

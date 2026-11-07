@@ -15,6 +15,8 @@ batches, recipes, voices, and model management.
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Transcription;
 
 AudioCppClient client = new AudioCppClient("http://127.0.0.1:8080");
 

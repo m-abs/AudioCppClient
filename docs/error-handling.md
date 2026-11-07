@@ -6,6 +6,8 @@ HTTP status.
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Transcription;
 
 try
 {

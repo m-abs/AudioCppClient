@@ -7,10 +7,16 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Mabs.AudioCpp.Enums;
 using Mabs.AudioCpp.Http;
 
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Alignment;
+using Mabs.AudioCpp.Models.Recipes;
+using Mabs.AudioCpp.Models.Speech;
+using Mabs.AudioCpp.Models.Speech.Live;
+using Mabs.AudioCpp.Models.Tasks;
+using Mabs.AudioCpp.Models.Transcription;
+using Mabs.AudioCpp.Models.Transcription.Batch;
 
 using Xunit;
 

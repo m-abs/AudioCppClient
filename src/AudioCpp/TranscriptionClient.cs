@@ -1,16 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
 using Mabs.AudioCpp.Http;
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Transcription;
+using Mabs.AudioCpp.Models.Transcription.Batch;
 using Mabs.AudioCpp.Utils;
 
 namespace Mabs.AudioCpp;

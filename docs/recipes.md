@@ -8,7 +8,8 @@ in `TaskRequestBody.Options` keys.
 
 ```csharp
 using Mabs.AudioCpp;
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Recipes;
+using Mabs.AudioCpp.Models.Tasks;
 
 RecipeRunRequest recipe = new()
 {

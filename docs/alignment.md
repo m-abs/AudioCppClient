@@ -8,7 +8,8 @@ Forced alignment of a known transcript against uploaded WAV bytes
 
 ```csharp
 using Mabs.AudioCpp;
-using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models.Alignment;
+using Mabs.AudioCpp.Models.Transcription;
 
 AlignmentResult aligned = await client.Alignments.RunAsync(new AlignmentRequest
 {
