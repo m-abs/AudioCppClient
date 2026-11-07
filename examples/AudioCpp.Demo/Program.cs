@@ -75,7 +75,7 @@ async Task<int> ModelsAsync()
     Console.WriteLine($"models={models.Count}");
     foreach (AudioCppModel model in models)
     {
-        Console.WriteLine($"  id={model.Id} configured={model.Configured} device={model.Device} params={model.Params?.Count.ToString() ?? "-"}");
+        Console.WriteLine($"  id={model.Id} configured={model.Configured} loaded={model.Loaded} family={model.Family} task={model.Task} path={model.Path} device={model.Device} params={model.Params?.Count.ToString() ?? "-"}");
     }
 
     return 0;

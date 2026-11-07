@@ -250,6 +250,18 @@ public sealed class AudioCppModel
     /// <summary>Effective backend device index.</summary>
     public int? Device { get; internal set; }
 
+    /// <summary><see langword="true"/> when the model is currently loaded in memory.</summary>
+    public bool Loaded { get; internal set; }
+
+    /// <summary>Model family, e.g. <c>kokoro</c> or <c>parakeet</c>.</summary>
+    public string? Family { get; internal set; }
+
+    /// <summary>Path or package id the server resolves the model from.</summary>
+    public string? Path { get; internal set; }
+
+    /// <summary>Task the model serves, e.g. <c>tts</c> or <c>asr</c>.</summary>
+    public string? Task { get; internal set; }
+
     /// <summary>Configured session options, when requested with <c>include_session_options=true</c>.</summary>
     public IReadOnlyDictionary<string, string>? SessionOptions { get; internal set; }
 

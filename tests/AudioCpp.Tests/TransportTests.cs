@@ -81,7 +81,7 @@ public class TransportTests
     {
         using FakeHandler handler = new();
         handler.QueueJson(
-            "{\"object\":\"list\",\"data\":[{\"id\":\"tts\",\"object\":\"model\",\"configured\":true,\"device\":0," +
+            "{\"object\":\"list\",\"data\":[{\"id\":\"tts\",\"object\":\"model\",\"configured\":true,\"device\":0,\"loaded\":true,\"family\":\"kokoro\",\"path\":\"models/kokoro.onnx\",\"task\":\"tts\"," +
             "\"session_options\":{\"threads\":\"4\"}," +
             "\"params\":[{\"name\":\"voice_id\",\"type\":\"enum\",\"required\":false,\"values\":[\"af_bella\",\"am_adam\"],\"default\":\"af_bella\"}," +
             "{\"name\":\"max_tokens\",\"type\":\"int\",\"required\":false,\"min\":1,\"max\":2048}]}]}");
@@ -90,12 +90,30 @@ public class TransportTests
         Assert.Equal("tts", model.Id);
         Assert.True(model.Configured);
         Assert.Equal(0, model.Device);
+        Assert.True(model.Loaded);
+        Assert.Equal("kokoro", model.Family);
+        Assert.Equal("models/kokoro.onnx", model.Path);
+        Assert.Equal("tts", model.Task);
         Assert.Equal("4", model.SessionOptions!["threads"]);
         Assert.Equal(2, model.Params!.Count);
         Assert.Equal("voice_id", model.Params![0].Name);
         Assert.Equal(new[] { "af_bella", "am_adam" }, model.Params![0].Values);
         Assert.Equal("af_bella", model.Params![0].Default!.Value.GetString());
         Assert.Equal(1, model.Params![1].Min!.Value.GetInt32());
+    }
+
+    /// <summary>Registry entries without loaded/family/path/task parse as false/null.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
+    [Fact]
+    public async Task ListModelsMissingRegistryFieldsParseAsDefaults()
+    {
+        using FakeHandler handler = new();
+        handler.QueueJson("{\"object\":\"list\",\"data\":[{\"id\":\"tts\",\"object\":\"model\",\"configured\":false}]}");
+        AudioCppModel model = Assert.Single(await NewClient(handler).ListModelsAsync());
+        Assert.False(model.Loaded);
+        Assert.Null(model.Family);
+        Assert.Null(model.Path);
+        Assert.Null(model.Task);
     }
 
     /// <summary>Unload posts the model ids and reports which ids the server did not find.</summary>

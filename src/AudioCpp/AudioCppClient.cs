@@ -337,6 +337,10 @@ public sealed class AudioCppClient
             Object = SseReader.ReadString(element, "object"),
             Configured = SseReader.ReadBool(element, "configured") ?? false,
             Device = SseReader.ReadInt(element, "device"),
+            Loaded = SseReader.ReadBool(element, "loaded") ?? false,
+            Family = SseReader.ReadString(element, "family"),
+            Path = SseReader.ReadString(element, "path"),
+            Task = SseReader.ReadString(element, "task"),
             SessionOptions = sessionOptions,
             Params = @params,
         };
