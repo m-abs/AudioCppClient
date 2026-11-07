@@ -52,7 +52,11 @@ uploads the cobertura report as an artifact).
 
 ## Formatting — mandatory (`.editorconfig` is the authority)
 
-- **No `var`** (warning severity): always explicit types, including `using (T x = …)`.
+- **No `var`** (warning severity): always explicit types, including `using T x = …` declarations.
+  A `using (x)` block stays only when disposal must happen before later code in the same scope
+  (writer flush before `ToArray()`, failure-path-only disposal, a disposable that is a parameter).
+  IDE0063 (`csharp_prefer_simple_using_statement`) is a warning and `EnforceCodeStyleInBuild` is on,
+  so the rule runs in build/CI.
 - File-scoped namespaces. 4-space indent for `*.cs`; 2-space for `*.csproj`/`*.xml`/`*.json`/`*.props`.
 - `insert_final_newline = false` for `*.cs` (no trailing blank line).
 - Braces always; expression-bodied properties/lambdas OK, **not** methods/ctors/accessors.
@@ -138,5 +142,7 @@ progress. The server is a test dependency, not a repo deliverable.
 
 Use the `audiocpp-api-update` skill (`skill://audiocpp-api-update`): probe the running server /
 source for the exact wire shape first, then thread it through Models → Http (if new SSE family)
-→ client method → tests → demo → README, and re-verify (build 3 TFMs, both test TFMs, live E2E,
-pack). Report every deviation from the plan doc — the live server wins.
+→ client method → tests → demo → README (README is part of the deliverable: endpoint table row
+per route, caveats, runnable snippets, and header facts re-derived from the csproj and a real
+test/pack run), and re-verify (build both library TFMs, tests on `net10.0`, live E2E, pack).
+Report every deviation from the plan doc — the live server wins.

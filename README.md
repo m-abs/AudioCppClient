@@ -4,10 +4,12 @@
 text-to-speech, transcription, alignment, live (duplex) routes, generic task execution,
 batches, recipes, voices, and model management.
 
-- NuGet: `AudioCpp` (0.0.1)
+- NuGet: `Mabs.AudioCppClient` (0.0.1)
 - Target frameworks: `netstandard2.0`, `net10.0`
 - Dependencies: `System.Text.Json` only (`Microsoft.Bcl.AsyncInterfaces` on netstandard2.0)
 - No OpenAI dependency; speaks the audio.cpp wire protocol directly
+- Server default port is `8080` (`--port`); the examples below use `8092`, the local development
+  instance, so they don't collide with an already-running audio.cpp service.
 
 ## Quick start
 
@@ -51,17 +53,15 @@ TranscriptionResult uploaded = await client.Transcriptions.TranscribeAsync(new T
 Streaming (C# 8+ / .NET targets — `IAsyncEnumerable`):
 
 ```csharp
-using (Stream out = File.OpenWrite("out.pcm"))
+using Stream out = File.OpenWrite("out.pcm");
+await foreach (SpeechStreamEvent evt in client.Speech.StreamAsync(new SpeechStreamRequest
 {
-    await foreach (SpeechStreamEvent evt in client.Speech.StreamAsync(new SpeechStreamRequest
-    {
-        Request = new SpeechRequest { Model = "stream-tts", Input = "Tell me a story" },
-        ReturnText = true,
-    }))
-    {
-        if (evt.Kind == SpeechStreamEventKind.AudioDelta) out.Write(evt.Pcm!);
-        if (evt.Kind == SpeechStreamEventKind.TextDelta) Console.Write(evt.Text);
-    }
+    Request = new SpeechRequest { Model = "stream-tts", Input = "Tell me a story" },
+    ReturnText = true,
+}))
+{
+    if (evt.Kind == SpeechStreamEventKind.AudioDelta) out.Write(evt.Pcm!);
+    if (evt.Kind == SpeechStreamEventKind.TextDelta) Console.Write(evt.Text);
 }
 ```
 
@@ -76,7 +76,8 @@ callers without `await foreach` language support.
 | Health | GET | `/health` | `GetHealthAsync()` |
 | Models | GET | `/v1/models` | `ListModelsAsync(includeParams, includeSessionOptions)` |
 | Model load | POST | `/v1/models/load` | `LoadModelAsync(ModelLoadRequest)` (needs `--ui-management`; `Path` or `PackageId`) |
-| Model unload | POST | `/v1/tasks/unload_models` | `UnloadModelsAsync(ids)` / `UnloadAllModelsAsync()` |
+| Model unload | POST | `/v1/tasks/unload_models` | `UnloadModelsAsync(ids)` |
+| Unload all models | POST | `/v1/tasks/unload_all_models` | `UnloadAllModelsAsync()` |
 | Voices | GET | `/v1/audio/voices` | `ListVoicesAsync(model?)` |
 | Recipes | GET | `/v1/recipes` | `ListRecipesAsync()` |
 | Recipe run | POST | `/v1/recipes/run` | `Recipes.RunAsync(...)` / `RunStreamAsync(...)` |
@@ -130,10 +131,15 @@ dotnet run --project examples/AudioCpp.Demo -- speech-stream http://127.0.0.1:80
 dotnet run --project examples/AudioCpp.Demo -- transcribe http://127.0.0.1:8092 parakeet /tmp/speech.wav --multipart
 ```
 
+Also available: `models`, `voices`, `load`, `unload`, `recipes`, `transcribe-details`, and the
+error-shape probes (`speech-error`, `speech-stream-error`, `tasks-run-error`, `recipe-run-error`).
+Run the built dll directly (`dotnet examples/AudioCpp.Demo/bin/Debug/net10.0/AudioCpp.Demo.dll …`)
+when passing flags, since `dotnet run` option parsing can eat app arguments.
+
 ## Build and test
 
 ```
 dotnet build AudioCpp.slnx
-dotnet test tests/AudioCpp.Tests        # 57 tests, fake handler, no network
-dotnet pack src/AudioCpp -c Release     # produces AudioCpp.0.0.1.nupkg
+dotnet test tests/AudioCpp.Tests        # 68 tests, fake handler, no network
+dotnet pack src/AudioCpp -c Release     # produces Mabs.AudioCppClient.0.0.1.nupkg
 ```

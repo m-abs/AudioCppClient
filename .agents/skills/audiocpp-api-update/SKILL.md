@@ -78,12 +78,14 @@ Keep to the repo's protocol conventions already encoded: `Seed` is `string?` (ui
   namespaces; namespace must match folder; no trailing newline on `*.cs`; `_camelCase` privates;
   usings outside the namespace, `System.*` first, blank-line groups. (`.editorconfig` wins on
   any doubt.)
-- Build all three TFMs after each substantive change; fix corruption or warnings immediately.
-  The bar is 0 warnings / 0 errors.
+- Build both library TFMs (`netstandard2.0` + `net10.0`) after each substantive change; fix
+  corruption or warnings immediately. The bar is 0 warnings / 0 errors, with
+  `EnforceCodeStyleInBuild` on so the `.editorconfig` IDE rules (no `var`, IDE0063 using
+  declarations) actually run.
 
 ## Phase 3 — test (the change isn't done until these exist)
 
-`tests/AudioCpp.Tests/`, 57 tests today, all FakeItEasy/`FakeHandler`-driven, zero network:
+`tests/AudioCpp.Tests/`, 68 tests today, all FakeItEasy/`FakeHandler`-driven, zero network:
 
 - **Serialization golden** for any new/changed request field: assert the exact JSON string in
   `SpeechRequestSerializationTests.cs` (literal expected text, correct field order).
@@ -103,8 +105,23 @@ Run the test TFM: `net10.0`.
   against the live server and exits non-zero if the expectation breaks (this is the real-world
   check the fakes can't give — cold model loads, real multipart parse, actual error codes).
   Run the **built dll** directly, not `dotnet run … -- ` with option flags (they mangle args).
-- Update the README endpoint table / notes if the surface changed. Note any new deviation from
-  prior documented behavior.
+- **README ships with the change** — update it in the same pass, and re-derive its claims from
+  ground truth rather than from the previous README text:
+  - **Endpoint table:** one row per route actually hit. Add the new route; split a row when two
+    client methods hit different routes (`/v1/tasks/unload_models` vs
+    `/v1/tasks/unload_all_models`). The "Client call" column must match the real public method
+    name on the sub-client.
+  - **Notes and caveats:** record every deviation the client now encodes — status codes, error
+    `type` strings, field names, JSON key order, query-vs-body params — the same facts reported
+    in Phase 5. If the new behavior contradicts an existing caveat, rewrite that caveat.
+  - **Quick start / Demo CLI:** snippets must be runnable as written. Base URL is the server
+    default `8080`; the examples use the `8092` development instance so they don't clash with a
+    service already running. New demo commands get listed in the Demo CLI section, and snippets
+    follow repo formatting (using declarations, no `var`).
+  - **Header facts:** NuGet `PackageId` (`Mabs.AudioCppClient`), target frameworks,
+    dependencies, the test count from an actual `dotnet test` run, and the pack output filename
+    (`Mabs.AudioCppClient.<version>.nupkg`) — these drift, so check them against the csproj and a
+    real run.
 
 ## Phase 5 — verify + pack + report
 
