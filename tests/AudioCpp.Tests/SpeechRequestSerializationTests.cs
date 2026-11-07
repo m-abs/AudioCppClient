@@ -317,6 +317,23 @@ public class SpeechRequestSerializationTests
         new ModelLoadRequest { Id = "x", PackageId = "pkg" }.Validate();
     }
 
+    /// <summary>Package-id loads serialize in the client field order: id, path, package_id, family, task.</summary>
+    [Fact]
+    public void ModelLoadRequestSerializesPackageIdGolden()
+    {
+        using System.IO.MemoryStream stream = new();
+        using (Utf8JsonWriter writer = new(stream))
+        {
+            ModelLoadRequest request = new() { Id = "sep", PackageId = "htdemucs_q8_0", Task = "sep" };
+            request.WriteTo(writer);
+        }
+
+        string json = System.Text.Encoding.UTF8.GetString(stream.ToArray());
+        Assert.Equal(
+            "{\"id\":\"sep\",\"package_id\":\"htdemucs_q8_0\",\"task\":\"sep\"}",
+            json);
+    }
+
     /// <summary>Exactly one audio form is required; supplying both fails validation.</summary>
     [Fact]
     public void TranscriptionInputValidatesOneOfForms()

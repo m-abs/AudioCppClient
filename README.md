@@ -75,7 +75,7 @@ callers without `await foreach` language support.
 |---|---|---|---|
 | Health | GET | `/health` | `GetHealthAsync()` |
 | Models | GET | `/v1/models` | `ListModelsAsync(includeParams, includeSessionOptions)` |
-| Model load | POST | `/v1/models/load` | `LoadModelAsync(ModelLoadRequest)` (needs `--ui-management`) |
+| Model load | POST | `/v1/models/load` | `LoadModelAsync(ModelLoadRequest)` (needs `--ui-management`; `Path` or `PackageId`) |
 | Model unload | POST | `/v1/tasks/unload_models` | `UnloadModelsAsync(ids)` / `UnloadAllModelsAsync()` |
 | Voices | GET | `/v1/audio/voices` | `ListVoicesAsync(model?)` |
 | Recipes | GET | `/v1/recipes` | `ListRecipesAsync()` |
@@ -103,8 +103,15 @@ callers without `await foreach` language support.
   `StreamAsync` because the server rejects other formats on the SSE path.
 - **`AudioCppException`** carries the server's `error.message`, `error.type`, and HTTP
   status. On error-terminated SSE streams the exception is thrown mid-iteration.
-- **Unknown models** return HTTP 500 (`type=server_error`) on `v0.9.3`, despite older docs
-  saying 404. The client surfaces whatever the server sends.
+- **Unknown models** return HTTP 500 (`type=server_error`) on `v0.9.3` and `v0.9.4`, despite
+  older docs saying 404. The client surfaces whatever the server sends.
+- **Model load by package id** (`v0.9.4`, native-model-manager builds): `ModelLoadRequest.PackageId`
+  replaces `Path` and the server resolves the load target from the package registry. Sending both,
+  or a non-string/empty `package_id`, is 400 `invalid_request_error`; an unknown or not-installed
+  package is 404 `not_found`. The client enforces the either-or rule locally in `Validate()`.
+- **`include_artifacts`** (`v0.9.4`): top-level flag on `TaskStreamRequest` and
+  `RecipeRunRequest` (default `false`). When set, stream events carry an `artifacts` array and
+  artifact-only events count toward `ttft_ms`.
 - **Options map** (`Dictionary<string, string>`) passes model-specific request options
   through verbatim; the client throws locally if a typed property and an option key
   collide, instead of silently picking one.

@@ -13,7 +13,7 @@ using Mabs.AudioCpp.Models;
 if (args.Length < 2)
 {
     Console.Error.WriteLine("usage: demo <command> <baseUrl> [args…]");
-    Console.Error.WriteLine("commands: health | voices | models | unload | load | recipes |");
+    Console.Error.WriteLine("commands: health | voices | models | unload | load | load-package-error | recipes |");
     Console.Error.WriteLine("          speech | transcribe | transcribe-details |");
     Console.Error.WriteLine("          speech-error | speech-stream-error | tasks-run-error | recipe-run-error");
     return 2;
@@ -35,6 +35,7 @@ try
         "models" => await ModelsAsync(),
         "unload" => await UnloadAsync(),
         "load" => await LoadAsync(),
+        "load-package-error" => await LoadPackageErrorAsync(),
         "recipes" => await RecipesAsync(),
         "speech" => await SpeechAsync(),
         "speech-stream" => await SpeechStreamAsync(),
@@ -309,6 +310,20 @@ async Task<int> TasksRunErrorAsync()
     {
         Console.WriteLine($"ok: status={ex.StatusCode} message={ex.Message}");
         return 0;
+    }
+}
+
+async Task<int> LoadPackageErrorAsync()
+{
+    try
+    {
+        await client.LoadModelAsync(new ModelLoadRequest { Id = "pkgload", PackageId = "definitely-not-installed" });
+        return Fail("expected AudioCppException");
+    }
+    catch (AudioCppException ex)
+    {
+        Console.WriteLine($"ok: status={ex.StatusCode} type={ex.ErrorType} message={ex.Message}");
+        return ex.StatusCode == 404 && ex.ErrorType == "not_found" ? 0 : Fail("expected 404 not_found");
     }
 }
 

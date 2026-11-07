@@ -46,7 +46,7 @@ dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/
 
 `dotnet` is 10.0.401; a .NET 8 runtime lives at `/home/vscode/.dotnet8` (tests set
 `RollForward=LatestMajor`). Expect **0 warnings, 0 errors** — the library builds clean on all
-three TFMs and the suite is 65 tests, no network.
+three TFMs and the suite is 68 tests, no network.
 
 ## Formatting — mandatory (`.editorconfig` is the authority)
 
@@ -64,7 +64,7 @@ Range-based `edit` has repeatedly corrupted files here (dropping/duplicating con
 For active files prefer a full-file `write`, or a single anchored `PUT`. **`dotnet build` is
 ground truth after every change** — fix corruption immediately, do not trust the edit echo.
 
-## Protocol facts the code encodes (grounded in v0.9.3, git 41c1f8ff)
+## Protocol facts the code encodes (grounded in v0.9.4, git f7ac446f)
 
 The live server is source of truth over the plan doc. Non-obvious wire behavior:
 
@@ -87,6 +87,13 @@ The live server is source of truth over the plan doc. Non-obvious wire behavior:
   collide throw locally (server aliases don't merge — silent overwrite is a footgun).
 - `TaskStreamRequest.StreamFormat = null` means the buffered JSON envelope, replayed client-side
   as the same event sequence; `"sse"` streams; any other value is rejected client-side (server 400s).
+- **models/load by `package_id`** (v0.9.4, native model manager builds): `package_id` replaces
+  `path`; both set or a non-string/empty `package_id` → 400 `invalid_request_error`; unknown or
+  not-installed package → 404 `not_found` (verified live). The client enforces either-or in
+  `ModelLoadRequest.Validate()` before sending.
+- **`include_artifacts`** (v0.9.4 top-level flag on task/recipe stream bodies, default false):
+  events gain an `artifacts` array between `named_audio_outputs` and `word_timestamps`, and
+  artifact-only events count toward `ttft_ms` when enabled.
 
 ## Testing conventions
 

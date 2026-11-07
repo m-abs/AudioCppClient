@@ -148,6 +148,26 @@ public class SseReaderTests
         Assert.Equal(42.0, done.Result!.Timing!.TtftMs);
     }
 
+    /// <summary>With include_artifacts events carry an artifacts array (id, kind, payload, meta) as the server writes it.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
+    [Fact]
+    public async Task TaskStreamEventCarriesArtifactsWhenIncluded()
+    {
+        // v0.9.4 stream_event_json: artifacts sits between named_audio_outputs and word_timestamps.
+        string sse =
+            "data: {\"type\":\"task.stream.event\",\"event\":{\"audio\":\"AAAA\",\"artifacts\":[{\"id\":\"reply\",\"kind\":\"custom\",\"payload\":\"AAAA\",\"meta\":{\"lang\":\"da\"}}],\"is_final\":false}}\n\n" +
+            "data: [DONE]\n\n";
+        List<SseEvent> events = await ReadAllAsync(sse);
+        TaskStreamEvent evt = TaskStreamEvent.ParseSse(events[0].Data);
+        Assert.Equal(TaskStreamEventKind.Event, evt.Kind);
+        AudioArtifact artifact = evt.Event!.Artifacts![0];
+        Assert.Equal("reply", artifact.Id);
+        Assert.Equal("custom", artifact.Kind);
+        Assert.Equal(new byte[] { 0, 0, 0 }, artifact.Payload);
+        Assert.Equal("da", artifact.Meta!["lang"]);
+        Assert.False(evt.Event!.IsFinal);
+    }
+
     /// <summary>An error event terminates the stream without a done event and throws with no status code.</summary>
     /// <returns>Completes after the assertions pass.</returns>
     [Fact]

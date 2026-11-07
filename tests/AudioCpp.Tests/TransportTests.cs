@@ -170,6 +170,22 @@ public class TransportTests
         Assert.Equal("server_busy", ex.ErrorType);
     }
 
+    /// <summary>A package-id load of an unknown package gets HTTP 404 with error type not_found (v0.9.4).</summary>
+    /// <returns>Completes after the assertion passes.</returns>
+    [Fact]
+    public async Task PackageLoadNotFoundThrowsWithNotFoundType()
+    {
+        // v0.9.4 live behavior: package_id loads resolve through the native model
+        // manager; an unknown or not-installed package is 404 not_found.
+        using FakeHandler handler = new();
+        handler.QueueJson("{\"error\":{\"message\":\"unknown package id: nope\",\"type\":\"not_found\"}}", HttpStatusCode.NotFound);
+        AudioCppException ex = await Assert.ThrowsAsync<AudioCppException>(() =>
+            NewClient(handler).LoadModelAsync(new ModelLoadRequest { Id = "x", PackageId = "nope" }));
+        Assert.Equal("unknown package id: nope", ex.Message);
+        Assert.Equal("not_found", ex.ErrorType);
+        Assert.Equal(404, ex.StatusCode);
+    }
+
     /// <summary>A non-JSON error body becomes the exception message as raw text with no error type.</summary>
     /// <returns>Completes after the assertion passes.</returns>
     [Fact]
