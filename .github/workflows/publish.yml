@@ -15,5 +15,5 @@ jobs:
       - run: dotnet test tests/AudioCpp.Tests -v q --nologo
       - run: dotnet pack src/AudioCpp -c Release --nologo
       - run: |
-          dotnet nuget add source --username "$GITHUB_ACTOR" --password "$GITHUB_TOKEN" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/m-abs/index.json"
+          dotnet nuget add source --username "any" --password "$GITHUB_TOKEN" --store-password-in-clear-text --name github "https://nuget.pkg.github.com/m-abs/index.json"
           dotnet nuget push src/AudioCpp/bin/Release/*.nupkg --source github
