@@ -9,6 +9,9 @@ namespace Mabs.AudioCpp.Http;
 /// <summary>Shared JSON response parsers.</summary>
 internal static class SseParsers
 {
+    /// <summary>Parses the unload response (<c>unloaded</c> and <c>not_found</c> id lists).</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The unload result; both lists are empty when absent.</returns>
     internal static UnloadModelsResult UnloadResult(JsonElement root)
     {
         return new UnloadModelsResult
@@ -18,6 +21,9 @@ internal static class SseParsers
         };
     }
 
+    /// <summary>Parses the <c>POST /v1/models/load</c> response.</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The load result.</returns>
     internal static ModelLoadResult ModelLoadResult(JsonElement root)
     {
         return new ModelLoadResult
@@ -28,6 +34,9 @@ internal static class SseParsers
         };
     }
 
+    /// <summary>Parses the non-streaming transcription response (<c>text</c> and <c>timing</c>).</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The transcription result.</returns>
     internal static TranscriptionResult Transcription(JsonElement root)
     {
         return new TranscriptionResult
@@ -37,11 +46,17 @@ internal static class SseParsers
         };
     }
 
+    /// <summary>Parses a task result envelope.</summary>
+    /// <param name="root">The JSON result object.</param>
+    /// <returns>The task result.</returns>
     internal static TaskResult TaskResult(JsonElement root)
     {
         return SseReader.ReadTaskResult(root);
     }
 
+    /// <summary>Parses the <c>response_format=json</c> speech envelope (<c>audio</c>, <c>format</c>, <c>timing</c>).</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The parsed speech JSON result.</returns>
     internal static SpeechJsonResult SpeechJson(JsonElement root)
     {
         return new SpeechJsonResult
@@ -52,6 +67,10 @@ internal static class SseParsers
         };
     }
 
+    /// <summary>Reads a string array property as a list.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The strings found; empty when the property is absent or not an array.</returns>
     internal static IReadOnlyList<string> ReadStringArray(JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out JsonElement array) ||

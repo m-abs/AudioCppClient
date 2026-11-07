@@ -9,7 +9,10 @@ namespace Mabs.AudioCpp.Http
     /// </summary>
     public class AudioCppException : Exception
     {
-        /// <summary>Initializes a new instance of the <see cref="AudioCppException"/> class.Initializes a new instance with all wire-reported fields.</summary>
+        /// <summary>Creates an exception carrying the wire-reported message, error type and HTTP status.</summary>
+        /// <param name="message">The server-reported message, or the raw body text when the body was not an error envelope.</param>
+        /// <param name="errorType">The envelope's <c>type</c> field, or <see langword="null"/> for SSE error events and non-envelope bodies.</param>
+        /// <param name="statusCode">The HTTP status code, or <see langword="null"/> for SSE error events.</param>
         public AudioCppException(string message, string? errorType, int? statusCode)
             : base(message)
         {
@@ -17,7 +20,8 @@ namespace Mabs.AudioCpp.Http
             StatusCode = statusCode;
         }
 
-        /// <summary>Initializes a new instance of the <see cref="AudioCppException"/> class.Initializes a new instance with a message only.</summary>
+        /// <summary>Creates an exception with a message only (no wire error type or status).</summary>
+        /// <param name="message">The message.</param>
         public AudioCppException(string message)
             : base(message)
         {

@@ -6,18 +6,24 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Http;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models;
 
 using Xunit;
 
-namespace mabs.AudioCpp.Tests;
+namespace Mabs.AudioCpp.Tests;
 
 /// <summary>SseReader fixtures for every event family the server writes.</summary>
 public class SseReaderTests
 {
+    /// <summary>Builds a reader over an in-memory copy of the SSE text.</summary>
+    /// <param name="sse">The event-stream text to read.</param>
+    /// <returns>An <c>SseReader</c> over the given text.</returns>
     private static SseReader Reader(string sse) => new(new MemoryStream(Encoding.UTF8.GetBytes(sse)));
 
+    /// <summary>Reads every event from the SSE text into a list.</summary>
+    /// <param name="sse">The event-stream text to read.</param>
+    /// <returns>The events delivered before the stream ended.</returns>
     private static async Task<List<SseEvent>> ReadAllAsync(string sse)
     {
         List<SseEvent> events = new();
@@ -29,6 +35,8 @@ public class SseReaderTests
         return events;
     }
 
+    /// <summary>Speech text and audio delta and done events arrive in stream order and parse with timing.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task SpeechTextAndAudioInterleave()
     {
@@ -50,6 +58,8 @@ public class SseReaderTests
         Assert.Equal(12.5, parsed[3].Timing!.TtftMs);
     }
 
+    /// <summary>Transcript delta, partial, and done events parse, including done timing.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TranscriptionDeltaPartialDone()
     {
@@ -69,6 +79,8 @@ public class SseReaderTests
         Assert.Equal(3606, done.Timing!.TtftMs);
     }
 
+    /// <summary>Diarization delta parses speaker turns, and an explicit null timing stays present-but-null.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task DiarizationDeltaAndDone()
     {
@@ -92,6 +104,8 @@ public class SseReaderTests
         Assert.False(timing.TtftPresent);
     }
 
+    /// <summary>Batch result and done events parse index, filename, result count, and timing.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task BatchResultAndDone()
     {
@@ -112,6 +126,8 @@ public class SseReaderTests
         Assert.Equal(0.0021, last.Timing!.Rtf);
     }
 
+    /// <summary>Task stream events parse partial text and language, and done parses the final result.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TaskStreamEventAndDone()
     {
@@ -132,6 +148,8 @@ public class SseReaderTests
         Assert.Equal(42.0, done.Result!.Timing!.TtftMs);
     }
 
+    /// <summary>An error event terminates the stream without a done event and throws with no status code.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task ErrorTerminatedStreamHasNoDone()
     {
@@ -145,6 +163,8 @@ public class SseReaderTests
         Assert.Null(ex.StatusCode);
     }
 
+    /// <summary>Reading stops at the [DONE] sentinel; events after it are never delivered.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TerminatesAtDoneSentinel()
     {
@@ -153,6 +173,8 @@ public class SseReaderTests
         Assert.Single(events);
     }
 
+    /// <summary>Comment lines are ignored and the event field is kept on the delivered event.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task HandlesCommentsAndEventField()
     {
@@ -163,6 +185,8 @@ public class SseReaderTests
         Assert.Equal("hello", events[0].Data);
     }
 
+    /// <summary>Consecutive data lines are joined with newlines per the SSE spec.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task JoinsMultiLineDataPerSpec()
     {
@@ -172,6 +196,8 @@ public class SseReaderTests
         Assert.Equal("{\"a\":\n1}", events[0].Data);
     }
 
+    /// <summary>A one-megabyte data line is read whole under the raised default limit.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task LargeLineUnderLimitIsRead()
     {
@@ -182,6 +208,8 @@ public class SseReaderTests
         Assert.Equal(big, events[0].Data.Substring("data: ".Length - 6));
     }
 
+    /// <summary>A data line larger than maxLineBytes throws InvalidOperationException.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task OversizedLineThrows()
     {
@@ -191,6 +219,8 @@ public class SseReaderTests
         await Assert.ThrowsAsync<InvalidOperationException>(() => reader.ReadEventsAsync(_ => Task.CompletedTask));
     }
 
+    /// <summary>A line larger than the internal buffer is reassembled across reads.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task WorksAcrossBufferBoundaries()
     {
@@ -203,6 +233,8 @@ public class SseReaderTests
         Assert.Equal(70000, evt.Pcm!.Length);
     }
 
+    /// <summary>Task batch result and done events parse, and an unknown event type throws JsonException.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TaskBatchResultAndDone()
     {
@@ -222,6 +254,8 @@ public class SseReaderTests
         Assert.Throws<System.Text.Json.JsonException>(() => TaskBatchEvent.Parse("{\"type\":\"task.batch.other\"}"));
     }
 
+    /// <summary>A bare data line dispatches nothing; the following event is delivered alone.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task EmptyDataLineIsSkippedPerSpec()
     {
@@ -230,6 +264,8 @@ public class SseReaderTests
         Assert.Equal("hello", events[0].Data);
     }
 
+    /// <summary>The raised default limit covers multi-megabyte done lines carrying a whole run's audio.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task LargeLineUnderDefaultLimitIsRead()
     {

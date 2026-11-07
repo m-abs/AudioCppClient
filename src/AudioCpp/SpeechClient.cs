@@ -19,6 +19,8 @@ public sealed class SpeechClient
 {
     private readonly AudioCppClient _client;
 
+    /// <summary>Creates the speech endpoint group bound to <paramref name="client"/>.</summary>
+    /// <param name="client">The owning client that carries the transport and base URL.</param>
     internal SpeechClient(AudioCppClient client)
     {
         _client = client;
@@ -28,7 +30,10 @@ public sealed class SpeechClient
     /// Synthesize speech. Returns the raw audio bytes (WAV by default) with the
     /// <c>X-AudioCPP-*</c> timing headers parsed into <see cref="SpeechResult.Timing"/>.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The speech request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The audio bytes, content type, and timing.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<SpeechResult> SynthesizeAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -52,7 +57,10 @@ public sealed class SpeechClient
     /// Synthesize with <c>response_format=json</c> and parse the JSON envelope
     /// (<c>audio</c> Base64 WAV, <c>format</c>, <c>timing</c>).
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The speech request; <see cref="SpeechRequest.ResponseFormat"/> is forced to <c>json</c>.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The parsed JSON envelope.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<SpeechJsonResult> SynthesizeJsonAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -71,7 +79,10 @@ public sealed class SpeechClient
     /// Ends after <c>speech.audio.done</c> and <c>[DONE]</c>; throws
     /// <see cref="AudioCppException"/> on an SSE error event.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="request">The stream request; <c>stream_format</c> must be <c>sse</c>.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<SpeechStreamEvent> StreamAsync(SpeechStreamRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -88,7 +99,11 @@ public sealed class SpeechClient
     }
 
     /// <summary>Callback streaming variant.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The stream request; <c>stream_format</c> must be <c>sse</c>.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task StreamAsync(SpeechStreamRequest request, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -107,7 +122,10 @@ public sealed class SpeechClient
     /// chunked octet-stream bytes. The caller owns the returned stream; reading it yields
     /// PCM16 bytes as the server produces them.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The stream request; <c>stream_format</c> is forced to <c>audio</c>.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The open response content stream.</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     public async Task<Stream> StreamPcmAsync(SpeechStreamRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -132,7 +150,11 @@ public sealed class SpeechClient
     /// ends — and the model treats it as end-of-speech — when <paramref name="pcmInput"/>
     /// reaches EOF; closing the connection without that is a server error, by contract.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="request">The live request; all fields travel as query parameters.</param>
+    /// <param name="pcmInput">The PCM stream to upload; EOF marks end-of-speech.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<SpeechStreamEvent> SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -163,7 +185,12 @@ public sealed class SpeechClient
     }
 
     /// <summary>Callback variant of <see cref="SpeakLiveAsync(LiveSpeechRequest, Stream, CancellationToken)"/>.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The live request.</param>
+    /// <param name="pcmInput">The PCM stream to upload; EOF marks end-of-speech.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -177,6 +204,12 @@ public sealed class SpeechClient
         }
     }
 
+    /// <summary>Opens the SSE stream response and wraps its content in a reader.</summary>
+    /// <param name="request">The stream request; <c>stream_format</c> must be <c>sse</c>.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A reader over the open event stream.</returns>
+    /// <exception cref="ArgumentException">The request is not SSE-shaped or not PCM output.</exception>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     private async Task<SseReader> OpenSpeechStreamAsync(SpeechStreamRequest request, CancellationToken cancellationToken)
     {
         if (request.StreamFormat != StreamFormat.Sse)

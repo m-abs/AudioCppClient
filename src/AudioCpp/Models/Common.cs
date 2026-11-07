@@ -316,6 +316,8 @@ public sealed class ModelLoadRequest
         }
     }
 
+    /// <summary>Writes the load request object (call <see cref="Validate"/> first).</summary>
+    /// <param name="writer">The JSON writer.</param>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         writer.WriteStartObject();

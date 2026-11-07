@@ -7,22 +7,28 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Http;
 
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models;
 
 using Xunit;
 
-namespace mabs.AudioCpp.Tests;
+namespace Mabs.AudioCpp.Tests;
 
 /// <summary>FakeItEasy-handler-driven transport tests: no real sockets.</summary>
 public class TransportTests
 {
+    /// <summary>Builds a client bound to the fake handler at the fixed loopback base URL.</summary>
+    /// <param name="handler">Fake handler serving the queued responses.</param>
+    /// <param name="apiKey">Optional API key; when set the client sends a Bearer header.</param>
+    /// <returns>A client whose requests are served by the fake handler.</returns>
     private static AudioCppClient NewClient(FakeHandler handler, string? apiKey = null)
     {
         return new AudioCppClient(new Uri("http://127.0.0.1:8092/"), handler.Client, apiKey);
     }
 
+    /// <summary>Health is fetched with GET at /health, parses the envelope, and sends no Authorization.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task GetHealthUsesCorrectMethodAndPath()
     {
@@ -38,6 +44,8 @@ public class TransportTests
         Assert.Null(handler.Last.Authorization);
     }
 
+    /// <summary>The Bearer header is sent only when an API key is configured.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task AuthorizationHeaderOnlyWithApiKey()
     {
@@ -52,6 +60,8 @@ public class TransportTests
         Assert.Null(anonymous.Last.Authorization);
     }
 
+    /// <summary>Model listing puts the include_params and include_session_options flags in the query string.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task ListModelsQueryFlags()
     {
@@ -64,6 +74,8 @@ public class TransportTests
         Assert.Contains("include_session_options=true", query);
     }
 
+    /// <summary>Model rows parse device, session options, and param rows with values and bounds.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task ListModelsParsesParamsRows()
     {
@@ -86,6 +98,8 @@ public class TransportTests
         Assert.Equal(1, model.Params![1].Min!.Value.GetInt32());
     }
 
+    /// <summary>Unload posts the model ids and reports which ids the server did not find.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task UnloadReportsNotFound()
     {
@@ -99,6 +113,8 @@ public class TransportTests
         Assert.Equal(new[] { "unknown-id" }, result.NotFound);
     }
 
+    /// <summary>Unload-all posts with no body and returns the unloaded ids.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task UnloadAllSendsWithNoBody()
     {
@@ -109,6 +125,8 @@ public class TransportTests
         Assert.Equal(new[] { "a" }, result.Unloaded);
     }
 
+    /// <summary>Error envelopes surface message, error type, and status code on the exception.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task ErrorEnvelopeThrowsAudioCppExceptionWithFields()
     {
@@ -122,17 +140,25 @@ public class TransportTests
         Assert.Equal(500, ex.StatusCode);
     }
 
+    /// <summary>A 400 invalid_request_error response throws with its status code and error type preserved.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task BadRequest400InvalidRequestErrorType()
     {
         using FakeHandler handler = new();
         handler.QueueJson("{\"error\":{\"message\":\"audio alignment requests must use multipart/form-data\",\"type\":\"invalid_request_error\"}}", HttpStatusCode.BadRequest);
         AudioCppException ex = await Assert.ThrowsAsync<AudioCppException>(() =>
-            NewClient(handler).SendJsonAsync(HttpMethod.Post, "v1/audio/alignments", w => { w.WriteStartObject(); w.WriteEndObject(); }, _ => new object(), CancellationToken.None));
+            NewClient(handler).SendJsonAsync(HttpMethod.Post, "v1/audio/alignments", w =>
+            {
+                w.WriteStartObject();
+                w.WriteEndObject();
+            }, _ => new object(), CancellationToken.None));
         Assert.Equal(400, ex.StatusCode);
         Assert.Equal("invalid_request_error", ex.ErrorType);
     }
 
+    /// <summary>A 503 server_busy response throws with status and type preserved.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task Busy503ServerErrorType()
     {
@@ -144,6 +170,8 @@ public class TransportTests
         Assert.Equal("server_busy", ex.ErrorType);
     }
 
+    /// <summary>A non-JSON error body becomes the exception message as raw text with no error type.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task NonJsonErrorBodyFallsBackToRawText()
     {
@@ -158,6 +186,8 @@ public class TransportTests
         Assert.Equal(502, ex.StatusCode);
     }
 
+    /// <summary>Binary speech responses return audio bytes, content type, and timing read from response headers.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task SynthesizeReturnsBytesContentTypeAndTimingHeaders()
     {
@@ -182,6 +212,8 @@ public class TransportTests
         Assert.Contains("\"model\":\"kokoro\"", handler.Last.ContentText());
     }
 
+    /// <summary>JSON speech responses parse base64 audio, format, and timing, and request the json format.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task SynthesizeJsonParsesEnvelope()
     {
@@ -195,6 +227,8 @@ public class TransportTests
         Assert.Contains("\"response_format\":\"json\"", handler.Last.ContentText());
     }
 
+    /// <summary>Audio paths serialize as JSON; uploaded files serialize as unquoted multipart form parts.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TranscribeUsesJsonForPathAndMultipartForFile()
     {
@@ -212,6 +246,7 @@ public class TransportTests
         Assert.Equal("uploaded", viaUpload.Text);
         Assert.Contains("multipart/form-data", handler.Last.ContentType);
         string body = handler.Last.ContentText();
+
         // .NET serializes form-data names unquoted (RFC 2231 filename* twin); the live
         // server parses both quoted and unquoted forms (verified against v0.9.3).
         Assert.Contains("name=file", body);
@@ -221,6 +256,8 @@ public class TransportTests
         Assert.Equal("http://127.0.0.1:8092/v1/audio/transcriptions", handler.Last.Uri.AbsoluteUri);
     }
 
+    /// <summary>Every alignment request field appears as its own multipart form-data part.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task MultipartPartsCarryAllFields()
     {
@@ -241,6 +278,8 @@ public class TransportTests
         }
     }
 
+    /// <summary>SSE stream requests default to pcm audio with sse format and parse delta and done events.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task StreamSseRequestsAcceptHeaderAndParsesEvents()
     {
@@ -254,11 +293,14 @@ public class TransportTests
             .ToListAsync();
         Assert.Equal(2, events.Count);
         Assert.Equal(SpeechStreamEventKind.AudioDelta, events[0].Kind);
+
         // Response format defaulted to pcm for streaming.
         Assert.Contains("\"response_format\":\"pcm\"", handler.Last.ContentText());
         Assert.Contains("\"stream_format\":\"sse\"", handler.Last.ContentText());
     }
 
+    /// <summary>JSON-mode task streams replay stored events plus a done event and omit stream_format.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TaskStreamJsonModeReplaysEventsAndDone()
     {
@@ -275,6 +317,8 @@ public class TransportTests
         Assert.DoesNotContain("\"stream_format\"", handler.Last.ContentText(), StringComparison.Ordinal);
     }
 
+    /// <summary>Batch requests send one file part per upload and parse result and done events.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task BatchTranscriptionRepeatsFileParts()
     {
@@ -297,6 +341,8 @@ public class TransportTests
         Assert.Equal("http://127.0.0.1:8092/v1/batches/transcriptions", handler.Last.Uri.AbsoluteUri);
     }
 
+    /// <summary>Live transcription posts raw pcm as octet-stream with the request parameters in the query.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task LiveRoutesPostChunkedPcmWithQuery()
     {
@@ -317,6 +363,8 @@ public class TransportTests
         Assert.Equal(3200, handler.Last.Content!.Length);
     }
 
+    /// <summary>An error event mid-stream throws while enumerating events.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task SseErrorEventThrowsDuringStreaming()
     {
@@ -334,6 +382,8 @@ public class TransportTests
         });
     }
 
+    /// <summary>Voice listing adds the model query parameter only when a model is supplied.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task VoicesQueryIncludesModelWhenGiven()
     {
@@ -344,6 +394,8 @@ public class TransportTests
         Assert.Contains("model=tts-model", handler.Last.Uri.Query);
     }
 
+    /// <summary>Recipe entries parse their id, description, and role list.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task RecipesListParsesRoles()
     {
@@ -357,6 +409,8 @@ public class TransportTests
         Assert.Equal("vc", recipe.Roles[1].Task);
     }
 
+    /// <summary>A 403 forbidden response from model loading throws with status and error type preserved.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task LoadModel403ForbiddenSurfaces()
     {
@@ -368,6 +422,7 @@ public class TransportTests
         Assert.Equal("forbidden", ex.ErrorType);
     }
 
+    /// <summary>Relative paths resolve correctly when the base URL has no trailing slash.</summary>
     [Fact]
     public void BaseUrlWithoutTrailingSlashStillResolvesRelativePaths()
     {
@@ -375,6 +430,8 @@ public class TransportTests
         Assert.Equal("http://host:1/path/v1/models", client.BuildUri("v1/models").AbsoluteUri);
     }
 
+    /// <summary>Stream-pcm forces audio-format pcm and hands back the raw response stream.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task StreamPcmForcesAudioFormatAndReturnsRawBytes()
     {
@@ -389,10 +446,13 @@ public class TransportTests
             await stream.CopyToAsync(sink);
             Assert.Equal(pcm, sink.ToArray());
         }
+
         Assert.Contains("\"stream_format\":\"audio\"", handler.Last.ContentText());
         Assert.Contains("\"response_format\":\"pcm\"", handler.Last.ContentText());
     }
 
+    /// <summary>Live speech posts pcm bytes with query parameters and parses the SSE events.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task SpeakLivePostsChunkedPcmAndParsesEvents()
     {
@@ -408,6 +468,8 @@ public class TransportTests
         Assert.Equal(new byte[] { 5, 6, 7 }, handler.Last.Content);
     }
 
+    /// <summary>Transcription streaming over the JSON path parses transcript events from the path body.</summary>
+    /// <returns>Completes after the assertions pass.</returns>
     [Fact]
     public async Task TranscribeStreamParsesEventsOnJsonPath()
     {
@@ -419,12 +481,15 @@ public class TransportTests
         Assert.Contains("\"audio\":\"/srv/a.wav\"", handler.Last.ContentText());
     }
 
+    /// <summary>An empty audio path fails request validation.</summary>
     [Fact]
     public void EmptyAudioPathFailsValidation()
     {
-        Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "asr", AudioPath = "" }.Validate());
+        Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "asr", AudioPath = string.Empty }.Validate());
     }
 
+    /// <summary>Copying a live body stops with OperationCanceledException when cancellation fires mid-body.</summary>
+    /// <returns>Completes after the assertion passes.</returns>
     [Fact]
     public async Task LiveBodyCopyStopsOnCancellationMidBody()
     {
@@ -434,16 +499,27 @@ public class TransportTests
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => content.CopyToAsync(new System.IO.MemoryStream(), cts.Token));
     }
 
+    /// <summary>Memory stream that cancels the token after its first successful read.</summary>
     private sealed class CancelAfterFirstRead : System.IO.MemoryStream
     {
+        /// <summary>The token source cancelled after the first read.</summary>
         private readonly CancellationTokenSource _cts;
+
+        /// <summary>Count of completed reads.</summary>
         private int _reads;
 
-        public CancelAfterFirstRead(CancellationTokenSource cts) : base(new byte[] { 1, 2, 3 })
+        /// <summary>Wraps a small buffer and the token source to cancel on first read.</summary>
+        /// <param name="cts">Token source to cancel after the first read.</param>
+        public CancelAfterFirstRead(CancellationTokenSource cts)
+            : base(new byte[] { 1, 2, 3 })
         {
             _cts = cts;
         }
 
+        /// <summary>Reads from the base stream and cancels the token after the first read completes.</summary>
+        /// <param name="buffer">Destination for the read bytes.</param>
+        /// <param name="cancellationToken">Cancellation token passed through to the base stream.</param>
+        /// <returns>The number of bytes read.</returns>
         public override async ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken)
         {
             int read = await base.ReadAsync(buffer, cancellationToken);
@@ -457,8 +533,13 @@ public class TransportTests
     }
 }
 
+/// <summary>Drains async enumerables into lists for assertions.</summary>
 internal static class AsyncEnumerableTestExtensions
 {
+    /// <summary>Collects every element yielded by the source.</summary>
+    /// <typeparam name="T">The element type.</typeparam>
+    /// <param name="source">The async enumerable to drain.</param>
+    /// <returns>A list of all elements in enumeration order.</returns>
     internal static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> source)
     {
         List<T> items = new();

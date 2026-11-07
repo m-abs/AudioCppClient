@@ -58,6 +58,7 @@ public class TranscriptionInputBase
         }
     }
 
+    /// <summary>Whether this request travels as a multipart upload (<see cref="AudioFile"/> form) rather than a JSON body.</summary>
     internal bool IsMultipart => AudioFile != null;
 }
 
@@ -112,6 +113,9 @@ public sealed class TranscriptionDetailsResult
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
 
+    /// <summary>Parses the details response root.</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The parsed details result; detail arrays are <see langword="null"/> when the model produced none.</returns>
     internal static TranscriptionDetailsResult Parse(JsonElement root)
     {
         return new TranscriptionDetailsResult
@@ -173,6 +177,10 @@ public readonly struct TranscriptEvent
     /// <summary>Timing on <see cref="TranscriptEventKind.TextDone"/> / <see cref="TranscriptEventKind.DiarizationDone"/>.</summary>
     public AudioCppTiming? Timing { get; }
 
+    /// <summary>Parses one SSE data payload into a transcript event.</summary>
+    /// <param name="json">The event's JSON data payload.</param>
+    /// <returns>The parsed event.</returns>
+    /// <exception cref="JsonException">The payload carries an unknown event type.</exception>
     internal static TranscriptEvent Parse(string json)
     {
         using JsonDocument doc = JsonDocument.Parse(json);
@@ -224,7 +232,7 @@ public sealed class LiveTranscriptionRequest
     public long? BusyTimeoutMs { get; set; }
 
     /// <summary>Validates and builds the query string.</summary>
-    /// <returns></returns>
+    /// <returns>The encoded query string with a leading <c>?</c>.</returns>
     public string BuildQueryString()
     {
         if (string.IsNullOrEmpty(Model))
@@ -304,7 +312,9 @@ public sealed class BatchTranscriptionRequest
 /// <summary>One uploaded file (multipart part).</summary>
 public sealed class AudioUpload
 {
-    /// <summary>Initializes a new instance of the <see cref="AudioUpload"/> class.Initializes an upload part.</summary>
+    /// <summary>Creates an upload part from a filename and its bytes.</summary>
+    /// <param name="fileName">Filename reported in the multipart form.</param>
+    /// <param name="content">File bytes.</param>
     public AudioUpload(string fileName, byte[] content)
     {
         FileName = fileName ?? throw new ArgumentNullException(nameof(fileName));
@@ -379,6 +389,10 @@ public readonly struct BatchTranscriptionEvent
     /// <summary>Aggregate timing (Done event).</summary>
     public AudioCppTiming? Timing { get; }
 
+    /// <summary>Parses one SSE data payload into a batch event.</summary>
+    /// <param name="json">The event's JSON data payload.</param>
+    /// <returns>The parsed event.</returns>
+    /// <exception cref="JsonException">The payload carries an unknown event type.</exception>
     internal static BatchTranscriptionEvent Parse(string json)
     {
         using JsonDocument doc = JsonDocument.Parse(json);

@@ -24,7 +24,8 @@ public readonly struct ResponseFormat : IEquatable<ResponseFormat>
     /// <summary>MP3 bytes (only builds with the <c>mp3_encode</c> frontend module).</summary>
     public static readonly ResponseFormat Mp3 = new("mp3");
 
-    /// <summary>Initializes a new instance of the <see cref="ResponseFormat"/> struct.Initializes a format from its wire string.</summary>
+    /// <summary>Creates a format from its wire string.</summary>
+    /// <param name="value">The wire string, e.g. <c>wav</c>.</param>
     public ResponseFormat(string value)
     {
         Value = value ?? throw new ArgumentNullException(nameof(value));
@@ -34,9 +35,13 @@ public readonly struct ResponseFormat : IEquatable<ResponseFormat>
     public string Value { get; }
 
     /// <summary>Implicit conversion from string.</summary>
+    /// <param name="value">The wire string.</param>
+    /// <returns>The format.</returns>
     public static implicit operator ResponseFormat(string value) => new(value);
 
     /// <summary>Implicit conversion to string.</summary>
+    /// <param name="format">The format.</param>
+    /// <returns>The wire string.</returns>
     public static implicit operator string(ResponseFormat format) => format.Value;
 
     /// <inheritdoc/>
@@ -61,7 +66,8 @@ public readonly struct StreamFormat : IEquatable<StreamFormat>
     /// <summary>Chunked raw audio bytes.</summary>
     public static readonly StreamFormat Audio = new("audio");
 
-    /// <summary>Initializes a new instance of the <see cref="StreamFormat"/> struct.Initializes a format from its wire string.</summary>
+    /// <summary>Creates a format from its wire string.</summary>
+    /// <param name="value">The wire string, e.g. <c>sse</c>.</param>
     public StreamFormat(string value)
     {
         Value = value ?? throw new ArgumentNullException(nameof(value));
@@ -71,9 +77,13 @@ public readonly struct StreamFormat : IEquatable<StreamFormat>
     public string Value { get; }
 
     /// <summary>Implicit conversion from string.</summary>
+    /// <param name="value">The wire string.</param>
+    /// <returns>The format.</returns>
     public static implicit operator StreamFormat(string value) => new(value);
 
     /// <summary>Implicit conversion to string.</summary>
+    /// <param name="format">The format.</param>
+    /// <returns>The wire string.</returns>
     public static implicit operator string(StreamFormat format) => format.Value;
 
     /// <inheritdoc/>
@@ -97,20 +107,23 @@ public readonly struct StreamFormat : IEquatable<StreamFormat>
 /// </summary>
 public sealed class VoiceRefObject
 {
-    /// <summary>Initializes a server-local path reference.</summary>
-    /// <returns></returns>
+    /// <summary>Creates a server-local path reference.</summary>
+    /// <param name="path">Server-local WAV path.</param>
+    /// <returns>The reference.</returns>
     public static VoiceRefObject FromPath(string path) =>
         new()
         { Type = "path", Path = path ?? throw new ArgumentNullException(nameof(path)) };
 
-    /// <summary>Initializes an inline Base64 WAV reference (bare Base64 or a data-URI; a data-URI is also accepted by the server).</summary>
-    /// <returns></returns>
+    /// <summary>Creates an inline Base64 WAV reference (bare Base64 or a data-URI; a data-URI is also accepted by the server).</summary>
+    /// <param name="data">Base64 text.</param>
+    /// <returns>The reference.</returns>
     public static VoiceRefObject FromBase64(string data) =>
         new()
         { Type = "base64", Data = data ?? throw new ArgumentNullException(nameof(data)) };
 
-    /// <summary>Initializes an inline reference from WAV bytes.</summary>
-    /// <returns></returns>
+    /// <summary>Creates an inline reference from WAV bytes.</summary>
+    /// <param name="wavBytes">WAV bytes to Base64-encode.</param>
+    /// <returns>The reference.</returns>
     public static VoiceRefObject FromBytes(byte[] wavBytes) =>
         new()
         { Type = "base64", Data = Convert.ToBase64String(wavBytes ?? throw new ArgumentNullException(nameof(wavBytes))) };
@@ -124,6 +137,8 @@ public sealed class VoiceRefObject
     /// <summary>Base64 payload; set when <see cref="Type"/> is <c>base64</c>.</summary>
     public string? Data { get; set; }
 
+    /// <summary>Writes the reference object.</summary>
+    /// <param name="writer">The JSON writer.</param>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         writer.WriteStartObject();
@@ -144,6 +159,10 @@ public sealed class VoiceRefObject
 /// <summary>Shared request-serialization helpers.</summary>
 internal static class RequestJson
 {
+    /// <summary>Writes a string field only when it is set.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="name">The field name.</param>
+    /// <param name="value">The value; nothing is written when null or empty.</param>
     internal static void WriteStringIfSet(Utf8JsonWriter writer, string name, string? value)
     {
         if (!string.IsNullOrEmpty(value))
@@ -152,6 +171,10 @@ internal static class RequestJson
         }
     }
 
+    /// <summary>Writes a numeric field only when it has a value.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="name">The field name.</param>
+    /// <param name="value">The value; nothing is written when null.</param>
     internal static void WriteNumberIfSet(Utf8JsonWriter writer, string name, double? value)
     {
         if (value.HasValue)
@@ -160,6 +183,10 @@ internal static class RequestJson
         }
     }
 
+    /// <summary>Writes a numeric field only when it has a value.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="name">The field name.</param>
+    /// <param name="value">The value; nothing is written when null.</param>
     internal static void WriteNumberIfSet(Utf8JsonWriter writer, string name, int? value)
     {
         if (value.HasValue)
@@ -168,6 +195,10 @@ internal static class RequestJson
         }
     }
 
+    /// <summary>Writes a numeric field only when it has a value.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="name">The field name.</param>
+    /// <param name="value">The value; nothing is written when null.</param>
     internal static void WriteNumberIfSet(Utf8JsonWriter writer, string name, long? value)
     {
         if (value.HasValue)
@@ -176,6 +207,9 @@ internal static class RequestJson
         }
     }
 
+    /// <summary>Writes the options map; omitted when null or empty.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="options">The options map.</param>
     internal static void WriteOptions(Utf8JsonWriter writer, IDictionary<string, string>? options)
     {
         if (options == null || options.Count == 0)
@@ -197,6 +231,9 @@ internal static class RequestJson
     /// treats aliases as non-merging, so a silent overwrite would be a footgun; the caller
     /// must set exactly one of the two spellings.
     /// </summary>
+    /// <param name="options">The options map.</param>
+    /// <param name="key">The key to check.</param>
+    /// <exception cref="ArgumentException">The key is present in the options map.</exception>
     internal static void ThrowOnOptionCollision(IDictionary<string, string>? options, string key)
     {
         if (options != null && options.ContainsKey(key))
@@ -387,6 +424,7 @@ public sealed class SpeechRequest
     }
 
     /// <summary>Serializes the full request object (validates first).</summary>
+    /// <param name="writer">The JSON writer.</param>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         Validate();
@@ -396,6 +434,7 @@ public sealed class SpeechRequest
     }
 
     /// <summary>Writes the request fields without surrounding braces (for stream/live bodies that add fields).</summary>
+    /// <param name="writer">The JSON writer.</param>
     internal void WriteFields(Utf8JsonWriter writer)
     {
         writer.WriteString("model", Model);
@@ -444,6 +483,11 @@ public sealed class SpeechRequest
         RequestJson.WriteOptions(writer, Options);
     }
 
+    /// <summary>Writes the voice-ref field: a string path or an object, depending on <see cref="VoiceRef"/>.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">
+    /// <see cref="VoiceRef"/> is neither a string nor a <see cref="VoiceRefObject"/>.
+    /// </exception>
     internal void WriteVoiceRef(Utf8JsonWriter writer)
     {
         if (VoiceRef == null)
@@ -483,6 +527,11 @@ public sealed class SpeechStreamRequest
     /// </summary>
     public bool? ReturnText { get; set; }
 
+    /// <summary>Writes the stream request object (validates the inner request first).</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">
+    /// <see cref="ReturnText"/> is set with a non-<c>sse</c> stream format.
+    /// </exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         Request.Validate();
@@ -556,7 +605,7 @@ public sealed class LiveSpeechRequest
     public Dictionary<string, string>? Options { get; set; }
 
     /// <summary>Validates the request and builds the query string.</summary>
-    /// <returns></returns>
+    /// <returns>The encoded query string with a leading <c>?</c>.</returns>
     public string BuildQueryString()
     {
         if (string.IsNullOrEmpty(Model))
@@ -648,7 +697,7 @@ public enum SpeechStreamEventKind
     /// <summary>Text written since the previous event (live streams with <c>return_text</c>).</summary>
     TextDelta,
 
-    /// <summary>The whole text, before <see cref="AudioDone"/>.</summary>
+    /// <summary>The whole text, before <see cref="SpeechStreamEventKind.AudioDone"/>.</summary>
     TextDone,
 }
 
@@ -675,6 +724,10 @@ public readonly struct SpeechStreamEvent
     /// <summary>Timing for <see cref="SpeechStreamEventKind.AudioDone"/>.</summary>
     public AudioCppTiming? Timing { get; }
 
+    /// <summary>Parses one SSE data payload into a speech stream event.</summary>
+    /// <param name="json">The event's JSON data payload.</param>
+    /// <returns>The parsed event.</returns>
+    /// <exception cref="JsonException">The payload carries an unknown event type.</exception>
     internal static SpeechStreamEvent Parse(string json)
     {
         using JsonDocument doc = JsonDocument.Parse(json);
@@ -701,6 +754,9 @@ internal sealed class QueryBuilder
 {
     private readonly StringBuilder _builder = new();
 
+    /// <summary>Appends one <c>key=value</c> pair; empty values are skipped.</summary>
+    /// <param name="key">The query key.</param>
+    /// <param name="value">The query value; nothing is appended when null or empty.</param>
     internal void Add(string key, string? value)
     {
         if (string.IsNullOrEmpty(value))

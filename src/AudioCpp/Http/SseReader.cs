@@ -20,7 +20,9 @@ namespace Mabs.AudioCpp.Http;
 /// </summary>
 public readonly struct SseEvent
 {
-    /// <summary>Initializes a new instance of the <see cref="SseEvent"/> struct.</summary>
+    /// <summary>Stores the parsed event fields.</summary>
+    /// <param name="eventType">The <c>event:</c> field value, or <see langword="null"/> when absent.</param>
+    /// <param name="data">The concatenated <c>data:</c> payload.</param>
     public SseEvent(string? eventType, string data)
     {
         EventType = eventType;
@@ -67,13 +69,16 @@ public sealed class SseReader
     private int _position;
     private int _bytesFilled;
 
-    /// <summary>Initializes a new instance of the <see cref="SseReader"/> class.Creates a reader over <paramref name="stream"/> with the default line limit.</summary>
+    /// <summary>Creates a reader over <paramref name="stream"/> with the default line limit.</summary>
+    /// <param name="stream">The response content stream to read events from.</param>
     public SseReader(Stream stream)
         : this(stream, DefaultMaxLineBytes)
     {
     }
 
-    /// <summary>Initializes a new instance of the <see cref="SseReader"/> class.Creates a reader with an explicit maximum line size.</summary>
+    /// <summary>Creates a reader with an explicit maximum line size.</summary>
+    /// <param name="stream">The response content stream to read events from.</param>
+    /// <param name="maxLineBytes">Maximum size of one line, in bytes; must be positive.</param>
     /// <exception cref="ArgumentOutOfRangeException">
     /// <paramref name="maxLineBytes"/> is not positive.
     /// </exception>
@@ -94,6 +99,7 @@ public sealed class SseReader
     /// error event (<c>{"type":"error","error":{"message":…}}</c>). SSE errors carry no
     /// error type or HTTP status per the server contract.
     /// </summary>
+    /// <param name="data">The <c>data:</c> payload of one event.</param>
     public static void ThrowIfErrorEvent(string data)
     {
         if (data.Length == 0 || data[0] != '{')
@@ -131,7 +137,9 @@ public sealed class SseReader
     /// <summary>
     /// Reads events until <c>data: [DONE]</c>, the stream end, or cancellation.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token observed while reading the stream.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
     public async Task ReadEventsAsync(Func<SseEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -155,7 +163,8 @@ public sealed class SseReader
     /// Enumerates events lazily. Available on all target frameworks because the
     /// library references <c>Microsoft.Bcl.AsyncInterfaces</c> on netstandard2.0.
     /// </summary>
-    /// <returns></returns>
+    /// <param name="cancellationToken">Cancellation token observed while reading the stream.</param>
+    /// <returns>The event sequence; iteration ends when <c>[DONE]</c> or connection close is observed.</returns>
     public async IAsyncEnumerable<SseEvent> EnumerateAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         while (true)
@@ -174,7 +183,8 @@ public sealed class SseReader
     /// Reads the next event, or <see langword="null"/> once the stream terminates
     /// (<c>[DONE]</c> or connection end).
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="cancellationToken">Cancellation token observed while reading.</param>
+    /// <returns>The next event, or <see langword="null"/> at stream termination.</returns>
     public async Task<SseEvent?> TryReadEventAsync(CancellationToken cancellationToken = default)
     {
         string? eventType = null;
@@ -246,6 +256,10 @@ public sealed class SseReader
         return new SseEvent(eventType, data);
     }
 
+    /// <summary>Parses a timing object; returns <see langword="null"/> when the property is absent or not an object.</summary>
+    /// <param name="root">The JSON object carrying the timing property.</param>
+    /// <param name="property">The property name, usually <c>timing</c>.</param>
+    /// <returns>The parsed timing, or <see langword="null"/>.</returns>
     internal static AudioCppTiming? ReadTiming(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement timing) ||
@@ -270,26 +284,46 @@ public sealed class SseReader
         };
     }
 
+    /// <summary>Reads a numeric property as a double, or <see langword="null"/> when absent or not a number.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The value, or <see langword="null"/>.</returns>
     internal static double? ReadDouble(System.Text.Json.JsonElement obj, string property)
     {
         return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetDouble() : (double?)null;
     }
 
+    /// <summary>Reads a numeric property as an int, or <see langword="null"/> when absent or not a number.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The value, or <see langword="null"/>.</returns>
     internal static int? ReadInt(System.Text.Json.JsonElement obj, string property)
     {
         return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number ? value.GetInt32() : (int?)null;
     }
 
+    /// <summary>Reads a numeric property as a long, or <see langword="null"/> when absent, not a number, or outside the int64 range.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The value, or <see langword="null"/>.</returns>
     internal static long? ReadLong(System.Text.Json.JsonElement obj, string property)
     {
         return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.Number && value.TryGetInt64(out long parsed) ? parsed : (long?)null;
     }
 
+    /// <summary>Reads a string property, or <see langword="null"/> when absent or not a string.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The value, or <see langword="null"/>.</returns>
     internal static string? ReadString(System.Text.Json.JsonElement obj, string property)
     {
         return obj.TryGetProperty(property, out System.Text.Json.JsonElement value) && value.ValueKind == System.Text.Json.JsonValueKind.String ? value.GetString() : null;
     }
 
+    /// <summary>Reads a boolean property, or <see langword="null"/> when absent or not a bool.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The value, or <see langword="null"/>.</returns>
     internal static bool? ReadBool(System.Text.Json.JsonElement obj, string property)
     {
         if (!obj.TryGetProperty(property, out System.Text.Json.JsonElement value))
@@ -305,6 +339,10 @@ public sealed class SseReader
         return value.ValueKind == System.Text.Json.JsonValueKind.False ? (bool?)false : null;
     }
 
+    /// <summary>Reads a Base64 string property and decodes it, or <see langword="null"/> when absent or not a string.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The decoded bytes, or <see langword="null"/>.</returns>
     internal static byte[]? ReadBase64(System.Text.Json.JsonElement obj, string property)
     {
         string? text = ReadString(obj, property);
@@ -317,7 +355,8 @@ public sealed class SseReader
     }
 
     /// <summary>Decodes a bare Base64 string or a <c>data:…;base64,…</c> URI.</summary>
-    /// <returns></returns>
+    /// <param name="text">The Base64 text, with an optional data-URI prefix.</param>
+    /// <returns>The decoded bytes.</returns>
     internal static byte[] ReadBase64Payload(string text)
     {
         if (text.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
@@ -332,6 +371,10 @@ public sealed class SseReader
         return Convert.FromBase64String(text);
     }
 
+    /// <summary>Reads a speaker-turn array property, or <see langword="null"/> when absent or not an array.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name, usually <c>speaker_turns</c>.</param>
+    /// <returns>The parsed turns, or <see langword="null"/>.</returns>
     internal static List<AudioCppSpeakerTurn>? ReadSpeakerTurns(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
@@ -356,6 +399,10 @@ public sealed class SseReader
         return turns;
     }
 
+    /// <summary>Reads a segment array property, or <see langword="null"/> when absent or not an array.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name, usually <c>segments</c>.</param>
+    /// <returns>The parsed segments, or <see langword="null"/>.</returns>
     internal static List<AudioCppSegment>? ReadSegments(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
@@ -379,6 +426,10 @@ public sealed class SseReader
         return segments;
     }
 
+    /// <summary>Reads a word-timestamp array property, or <see langword="null"/> when absent or not an array.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name, usually <c>words</c> or <c>word_timestamps</c>.</param>
+    /// <returns>The parsed words, or <see langword="null"/>.</returns>
     internal static List<AudioCppWord>? ReadWords(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
@@ -404,6 +455,10 @@ public sealed class SseReader
         return words;
     }
 
+    /// <summary>Reads an artifact array property, or <see langword="null"/> when absent or not an array.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name, usually <c>artifacts</c>.</param>
+    /// <returns>The parsed artifacts, or <see langword="null"/>.</returns>
     internal static List<AudioArtifact>? ReadArtifacts(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
@@ -440,6 +495,10 @@ public sealed class SseReader
         return artifacts;
     }
 
+    /// <summary>Reads a named-audio-output array property, or <see langword="null"/> when absent or not an array.</summary>
+    /// <param name="root">The JSON object to read from.</param>
+    /// <param name="property">The property name, usually <c>named_audio_outputs</c>.</param>
+    /// <returns>The parsed outputs, or <see langword="null"/>.</returns>
     internal static List<NamedAudioOutput>? ReadNamedAudioOutputs(System.Text.Json.JsonElement root, string property)
     {
         if (!root.TryGetProperty(property, out System.Text.Json.JsonElement array) ||
@@ -464,6 +523,9 @@ public sealed class SseReader
         return outputs;
     }
 
+    /// <summary>Parses a task result object (the shape shared by results and stream done events).</summary>
+    /// <param name="element">The JSON result object.</param>
+    /// <returns>The parsed task result.</returns>
     internal static TaskResult ReadTaskResult(System.Text.Json.JsonElement element)
     {
         return new TaskResult
@@ -482,6 +544,9 @@ public sealed class SseReader
         };
     }
 
+    /// <summary>Splits one line into SSE fields on <c>\r</c> (defensive; the server writes one field per line).</summary>
+    /// <param name="line">The raw line.</param>
+    /// <returns>The non-empty field segments.</returns>
     private static IEnumerable<string> SplitFields(string line)
     {
         // An SSE line may carry several fields separated by \r; the audio.cpp server
@@ -501,6 +566,10 @@ public sealed class SseReader
         }
     }
 
+    /// <summary>Reads one line (UTF-8 decoded, line terminators trimmed), or <see langword="null"/> at clean EOF.</summary>
+    /// <param name="cancellationToken">Cancellation token observed while reading.</param>
+    /// <returns>The line, or <see langword="null"/> when the stream ends with no pending bytes.</returns>
+    /// <exception cref="InvalidOperationException">The line exceeded the configured maximum size.</exception>
     private async Task<string?> ReadLineAsync(CancellationToken cancellationToken)
     {
         _line.Clear();
@@ -539,6 +608,8 @@ public sealed class SseReader
         }
     }
 
+    /// <summary>Decodes the buffered line (trimming one trailing <c>\r</c>) and clears the buffer.</summary>
+    /// <returns>The line text.</returns>
     private string FlushLine()
     {
         // Trim one trailing \r for \r\n framing.

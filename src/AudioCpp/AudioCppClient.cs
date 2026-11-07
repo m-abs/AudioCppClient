@@ -27,7 +27,7 @@ public sealed class AudioCppClient
     private readonly HttpClient _http;
     private readonly Uri _baseUri;
 
-    /// <summary>Initializes a new instance of the <see cref="AudioCppClient"/> class.Creates a client for the server at <paramref name="baseUrl"/>.</summary>
+    /// <summary>Creates a client for the server at <paramref name="baseUrl"/>.</summary>
     /// <param name="baseUrl">Server root, for example <c>http://127.0.0.1:8080</c>.</param>
     /// <param name="httpClient">
     /// Optional transport. When omitted, a default <see cref="HttpClient"/> is created; pass
@@ -56,7 +56,10 @@ public sealed class AudioCppClient
         Recipes = new RecipeClient(this);
     }
 
-    /// <summary>Initializes a new instance of the <see cref="AudioCppClient"/> class.Creates a client from a base URL string.</summary>
+    /// <summary>Creates a client from a base URL string.</summary>
+    /// <param name="baseUrl">Server root, for example <c>http://127.0.0.1:8080</c>.</param>
+    /// <param name="httpClient">Optional transport; see the <see cref="Uri"/> constructor overload.</param>
+    /// <param name="apiKey">Optional bearer token sent on every request.</param>
     public AudioCppClient(string baseUrl, HttpClient? httpClient = null, string? apiKey = null)
         : this(new Uri(baseUrl ?? throw new ArgumentNullException(nameof(baseUrl))), httpClient, apiKey)
     {
@@ -81,7 +84,9 @@ public sealed class AudioCppClient
     public RecipeClient Recipes { get; }
 
     /// <summary>Server readiness from <c>GET /health</c>.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The health report.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<AudioCppHealth> GetHealthAsync(CancellationToken cancellationToken = default)
     {
         return await SendJsonAsync(HttpMethod.Get, "health", writeBody: null, root =>
@@ -106,7 +111,8 @@ public sealed class AudioCppClient
     /// <param name="includeParams">Add each model's declared request options (<c>include_params=true</c>).</param>
     /// <param name="includeSessionOptions">Echo each model's configured session options (<c>include_session_options=true</c>).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <returns>The model list (<c>data</c> array).</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<IReadOnlyList<AudioCppModel>> ListModelsAsync(
         bool includeParams = false,
         bool includeSessionOptions = false,
@@ -144,7 +150,10 @@ public sealed class AudioCppClient
     /// configured preset names, and shared voice-dir WAV basenames. Pass
     /// <paramref name="model"/> when several models are configured.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="model">Model id to scope the lookup to.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The voice names the server reports.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<IReadOnlyList<string>> ListVoicesAsync(string? model = null, CancellationToken cancellationToken = default)
     {
         QueryBuilder query = new();
@@ -169,7 +178,10 @@ public sealed class AudioCppClient
     }
 
     /// <summary>Unload specific models from memory; unknown ids are reported, not an error.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="modelIds">Model ids to unload.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The unload report (unloaded and not-found ids).</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<UnloadModelsResult> UnloadModelsAsync(IEnumerable<string> modelIds, CancellationToken cancellationToken = default)
     {
         if (modelIds == null)
@@ -197,7 +209,9 @@ public sealed class AudioCppClient
     }
 
     /// <summary>Unload every currently loaded model.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The unload report.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<UnloadModelsResult> UnloadAllModelsAsync(CancellationToken cancellationToken = default)
     {
         return await SendJsonAsync(HttpMethod.Post, "v1/tasks/unload_all_models", writeBody: null, SseParsers.UnloadResult, cancellationToken).ConfigureAwait(false);
@@ -208,7 +222,10 @@ public sealed class AudioCppClient
     /// native model management and started with <c>--ui-management</c> serve this route
     /// (otherwise HTTP 403, error type <c>forbidden</c>).
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The load request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The load report.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<ModelLoadResult> LoadModelAsync(ModelLoadRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -221,7 +238,9 @@ public sealed class AudioCppClient
     }
 
     /// <summary>List available recipes from <c>GET /v1/recipes</c>.</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The recipe list (<c>data</c> array).</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<IReadOnlyList<RecipeEntry>> ListRecipesAsync(CancellationToken cancellationToken = default)
     {
         return await SendJsonAsync(HttpMethod.Get, "v1/recipes", writeBody: null, root =>
@@ -260,6 +279,9 @@ public sealed class AudioCppClient
         }, cancellationToken).ConfigureAwait(false);
     }
 
+    /// <summary>Parses one model entry from the <c>data</c> array.</summary>
+    /// <param name="element">The JSON model object.</param>
+    /// <returns>The parsed model.</returns>
     internal static AudioCppModel ParseModel(JsonElement element)
     {
         Dictionary<string, string>? sessionOptions = null;
@@ -321,7 +343,8 @@ public sealed class AudioCppClient
     }
 
     /// <summary>Builds a JSON content body from a writer callback.</summary>
-    /// <returns></returns>
+    /// <param name="writeBody">Callback that writes the JSON body.</param>
+    /// <returns>The <c>application/json</c> content.</returns>
     internal static StringContent CreateJsonContent(Action<Utf8JsonWriter> writeBody)
     {
         using (MemoryStream stream = new())
@@ -340,6 +363,9 @@ public sealed class AudioCppClient
     /// errors as <c>{"error":{"message":"…","type":"server_error"}}</c>; anything else is
     /// surfaced as the raw body text.
     /// </summary>
+    /// <param name="response">The response to check.</param>
+    /// <param name="body">The body text already read from it.</param>
+    /// <exception cref="AudioCppException">The response is not a success status.</exception>
     internal static void EnsureSuccess(HttpResponseMessage response, string body)
     {
         if (response.IsSuccessStatusCode)
@@ -382,6 +408,9 @@ public sealed class AudioCppClient
         throw new AudioCppException(message, errorType, status);
     }
 
+    /// <summary>Reads the <c>X-AudioCPP-Wall-Ms</c>, <c>X-AudioCPP-Audio-Duration-Ms</c> and <c>X-AudioCPP-RTF</c> headers.</summary>
+    /// <param name="headers">The response headers.</param>
+    /// <returns>The timing, or <see langword="null"/> when no timing header is present.</returns>
     internal static AudioCppTiming? ReadTimingHeaders(HttpResponseHeaders headers)
     {
         double? wall = TryGetDoubleHeader(headers, "X-AudioCPP-Wall-Ms");
@@ -395,6 +424,10 @@ public sealed class AudioCppClient
         return new AudioCppTiming { WallMs = wall, AudioDurationMs = duration, Rtf = rtf };
     }
 
+    /// <summary>Reads a property as a cloned element, or <see langword="null"/> when absent or JSON null.</summary>
+    /// <param name="obj">The JSON object to read from.</param>
+    /// <param name="property">The property name.</param>
+    /// <returns>The element, or <see langword="null"/>.</returns>
     private static JsonElement? ElementOrNull(JsonElement obj, string property)
     {
         if (!obj.TryGetProperty(property, out JsonElement value) ||
@@ -406,6 +439,11 @@ public sealed class AudioCppClient
         return value.Clone();
     }
 
+    /// <summary>Sends one request through the transport, adding the auth header first.</summary>
+    /// <param name="request">The request to send.</param>
+    /// <param name="completion">Completion option (buffered vs headers-read).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The response.</returns>
     internal Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, HttpCompletionOption completion, CancellationToken cancellationToken)
     {
         Prepare(request);
@@ -413,6 +451,7 @@ public sealed class AudioCppClient
     }
 
     /// <summary>Adds the bearer header when an API key is configured.</summary>
+    /// <param name="request">The request to decorate.</param>
     private void Prepare(HttpRequestMessage request)
     {
         if (!string.IsNullOrEmpty(ApiKey))
@@ -422,7 +461,10 @@ public sealed class AudioCppClient
     }
 
     /// <summary>Sends a request and returns the raw response bytes with their headers (audio bodies).</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The request to send; disposed by this method.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The raw response (bytes, headers, content type).</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     internal async Task<AudioRawResponse> SendForBytesAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         using (request)
@@ -434,6 +476,10 @@ public sealed class AudioCppClient
         }
     }
 
+    /// <summary>Builds the request URI from a relative path and optional query string.</summary>
+    /// <param name="relativePath">Path below the base URL, without a leading slash.</param>
+    /// <param name="query">Optional query string with a leading <c>?</c>.</param>
+    /// <returns>The absolute URI.</returns>
     internal Uri BuildUri(string relativePath, string? query = null)
     {
         string baseUrl = _baseUri.AbsoluteUri;
@@ -445,13 +491,24 @@ public sealed class AudioCppClient
         return new Uri(new Uri(baseUrl), relativePath + query);
     }
 
+    /// <summary>Creates a request for a path below the base URL.</summary>
+    /// <param name="method">The HTTP method.</param>
+    /// <param name="path">Path below the base URL, without a leading slash.</param>
+    /// <returns>The request.</returns>
     internal HttpRequestMessage NewRequest(HttpMethod method, string path)
     {
         return new HttpRequestMessage(method, BuildUri(path));
     }
 
     /// <summary>Sends a JSON request and parses the JSON response (validates the body writer callback once).</summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <typeparam name="T">The parsed response type.</typeparam>
+    /// <param name="method">The HTTP method.</param>
+    /// <param name="path">Path below the base URL, with an optional query string.</param>
+    /// <param name="writeBody">Body writer callback, or <see langword="null"/> for a bodyless request.</param>
+    /// <param name="parse">Parser applied to the response root.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The parsed response.</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     internal async Task<T> SendJsonAsync<T>(HttpMethod method, string path, Action<Utf8JsonWriter>? writeBody, Func<JsonElement, T> parse, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = NewRequest(method, path);
@@ -469,6 +526,11 @@ public sealed class AudioCppClient
         }
     }
 
+    /// <summary>Sends a request and returns the response body text (throws on failure).</summary>
+    /// <param name="request">The request to send; disposed by this method.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The response body text.</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     internal async Task<string> ReadBodyAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         using (request)
@@ -480,6 +542,13 @@ public sealed class AudioCppClient
         }
     }
 
+    /// <summary>Sends a request, parses the JSON body, and returns the parsed value.</summary>
+    /// <typeparam name="T">The parsed response type.</typeparam>
+    /// <param name="request">The request to send; disposed by this method.</param>
+    /// <param name="parse">Parser applied to the response root.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The parsed response.</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     internal async Task<T> ReadJsonAsync<T>(HttpRequestMessage request, Func<JsonElement, T> parse, CancellationToken cancellationToken)
     {
         string body = await ReadBodyAsync(request, cancellationToken).ConfigureAwait(false);
@@ -494,7 +563,10 @@ public sealed class AudioCppClient
     /// hands back the response so the caller can read the content stream incrementally.
     /// The caller owns the returned message.
     /// </summary>
-    /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+    /// <param name="request">The request to send; not disposed — the caller owns the response.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The successful response, with the content stream still open.</returns>
+    /// <exception cref="AudioCppException">The response failed.</exception>
     internal async Task<HttpResponseMessage> OpenStreamedResponseAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
@@ -513,6 +585,10 @@ public sealed class AudioCppClient
         return response;
     }
 
+    /// <summary>Parses the first invariant-culture double value of a response header.</summary>
+    /// <param name="headers">The response headers.</param>
+    /// <param name="name">The header name.</param>
+    /// <returns>The parsed value, or <see langword="null"/> when absent or unparseable.</returns>
     private static double? TryGetDoubleHeader(HttpResponseHeaders headers, string name)
     {
         if (headers.TryGetValues(name, out IEnumerable<string>? values))
@@ -535,6 +611,9 @@ public sealed class AudioCppClient
         private readonly Stream _source;
         private readonly CancellationToken _cancellationToken;
 
+        /// <summary>Wraps the PCM stream to stream as a chunked body.</summary>
+        /// <param name="source">The PCM stream to copy.</param>
+        /// <param name="cancellationToken">Cancellation token observed while copying.</param>
         internal ChunkedStreamContent(Stream source, CancellationToken cancellationToken)
         {
             _source = source ?? throw new ArgumentNullException(nameof(source));

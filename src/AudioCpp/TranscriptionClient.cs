@@ -10,10 +10,10 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Http;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models;
 
-namespace mabs.AudioCpp;
+namespace Mabs.AudioCpp;
 
 /// <summary>
 /// Transcription against <c>POST /v1/audio/transcriptions</c>, its details/batch/live
@@ -23,6 +23,8 @@ public sealed class TranscriptionClient
 {
     private readonly AudioCppClient _client;
 
+    /// <summary>Creates the transcription endpoint group bound to <paramref name="client"/>.</summary>
+    /// <param name="client">The owning client that carries the transport and base URL.</param>
     internal TranscriptionClient(AudioCppClient client)
     {
         _client = client;
@@ -33,6 +35,10 @@ public sealed class TranscriptionClient
     /// (server-local path); the multipart upload form uses
     /// <see cref="TranscriptionInputBase.AudioFile"/>. Exactly one must be set.
     /// </summary>
+    /// <param name="request">The transcription request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The transcription result.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<TranscriptionResult> TranscribeAsync(TranscriptionRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -57,6 +63,10 @@ public sealed class TranscriptionClient
     /// Same inputs as <see cref="TranscribeAsync"/>; the server rejects <c>stream</c> on
     /// this route.
     /// </summary>
+    /// <param name="request">The details request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The transcription result with detail arrays.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<TranscriptionDetailsResult> TranscribeDetailsAsync(TranscriptionDetailsRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -82,6 +92,10 @@ public sealed class TranscriptionClient
     /// <see cref="TranscriptionInputBase.AudioFile"/> is set, or sends the JSON body with
     /// <c>stream=true</c> when <see cref="TranscriptionInputBase.AudioPath"/> is set.
     /// </summary>
+    /// <param name="request">The transcription request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<TranscriptEvent> TranscribeStreamAsync(TranscriptionRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -108,6 +122,11 @@ public sealed class TranscriptionClient
     }
 
     /// <summary>Callback variant of <see cref="TranscribeStreamAsync(TranscriptionRequest, CancellationToken)"/>.</summary>
+    /// <param name="request">The transcription request.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task TranscribeStreamAsync(TranscriptionRequest request, Func<TranscriptEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -129,6 +148,11 @@ public sealed class TranscriptionClient
     /// request ends — the model's end-of-speech signal — when <paramref name="pcmInput"/>
     /// reaches EOF.
     /// </summary>
+    /// <param name="request">The live request; all fields travel as query parameters.</param>
+    /// <param name="pcmInput">The PCM stream to upload; EOF marks end-of-speech.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<TranscriptEvent> TranscribeLiveAsync(LiveTranscriptionRequest request, Stream pcmInput, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -152,6 +176,12 @@ public sealed class TranscriptionClient
     }
 
     /// <summary>Callback variant of <see cref="TranscribeLiveAsync(LiveTranscriptionRequest, Stream, CancellationToken)"/>.</summary>
+    /// <param name="request">The live request.</param>
+    /// <param name="pcmInput">The PCM stream to upload; EOF marks end-of-speech.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task TranscribeLiveAsync(LiveTranscriptionRequest request, Stream pcmInput, Func<TranscriptEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -170,6 +200,10 @@ public sealed class TranscriptionClient
     /// native-batching model. Results stream per file as the model finishes it;
     /// <see cref="BatchTranscriptionEvent.Index"/> maps a result back to its upload position.
     /// </summary>
+    /// <param name="request">The batch request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<BatchTranscriptionEvent> TranscribeBatchAsync(BatchTranscriptionRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -194,6 +228,11 @@ public sealed class TranscriptionClient
     }
 
     /// <summary>Callback variant of <see cref="TranscribeBatchAsync(BatchTranscriptionRequest, CancellationToken)"/>.</summary>
+    /// <param name="request">The batch request.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task TranscribeBatchAsync(BatchTranscriptionRequest request, Func<BatchTranscriptionEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -207,24 +246,10 @@ public sealed class TranscriptionClient
         }
     }
 
-    private async IAsyncEnumerable<TranscriptEvent> EnumerateTranscriptEventsAsync(HttpRequestMessage httpRequest, [EnumeratorCancellation] CancellationToken cancellationToken)
-    {
-        using (httpRequest)
-        {
-            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
-            using (response)
-            {
-                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-                SseReader reader = new(stream);
-                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    SseReader.ThrowIfErrorEvent(evt.Data);
-                    yield return TranscriptEvent.Parse(evt.Data);
-                }
-            }
-        }
-    }
-
+    /// <summary>Writes the transcription JSON body (the <c>stream</c> field is added only for the streaming route).</summary>
+    /// <param name="request">The request to serialize.</param>
+    /// <param name="writer">The JSON writer.</param>
+    /// <param name="stream">Whether to emit <c>stream: true</c>.</param>
     private static void WriteJson(TranscriptionRequest request, Utf8JsonWriter writer, bool stream)
     {
         writer.WriteStartObject();
@@ -242,6 +267,9 @@ public sealed class TranscriptionClient
         writer.WriteEndObject();
     }
 
+    /// <summary>Writes the transcription-details JSON body.</summary>
+    /// <param name="request">The request to serialize.</param>
+    /// <param name="writer">The JSON writer.</param>
     private static void WriteJsonDetails(TranscriptionDetailsRequest request, Utf8JsonWriter writer)
     {
         writer.WriteStartObject();
@@ -253,11 +281,39 @@ public sealed class TranscriptionClient
         RequestJson.WriteOptions(writer, request.Options);
         writer.WriteEndObject();
     }
+
+    /// <summary>Opens the response, enumerates its SSE events, and parses each as a transcript event.</summary>
+    /// <param name="httpRequest">The request to send; disposed here.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
+    private async IAsyncEnumerable<TranscriptEvent> EnumerateTranscriptEventsAsync(HttpRequestMessage httpRequest, [EnumeratorCancellation] CancellationToken cancellationToken)
+    {
+        using (httpRequest)
+        {
+            HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
+            using (response)
+            {
+                Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                SseReader reader = new(stream);
+                await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    SseReader.ThrowIfErrorEvent(evt.Data);
+                    yield return TranscriptEvent.Parse(evt.Data);
+                }
+            }
+        }
+    }
 }
 
 /// <summary>Multipart request construction shared by the transcription/alignment/batch routes.</summary>
 internal static class Multipart
 {
+    /// <summary>Builds a POST request with the single-file multipart body.</summary>
+    /// <param name="uri">The target route.</param>
+    /// <param name="request">The request whose <see cref="TranscriptionInputBase.AudioFile"/> is uploaded.</param>
+    /// <param name="stream">Whether to add the <c>stream=true</c> form field.</param>
+    /// <returns>The request, ready to send.</returns>
     internal static HttpRequestMessage Post(Uri uri, TranscriptionInputBase request, bool stream = false)
     {
         HttpRequestMessage httpRequest = new(HttpMethod.Post, uri);
@@ -265,6 +321,10 @@ internal static class Multipart
         return httpRequest;
     }
 
+    /// <summary>Builds the single-file multipart body: file part plus model/language/prompt/busy_timeout fields.</summary>
+    /// <param name="request">The request whose file and fields are serialized.</param>
+    /// <param name="stream">Whether to add the <c>stream=true</c> form field.</param>
+    /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildSingle(TranscriptionInputBase request, bool stream)
     {
         MultipartFormDataContent content = new();
@@ -275,9 +335,7 @@ internal static class Multipart
             content.Add(new StringContent(request.Language!), "language");
         }
 
-        string? prompt = request is TranscriptionRequest transcription ? transcription.Prompt
-            : request is TranscriptionDetailsRequest details ? details.Prompt
-            : null;
+        string? prompt = request is TranscriptionRequest transcription ? transcription.Prompt : request is TranscriptionDetailsRequest details ? details.Prompt : null;
         if (!string.IsNullOrEmpty(prompt))
         {
             content.Add(new StringContent(prompt!), "prompt");
@@ -296,6 +354,9 @@ internal static class Multipart
         return content;
     }
 
+    /// <summary>Builds the batch multipart body: one file part per upload plus the batch fields.</summary>
+    /// <param name="request">The batch request.</param>
+    /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildBatch(BatchTranscriptionRequest request)
     {
         MultipartFormDataContent content = new();
@@ -328,6 +389,9 @@ internal static class Multipart
         return content;
     }
 
+    /// <summary>Builds the alignment multipart body: file, model, text, and optional language.</summary>
+    /// <param name="request">The alignment request.</param>
+    /// <returns>The multipart content.</returns>
     internal static MultipartFormDataContent BuildAlignment(AlignmentRequest request)
     {
         MultipartFormDataContent content = new();
@@ -342,6 +406,11 @@ internal static class Multipart
         return content;
     }
 
+    /// <summary>Adds one file part as bytes with an octet-stream content type.</summary>
+    /// <param name="content">The multipart body to append to.</param>
+    /// <param name="name">The form-field name (<c>file</c>).</param>
+    /// <param name="data">The file bytes.</param>
+    /// <param name="fileName">The filename reported in the part headers.</param>
     private static void AddFile(MultipartFormDataContent content, string name, byte[] data, string fileName)
     {
         ByteArrayContent part = new(data);
@@ -349,6 +418,11 @@ internal static class Multipart
         content.Add(part, name, fileName);
     }
 
+    /// <summary>Adds one file part as a stream with an octet-stream content type.</summary>
+    /// <param name="content">The multipart body to append to.</param>
+    /// <param name="name">The form-field name (<c>file</c>).</param>
+    /// <param name="data">The file stream.</param>
+    /// <param name="fileName">The filename reported in the part headers.</param>
     private static void AddFile(MultipartFormDataContent content, string name, Stream data, string fileName)
     {
         StreamContent part = new(data);
@@ -356,6 +430,9 @@ internal static class Multipart
         content.Add(part, name, fileName);
     }
 
+    /// <summary>Serializes the options map to a JSON string for the batch form field.</summary>
+    /// <param name="options">The options map.</param>
+    /// <returns>The JSON object string.</returns>
     private static string BuildOptionsJson(Dictionary<string, string> options)
     {
         using MemoryStream stream = new();

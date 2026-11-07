@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Models;
 
 using Xunit;
 
-namespace mabs.AudioCpp.Tests;
+namespace Mabs.AudioCpp.Tests;
 
 /// <summary>Golden serialization of SpeechRequest bodies.</summary>
 public class SpeechRequestSerializationTests
 {
+    /// <summary>Serializes a request body to JSON for golden comparisons.</summary>
+    /// <param name="request">The request to write.</param>
+    /// <returns>The UTF-8 JSON produced by the writer.</returns>
     private static string Serialize(SpeechRequest request)
     {
         using System.IO.MemoryStream stream = new();
@@ -22,6 +25,7 @@ public class SpeechRequestSerializationTests
         return System.Text.Encoding.UTF8.GetString(stream.ToArray());
     }
 
+    /// <summary>A minimal request serializes to exactly model and input.</summary>
     [Fact]
     public void MinimalBody()
     {
@@ -29,6 +33,7 @@ public class SpeechRequestSerializationTests
         Assert.Equal("{\"model\":\"kokoro\",\"input\":\"hello\"}", json);
     }
 
+    /// <summary>Set fields serialize in server field order with unset fields omitted.</summary>
     [Fact]
     public void FieldOrderAndNulls()
     {
@@ -44,6 +49,7 @@ public class SpeechRequestSerializationTests
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"language\":\"en\",\"voice\":\"am_adam\",\"seed\":\"1234\",\"max_tokens\":96}", json);
     }
 
+    /// <summary>Setting both instruct and instructions fails validation.</summary>
     [Fact]
     public void InstructAndInstructionsBothSetThrows()
     {
@@ -58,6 +64,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("instruct and instructions", ex.Message);
     }
 
+    /// <summary>Instruct serializes when set; instructions serialize only when instruct is absent.</summary>
     [Fact]
     public void InstructPreferredThenInstructions()
     {
@@ -69,6 +76,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("\"instructions\":\"speak\"", json);
     }
 
+    /// <summary>Setting both speed and speaking_rate fails validation.</summary>
     [Fact]
     public void SpeedAndSpeakingRateBothSetThrows()
     {
@@ -76,12 +84,14 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => request.Validate());
     }
 
+    /// <summary>A zero speed fails validation.</summary>
     [Fact]
     public void NonPositiveSpeedThrows()
     {
         Assert.Throws<ArgumentException>(() => new SpeechRequest { Model = "m", Input = "t", Speed = 0 }.Validate());
     }
 
+    /// <summary>A seed beyond int64 range stays a string in the JSON.</summary>
     [Fact]
     public void StringSeedPreserved()
     {
@@ -89,6 +99,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("\"seed\":\"18446744073709551615\"", json);
     }
 
+    /// <summary>An options key colliding with a typed field fails validation.</summary>
     [Fact]
     public void OptionsCollisionThrows()
     {
@@ -103,6 +114,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("max_tokens", ex.Message);
     }
 
+    /// <summary>The options map serializes after the typed fields.</summary>
     [Fact]
     public void OptionsMapSerializedAfterTypedFields()
     {
@@ -116,6 +128,7 @@ public class SpeechRequestSerializationTests
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"options\":{\"retry_badcase\":\"false\",\"chunk_seconds\":\"2\"}}", json);
     }
 
+    /// <summary>Voice ref serializes as a plain string or as a typed base64/path object.</summary>
     [Fact]
     public void VoiceRefStringAndObject()
     {
@@ -129,6 +142,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("\"voice_ref\":{\"type\":\"path\",\"path\":\"voices/alice.wav\"}", json);
     }
 
+    /// <summary>Response format and busy timeout serialize under their server field names.</summary>
     [Fact]
     public void ResponseFormatAndBusyTimeout()
     {
@@ -144,6 +158,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("\"busy_timeout_ms\":5000", json);
     }
 
+    /// <summary>Missing model or input fails validation, while an empty input string is allowed.</summary>
     [Fact]
     public void MissingModelOrInputThrows()
     {
@@ -154,6 +169,7 @@ public class SpeechRequestSerializationTests
         new SpeechRequest { Model = "m", Input = string.Empty }.Validate();
     }
 
+    /// <summary>The stream wrapper adds stream_format and return_text after the inner request fields.</summary>
     [Fact]
     public void StreamRequestAddsStreamFormatAndReturnText()
     {
@@ -172,6 +188,7 @@ public class SpeechRequestSerializationTests
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"response_format\":\"pcm\",\"stream_format\":\"sse\",\"return_text\":true}", json);
     }
 
+    /// <summary>return_text with a non-SSE stream format throws at write time.</summary>
     [Fact]
     public void ReturnTextWithoutSseThrows()
     {
@@ -186,6 +203,7 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => request.WriteTo(writer));
     }
 
+    /// <summary>The live speech query string is percent-encoded and includes the default rate and format.</summary>
     [Fact]
     public void LiveSpeechQueryEncodesAndValidates()
     {
@@ -204,6 +222,7 @@ public class SpeechRequestSerializationTests
         Assert.Contains("stream_format=sse", query);
     }
 
+    /// <summary>Out-of-range sample rate, out-of-range channels, and missing model all fail query building.</summary>
     [Fact]
     public void LiveSpeechRejectsOutOfRange()
     {
@@ -212,6 +231,7 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => new LiveSpeechRequest { Input = "x" }.BuildQueryString());
     }
 
+    /// <summary>Supplying both audio path and audio base64 fails validation.</summary>
     [Fact]
     public void TaskRequestRejectsBothAudioForms()
     {
@@ -223,6 +243,7 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => body.Validate());
     }
 
+    /// <summary>Artifacts serialize with base64 payload and meta, followed by the options map.</summary>
     [Fact]
     public void TaskRequestSerializesArtifacts()
     {
@@ -234,7 +255,8 @@ public class SpeechRequestSerializationTests
                 AudioPath = "/in.wav",
                 Artifacts = new List<AudioArtifactInput>
                 {
-                    new() {
+                    new()
+                    {
                         Id = "example.state",
                         Kind = ArtifactKind.Custom,
                         Payload = new byte[] { 1, 2, 3 },
@@ -251,6 +273,7 @@ public class SpeechRequestSerializationTests
             json);
     }
 
+    /// <summary>An unknown artifact kind or a payload combined with a path fails at write time.</summary>
     [Fact]
     public void ArtifactRejectsUnknownKindAndBothPayloadPath()
     {
@@ -258,6 +281,7 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = ArtifactKind.Custom, Payload = new byte[] { 1 }, Path = "/x" }.WriteTo(NullWriter()));
     }
 
+    /// <summary>Recipe name, stream flags, model map, and inner request serialize in order.</summary>
     [Fact]
     public void RecipeRequestSerializesRolesAndStreamFlags()
     {
@@ -283,6 +307,7 @@ public class SpeechRequestSerializationTests
             json);
     }
 
+    /// <summary>Exactly one of path or package id is required for a model load.</summary>
     [Fact]
     public void ModelLoadValidatesPathXorPackage()
     {
@@ -292,6 +317,7 @@ public class SpeechRequestSerializationTests
         new ModelLoadRequest { Id = "x", PackageId = "pkg" }.Validate();
     }
 
+    /// <summary>Exactly one audio form is required; supplying both fails validation.</summary>
     [Fact]
     public void TranscriptionInputValidatesOneOfForms()
     {
@@ -300,6 +326,8 @@ public class SpeechRequestSerializationTests
         new TranscriptionRequest { Model = "m", AudioPath = "/a.wav" }.Validate();
     }
 
+    /// <summary>A throwaway writer for validation-only WriteTo calls.</summary>
+    /// <returns>A writer over an unused in-memory stream.</returns>
     private static Utf8JsonWriter NullWriter()
     {
         return new Utf8JsonWriter(new System.IO.MemoryStream());

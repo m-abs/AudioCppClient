@@ -7,22 +7,28 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using mabs.AudioCpp.Http;
-using mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Http;
+using Mabs.AudioCpp.Models;
 
-namespace mabs.AudioCpp;
+namespace Mabs.AudioCpp;
 
 /// <summary>Forced alignment against <c>POST /v1/audio/alignments</c> (multipart only).</summary>
 public sealed class AlignmentClient
 {
     private readonly AudioCppClient _client;
 
+    /// <summary>Creates the alignment endpoint group bound to <paramref name="client"/>.</summary>
+    /// <param name="client">The owning client that carries the transport and base URL.</param>
     internal AlignmentClient(AudioCppClient client)
     {
         _client = client;
     }
 
     /// <summary>Align a known transcript against uploaded WAV bytes.</summary>
+    /// <param name="request">The alignment request (validated before sending).</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The alignment result with word timestamps.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<AlignmentResult> RunAsync(AlignmentRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -45,12 +51,18 @@ public sealed class TaskClient
 {
     private readonly AudioCppClient _client;
 
+    /// <summary>Creates the generic task endpoint group bound to <paramref name="client"/>.</summary>
+    /// <param name="client">The owning client that carries the transport and base URL.</param>
     internal TaskClient(AudioCppClient client)
     {
         _client = client;
     }
 
     /// <summary>Run one generic request.</summary>
+    /// <param name="request">The run request.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The task result.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<TaskResult> RunAsync(TaskRunRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -64,6 +76,11 @@ public sealed class TaskClient
     }
 
     /// <summary>Run one generic request with inline audio bytes (Base64 form).</summary>
+    /// <param name="model">The model id.</param>
+    /// <param name="audioBytes">The audio bytes, Base64-encoded into the request body.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The task result.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public Task<TaskResult> RunAsync(string model, byte[] audioBytes, CancellationToken cancellationToken = default)
     {
         return RunAsync(
@@ -83,6 +100,10 @@ public sealed class TaskClient
     /// <see cref="TaskStreamEventKind.Done"/> arrives; mid-stream failures throw
     /// <see cref="AudioCppException"/> from the SSE error event.
     /// </summary>
+    /// <param name="request">The stream request.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<TaskStreamEvent> StreamAsync(TaskStreamRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -136,6 +157,11 @@ public sealed class TaskClient
     }
 
     /// <summary>Callback variant of <see cref="StreamAsync(TaskStreamRequest, CancellationToken)"/>.</summary>
+    /// <param name="request">The stream request.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task StreamAsync(TaskStreamRequest request, Func<TaskStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -153,6 +179,10 @@ public sealed class TaskClient
     /// Native offline batch of generic requests. Results stream per entry (original
     /// request index preserved); per-result timing is null by design.
     /// </summary>
+    /// <param name="request">The batch request.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<TaskBatchEvent> BatchAsync(TaskBatchRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -179,6 +209,11 @@ public sealed class TaskClient
     }
 
     /// <summary>Callback variant of <see cref="BatchAsync(TaskBatchRequest, CancellationToken)"/>.</summary>
+    /// <param name="request">The batch request.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task BatchAsync(TaskBatchRequest request, Func<TaskBatchEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)
@@ -203,12 +238,18 @@ public sealed class RecipeClient
 {
     private readonly AudioCppClient _client;
 
+    /// <summary>Creates the recipe endpoint group bound to <paramref name="client"/>.</summary>
+    /// <param name="client">The owning client that carries the transport and base URL.</param>
     internal RecipeClient(AudioCppClient client)
     {
         _client = client;
     }
 
     /// <summary>Run a recipe and return the final result.</summary>
+    /// <param name="request">The recipe request; <see cref="RecipeRunRequest.Stream"/> must be false.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The final task result.</returns>
+    /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<TaskResult> RunAsync(RecipeRunRequest request, CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -230,6 +271,10 @@ public sealed class RecipeClient
     /// Run a recipe with <c>stream:true</c>; events use the same
     /// <c>task.stream.event</c>/<c>task.stream.done</c> envelope as generic task streaming.
     /// </summary>
+    /// <param name="request">The recipe request; <see cref="RecipeRunRequest.Stream"/> is forced to true.</param>
+    /// <param name="cancellationToken">Cancellation token observed while enumerating.</param>
+    /// <returns>The event sequence; iteration ends at <c>[DONE]</c> or connection close.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<TaskStreamEvent> RunStreamAsync(RecipeRunRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
         if (request == null)
@@ -257,6 +302,11 @@ public sealed class RecipeClient
     }
 
     /// <summary>Callback variant of <see cref="RunStreamAsync(RecipeRunRequest, CancellationToken)"/>.</summary>
+    /// <param name="request">The recipe request.</param>
+    /// <param name="onEvent">Callback invoked for each event; iteration stops if it throws.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
+    /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task RunStreamAsync(RecipeRunRequest request, Func<TaskStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
         if (onEvent == null)

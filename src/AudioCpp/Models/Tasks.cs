@@ -46,6 +46,8 @@ public static class ArtifactKind
     };
 
     /// <summary>Throws when <paramref name="kind"/> is not a server-accepted value.</summary>
+    /// <param name="kind">The artifact kind to check.</param>
+    /// <exception cref="ArgumentException">The kind is not in <see cref="All"/>.</exception>
     public static void Validate(string kind)
     {
         if (!All.Contains(kind))
@@ -75,6 +77,9 @@ public sealed class AudioArtifactInput
     /// <summary>Optional string metadata (numbers/bools become text like the option map).</summary>
     public Dictionary<string, string>? Meta { get; set; }
 
+    /// <summary>Validates the artifact and writes its JSON object.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">The artifact lacks id/kind/payload-or-path, or the kind is unknown.</exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         if (string.IsNullOrEmpty(Id))
@@ -168,6 +173,8 @@ public sealed class TaskRequestBody
         }
     }
 
+    /// <summary>Writes the request object (validates first).</summary>
+    /// <param name="writer">The JSON writer.</param>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         Validate();
@@ -224,6 +231,9 @@ public sealed class TaskRunRequest
     /// <summary>Busy-wait bound for this run, in milliseconds.</summary>
     public long? BusyTimeoutMs { get; set; }
 
+    /// <summary>Writes the run request object.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">The model id is missing.</exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         if (string.IsNullOrEmpty(Model))
@@ -262,6 +272,9 @@ public sealed class TaskStreamRequest
     /// <summary>Busy-wait bound for this run, in milliseconds.</summary>
     public long? BusyTimeoutMs { get; set; }
 
+    /// <summary>Writes the stream request object.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">The model id is missing, or <see cref="StreamFormat"/> is neither <c>sse</c> nor null.</exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         if (string.IsNullOrEmpty(Model))
@@ -305,6 +318,9 @@ public sealed class TaskBatchRequest
     /// <summary>Busy-wait bound for the batch, in milliseconds.</summary>
     public long? BusyTimeoutMs { get; set; }
 
+    /// <summary>Writes the batch request object.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">The model id is missing or the requests array is empty.</exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         if (string.IsNullOrEmpty(Model))
@@ -361,6 +377,9 @@ public sealed class TaskStreamEventBody
     /// <summary>Whether this event is the final one.</summary>
     public bool IsFinal { get; internal set; }
 
+    /// <summary>Parses a plain event object (flat field names).</summary>
+    /// <param name="element">The JSON event object.</param>
+    /// <returns>The parsed event body.</returns>
     internal static TaskStreamEventBody Parse(JsonElement element)
     {
         return new TaskStreamEventBody
@@ -376,6 +395,13 @@ public sealed class TaskStreamEventBody
         };
     }
 
+    /// <summary>
+    /// Parses an event with the nested <c>partial_text</c>/<c>partial_text_snapshot</c>
+    /// shapes: the SSE envelope (<c>{"type":"task.stream.event","event":{…}}</c>) or a JSON
+    /// <c>events[]</c> row.
+    /// </summary>
+    /// <param name="element">The JSON envelope or event object.</param>
+    /// <returns>The parsed event body.</returns>
     internal static TaskStreamEventBody ParseEnvelope(JsonElement element)
     {
         // SSE: {"type":"task.stream.event","event":{…}}
@@ -449,10 +475,20 @@ public readonly struct TaskStreamEvent
     /// <summary>The final result (<see cref="TaskStreamEventKind.Done"/>).</summary>
     public TaskResult? Result { get; }
 
+    /// <summary>Wraps an incremental event body.</summary>
+    /// <param name="body">The event body.</param>
+    /// <returns>The event.</returns>
     internal static TaskStreamEvent FromEvent(TaskStreamEventBody body) => new(TaskStreamEventKind.Event, body, null);
 
+    /// <summary>Wraps the terminal result.</summary>
+    /// <param name="result">The final result.</param>
+    /// <returns>The event.</returns>
     internal static TaskStreamEvent FromDone(TaskResult result) => new(TaskStreamEventKind.Done, null, result);
 
+    /// <summary>Parses one SSE data payload into a task stream event.</summary>
+    /// <param name="json">The event's JSON data payload.</param>
+    /// <returns>The parsed event.</returns>
+    /// <exception cref="JsonException">The payload carries an unknown event type.</exception>
     internal static TaskStreamEvent ParseSse(string json)
     {
         using JsonDocument doc = JsonDocument.Parse(json);
@@ -513,6 +549,10 @@ public readonly struct TaskBatchEvent
     /// <summary>Aggregate timing (Done event).</summary>
     public AudioCppTiming? Timing { get; }
 
+    /// <summary>Parses one SSE data payload into a batch event.</summary>
+    /// <param name="json">The event's JSON data payload.</param>
+    /// <returns>The parsed event.</returns>
+    /// <exception cref="JsonException">The payload carries an unknown event type.</exception>
     internal static TaskBatchEvent Parse(string json)
     {
         using JsonDocument doc = JsonDocument.Parse(json);
@@ -587,6 +627,9 @@ public sealed class AlignmentResult
     /// <summary>Run timing.</summary>
     public AudioCppTiming? Timing { get; internal set; }
 
+    /// <summary>Parses the alignment response root.</summary>
+    /// <param name="root">The JSON response root.</param>
+    /// <returns>The parsed alignment result.</returns>
     internal static AlignmentResult Parse(JsonElement root)
     {
         return new AlignmentResult
@@ -620,6 +663,9 @@ public sealed class RecipeRunRequest
     /// <summary>Busy-wait bound for the run, in milliseconds.</summary>
     public long? BusyTimeoutMs { get; set; }
 
+    /// <summary>Writes the recipe run request object.</summary>
+    /// <param name="writer">The JSON writer.</param>
+    /// <exception cref="ArgumentException">The recipe id is missing or the models map is empty.</exception>
     internal void WriteTo(Utf8JsonWriter writer)
     {
         if (string.IsNullOrEmpty(Recipe))
