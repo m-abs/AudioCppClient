@@ -47,7 +47,8 @@ dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/
 `dotnet` is 10.0.401. Expect **0 warnings, 0 errors** — the library builds clean on both
 TFMs and the suite is 68 tests, no network. Coverage (coverlet.msbuild, test project only):
 ~74% line / ~65% branch as of 2026-11-07; `.github/workflows/coverage.yml` runs it on every
-push/PR and uploads the cobertura report as an artifact.
+push and on PRs only when a maintainer comments `/coverage` (posts the summary back on the PR,
+uploads the cobertura report as an artifact).
 
 ## Formatting — mandatory (`.editorconfig` is the authority)
 
