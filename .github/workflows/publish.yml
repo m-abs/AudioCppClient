@@ -1,0 +1,17 @@
+name: publish
+on:
+  push:
+    tags: ['v*']
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      - run: dotnet test tests/AudioCpp.Tests -v q --nologo
+      - run: dotnet pack src/AudioCpp -c Release --nologo
+      - run: dotnet nuget push src/AudioCpp/bin/Release/*.nupkg --source https://nuget.pkg.github.com/m-abs/index.json --api-key "$GITHUB_TOKEN"

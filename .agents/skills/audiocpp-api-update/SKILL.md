@@ -95,7 +95,7 @@ Keep to the repo's protocol conventions already encoded: `Seed` is `string?` (ui
 - **SSE**: if a new event family, add fixtures to `SseReaderTests.cs` (real event JSON from
   Phase 0) and drive it through the client with `FakeHandler.QueueSse`.
 
-Run both TFMs: `-f net10.0`, and `-f net8.0` with `DOTNET_ROOT=/home/vscode/.dotnet8`.
+Run the test TFM: `net10.0`.
 
 ## Phase 4 — demo + README
 
@@ -108,12 +108,12 @@ Run both TFMs: `-f net10.0`, and `-f net8.0` with `DOTNET_ROOT=/home/vscode/.dot
 
 ## Phase 5 — verify + pack + report
 
-- `dotnet build AudioCpp.slnx` (0W/0E on netstandard2.0+net8.0+net10.0).
-- `dotnet test` on **both** test TFMs, all green.
+- `dotnet build AudioCpp.slnx` (0W/0E on netstandard2.0+net10.0).
+- `dotnet test`, all green.
 - Run the demo command live; paste the observed values.
 - `dotnet pack src/AudioCpp -c Release`; if the API is a release-level change, bump
-  `<Version>` in `src/AudioCpp/AudioCpp.csproj` and confirm the new `.nupkg` still carries all
-  three TFMs under `lib/`.
+  `<Version>` in `src/AudioCpp/AudioCpp.csproj` and confirm the new `.nupkg` still carries
+  both TFMs under `lib/`.
 - **Report every deviation** between the plan doc and the observed server, and any behavior the
   client now encodes that differs from older docs (status codes, field names, key order). The
   live server wins; say what you found rather than silently reconciling to the doc.

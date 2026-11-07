@@ -5,7 +5,7 @@ text-to-speech, transcription, alignment, live (duplex) routes, generic task exe
 batches, recipes, voices, and model management.
 
 - NuGet: `AudioCpp` (0.0.1)
-- Target frameworks: `netstandard2.0`, `net8.0`, `net10.0`
+- Target frameworks: `netstandard2.0`, `net10.0`
 - Dependencies: `System.Text.Json` only (`Microsoft.Bcl.AsyncInterfaces` on netstandard2.0)
 - No OpenAI dependency; speaks the audio.cpp wire protocol directly
 

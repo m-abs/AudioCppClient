@@ -32,6 +32,8 @@ x86/
 bld/
 [Bb]in/
 [Oo]bj/
+# ...but keep the repo-root scripts dir
+!/bin/
 [Ll]og/
 [Ll]ogs/
 
@@ -154,6 +156,7 @@ _TeamCity*
 coverage*.json
 coverage*.xml
 coverage*.info
+coverage/report/
 
 # Visual Studio code coverage results
 *.coverage

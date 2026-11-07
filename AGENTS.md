@@ -9,7 +9,7 @@ Working notes for agents in this repository. Read before editing.
 directly; there is **no OpenAI dependency**. Namespaces: `MabsDk.AudioCpp`,
 `MabsDk.AudioCpp.Http`, `MabsDk.AudioCpp.Models`.
 
-Target frameworks: `netstandard2.0;net8.0;net10.0`. Only library dependencies are
+Target frameworks: `netstandard2.0;net10.0`. Only library dependencies are
 `System.Text.Json` and (netstandard2.0 only) `Microsoft.Bcl.AsyncInterfaces`, both pinned to
 `9.0.8`. Current package version `0.0.1`.
 
@@ -39,14 +39,15 @@ internal `SseReader`/`SseParsers` helpers. The test assembly sees `internal`s vi
 
 ```
 dotnet build AudioCpp.slnx -v q --nologo          # library + tests + demo
-dotnet test tests/AudioCpp.Tests -f net10.0 -v q --nologo
-DOTNET_ROOT=/home/vscode/.dotnet8 dotnet test tests/AudioCpp.Tests -f net8.0 -v q --nologo
+dotnet test tests/AudioCpp.Tests -v q --nologo
+bin/coverage.sh                                                              # tests + cobertura + HTML report (needs reportgenerator global tool) -> coverage/report/index.html
 dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/AudioCpp.0.0.1.nupkg
 ```
 
-`dotnet` is 10.0.401; a .NET 8 runtime lives at `/home/vscode/.dotnet8` (tests set
-`RollForward=LatestMajor`). Expect **0 warnings, 0 errors** — the library builds clean on all
-three TFMs and the suite is 68 tests, no network.
+`dotnet` is 10.0.401. Expect **0 warnings, 0 errors** — the library builds clean on both
+TFMs and the suite is 68 tests, no network. Coverage (coverlet.msbuild, test project only):
+~74% line / ~65% branch as of 2026-11-07; `.github/workflows/coverage.yml` runs it on every
+push/PR and uploads the cobertura report as an artifact.
 
 ## Formatting — mandatory (`.editorconfig` is the authority)
 
