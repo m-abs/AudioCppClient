@@ -4,9 +4,9 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 
+using Mabs.AudioCpp.Enums;
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
 
@@ -98,11 +98,9 @@ public class SseReaderTests
         TranscriptEvent done = TranscriptEvent.Parse(events[1].Data);
         Assert.Equal(TranscriptEventKind.DiarizationDone, done.Kind);
 
-        // ttft_ms explicit null: present-but-null is distinguishable.
-        using JsonDocument doc = JsonDocument.Parse(events[1].Data);
-        AudioCppTiming? timing = SseReader.ReadTiming(doc.RootElement, "timing");
-        Assert.Null(timing!.TtftMs);
-        Assert.False(timing.TtftPresent);
+        // ttft_ms explicit null: present-but-null is distinguishable through the parsed event.
+        Assert.Null(done.Timing!.TtftMs);
+        Assert.False(done.Timing.TtftPresent);
     }
 
     /// <summary>Batch result and done events parse index, filename, result count, and timing.</summary>

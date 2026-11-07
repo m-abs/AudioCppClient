@@ -1,30 +1,23 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Text.Json;
 
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Utils;
 
 using Xunit;
 
 namespace Mabs.AudioCpp.Tests;
 
-/// <summary>Golden serialization of SpeechRequest bodies.</summary>
+/// <summary>Golden serialization of request bodies through the shared serializer settings.</summary>
 public class SpeechRequestSerializationTests
 {
-    /// <summary>Serializes a request body to JSON for golden comparisons.</summary>
-    /// <param name="request">The request to write.</param>
-    /// <returns>The UTF-8 JSON produced by the writer.</returns>
+    /// <summary>Serializes a request body with the shared options.</summary>
+    /// <param name="request">The request to serialize.</param>
+    /// <returns>The JSON produced by <see cref="Json.SerializerOptions"/>.</returns>
     private static string Serialize(SpeechRequest request)
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
-        {
-            request.WriteTo(writer);
-        }
-
-        return Encoding.UTF8.GetString(stream.ToArray());
+        return Json.Serialize(request);
     }
 
     /// <summary>A minimal request serializes to exactly model and input.</summary>
@@ -130,6 +123,14 @@ public class SpeechRequestSerializationTests
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"options\":{\"retry_badcase\":\"false\",\"chunk_seconds\":\"2\"}}", json);
     }
 
+    /// <summary>An empty options map is omitted, matching the wire format the server expects.</summary>
+    [Fact]
+    public void EmptyOptionsMapIsOmitted()
+    {
+        string json = Serialize(new SpeechRequest { Model = "m", Input = "t", Options = [] });
+        Assert.Equal("{\"model\":\"m\",\"input\":\"t\"}", json);
+    }
+
     /// <summary>Voice ref serializes as a plain string or as a typed base64/path object.</summary>
     [Fact]
     public void VoiceRefStringAndObject()
@@ -175,22 +176,17 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void StreamRequestAddsStreamFormatAndReturnText()
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
+        SpeechStreamRequest request = new()
         {
-            new SpeechStreamRequest
-            {
-                Request = new SpeechRequest { Model = "m", Input = "t", ResponseFormat = ResponseFormat.Pcm },
-                StreamFormat = StreamFormat.Sse,
-                ReturnText = true,
-            }.WriteTo(writer);
-        }
-
-        string json = Encoding.UTF8.GetString(stream.ToArray());
+            Request = new SpeechRequest { Model = "m", Input = "t", ResponseFormat = ResponseFormat.Pcm },
+            StreamFormat = StreamFormat.Sse,
+            ReturnText = true,
+        };
+        string json = Json.Serialize(request);
         Assert.Equal("{\"model\":\"m\",\"input\":\"t\",\"response_format\":\"pcm\",\"stream_format\":\"sse\",\"return_text\":true}", json);
     }
 
-    /// <summary>return_text with a non-SSE stream format throws at write time.</summary>
+    /// <summary>return_text with a non-SSE stream format fails validation.</summary>
     [Fact]
     public void ReturnTextWithoutSseThrows()
     {
@@ -200,9 +196,7 @@ public class SpeechRequestSerializationTests
             StreamFormat = StreamFormat.Audio,
             ReturnText = true,
         };
-        using MemoryStream stream = new();
-        using Utf8JsonWriter writer = new(stream);
-        Assert.Throws<ArgumentException>(() => request.WriteTo(writer));
+        Assert.Throws<ArgumentException>(() => request.Validate());
     }
 
     /// <summary>The live speech query string is percent-encoded and includes the default rate and format.</summary>
@@ -240,7 +234,7 @@ public class SpeechRequestSerializationTests
         TaskRequestBody body = new()
         {
             AudioPath = "/tmp/a.wav",
-            AudioBase64 = new byte[] { 1 },
+            AudioBase64 = [1],
         };
         Assert.Throws<ArgumentException>(() => body.Validate());
     }
@@ -249,61 +243,50 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void TaskRequestSerializesArtifacts()
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
+        TaskRequestBody body = new()
         {
-            new TaskRequestBody
+            AudioPath = "/in.wav",
+            Artifacts = new List<AudioArtifactInput>
             {
-                AudioPath = "/in.wav",
-                Artifacts = new List<AudioArtifactInput>
+                new()
                 {
-                    new()
-                    {
-                        Id = "example.state",
-                        Kind = ArtifactKind.Custom,
-                        Payload = new byte[] { 1, 2, 3 },
-                        Meta = new Dictionary<string, string> { ["format"] = "example/1" },
-                    },
+                    Id = "example.state",
+                    Kind = ArtifactKind.Custom,
+                    Payload = [1, 2, 3],
+                    Meta = new Dictionary<string, string> { ["format"] = "example/1" },
                 },
-                Options = new Dictionary<string, string> { ["seed"] = "42" },
-            }.WriteTo(writer);
-        }
-
-        string json = Encoding.UTF8.GetString(stream.ToArray());
+            },
+            Options = new Dictionary<string, string> { ["seed"] = "42" },
+        };
+        string json = Json.Serialize(body);
         Assert.Equal(
             "{\"audio\":\"/in.wav\",\"artifacts\":[{\"id\":\"example.state\",\"kind\":\"custom\",\"payload\":\"AQID\",\"meta\":{\"format\":\"example/1\"}}],\"options\":{\"seed\":\"42\"}}",
             json);
     }
 
-    /// <summary>An unknown artifact kind or a payload combined with a path fails at write time.</summary>
+    /// <summary>An unknown artifact kind or a payload combined with a path fails validation.</summary>
     [Fact]
     public void ArtifactRejectsUnknownKindAndBothPayloadPath()
     {
-        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = "tokens", Path = "/x" }.WriteTo(NullWriter()));
-        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = ArtifactKind.Custom, Payload = new byte[] { 1 }, Path = "/x" }.WriteTo(NullWriter()));
+        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = "tokens", Path = "/x" }.Validate());
+        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = ArtifactKind.Custom, Payload = [1], Path = "/x" }.Validate());
     }
 
     /// <summary>Recipe name, stream flags, model map, and inner request serialize in order.</summary>
     [Fact]
     public void RecipeRequestSerializesRolesAndStreamFlags()
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
+        RecipeRunRequest request = new()
         {
-            RecipeRunRequest request = new()
-            {
-                Recipe = "speaking-avatar",
-                Stream = true,
-                IncludeArtifacts = true,
-            };
-            request.Models["tts"] = "chat-voice";
-            request.Models["avatar"] = "chat-avatar";
-            request.Request.Text = "Hello!";
-            request.Request.Options = new Dictionary<string, string> { ["avatar.reference_image_file"] = "/p.png" };
-            request.WriteTo(writer);
-        }
-
-        string json = Encoding.UTF8.GetString(stream.ToArray());
+            Recipe = "speaking-avatar",
+            Stream = true,
+            IncludeArtifacts = true,
+        };
+        request.Models["tts"] = "chat-voice";
+        request.Models["avatar"] = "chat-avatar";
+        request.Request.Text = "Hello!";
+        request.Request.Options = new Dictionary<string, string> { ["avatar.reference_image_file"] = "/p.png" };
+        string json = Json.Serialize(request);
         Assert.Equal(
             "{\"recipe\":\"speaking-avatar\",\"stream\":true,\"include_artifacts\":true,\"models\":{\"tts\":\"chat-voice\",\"avatar\":\"chat-avatar\"},\"request\":{\"text\":\"Hello!\",\"options\":{\"avatar.reference_image_file\":\"/p.png\"}}}",
             json);
@@ -323,14 +306,8 @@ public class SpeechRequestSerializationTests
     [Fact]
     public void ModelLoadRequestSerializesPackageIdGolden()
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
-        {
-            ModelLoadRequest request = new() { Id = "sep", PackageId = "htdemucs_q8_0", Task = "sep" };
-            request.WriteTo(writer);
-        }
-
-        string json = Encoding.UTF8.GetString(stream.ToArray());
+        ModelLoadRequest request = new() { Id = "sep", PackageId = "htdemucs_q8_0", Task = "sep" };
+        string json = Json.Serialize(request);
         Assert.Equal(
             "{\"id\":\"sep\",\"package_id\":\"htdemucs_q8_0\",\"task\":\"sep\"}",
             json);
@@ -343,12 +320,5 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "m" }.Validate());
         Assert.Throws<ArgumentException>(() => new TranscriptionRequest { Model = "m", AudioPath = "/a.wav", AudioFile = new MemoryStream(), AudioFileName = "a.wav" }.Validate());
         new TranscriptionRequest { Model = "m", AudioPath = "/a.wav" }.Validate();
-    }
-
-    /// <summary>A throwaway writer for validation-only WriteTo calls.</summary>
-    /// <returns>A writer over an unused in-memory stream.</returns>
-    private static Utf8JsonWriter NullWriter()
-    {
-        return new Utf8JsonWriter(new MemoryStream());
     }
 }

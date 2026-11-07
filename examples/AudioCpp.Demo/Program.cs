@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Mabs.AudioCpp;
+using Mabs.AudioCpp.Enums;
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
 
@@ -145,7 +146,7 @@ async Task<int> SpeechAsync()
         }
         else if (args[i] == "--option" && i + 1 < args.Length)
         {
-            string[] pair = args[++i].Split(new[] { '=' }, 2);
+            string[] pair = args[++i].Split(['='], 2);
             if (pair.Length == 2)
             {
                 if (request.Options == null)

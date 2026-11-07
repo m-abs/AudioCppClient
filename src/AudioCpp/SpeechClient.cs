@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Utils;
 
 namespace Mabs.AudioCpp;
 
@@ -36,14 +37,11 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<SpeechResult> SynthesizeAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
         request.Validate();
         using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
-        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+        httpRequest.Content = AudioCppClient.CreateJsonContent(request);
         AudioRawResponse raw = await _client.SendForBytesAsync(httpRequest, cancellationToken).ConfigureAwait(false);
         return new SpeechResult
         {
@@ -63,15 +61,13 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<SpeechJsonResult> SynthesizeJsonAsync(SpeechRequest request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
         request.ResponseFormat = ResponseFormat.Json;
+        request.Validate();
         using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
-        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
-        return await _client.ReadJsonAsync(httpRequest, SseParsers.SpeechJson, cancellationToken).ConfigureAwait(false);
+        httpRequest.Content = AudioCppClient.CreateJsonContent(request);
+        return await _client.ReadJsonAsync<SpeechJsonResult>(httpRequest, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -85,16 +81,13 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<SpeechStreamEvent> StreamAsync(SpeechStreamRequest request, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
         SseReader reader = await OpenSpeechStreamAsync(request, cancellationToken).ConfigureAwait(false);
         await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
             SseReader.ThrowIfErrorEvent(evt.Data);
-            yield return SpeechStreamEvent.Parse(evt.Data);
+            yield return Json.Deserialize<SpeechStreamEvent>(evt.Data);
         }
     }
 
@@ -106,10 +99,7 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task StreamAsync(SpeechStreamRequest request, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
-        if (onEvent == null)
-        {
-            throw new ArgumentNullException(nameof(onEvent));
-        }
+        ArgumentNullException.ThrowIfNull(onEvent);
 
         await foreach (SpeechStreamEvent evt in StreamAsync(request, cancellationToken).ConfigureAwait(false))
         {
@@ -128,15 +118,13 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed.</exception>
     public async Task<Stream> StreamPcmAsync(SpeechStreamRequest request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
         request.StreamFormat = StreamFormat.Audio;
         request.Request.ResponseFormat = ResponseFormat.Pcm;
+        request.Validate();
         using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
-        httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+        httpRequest.Content = AudioCppClient.CreateJsonContent(request);
         HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
         return await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
     }
@@ -157,15 +145,9 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async IAsyncEnumerable<SpeechStreamEvent> SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
-        if (pcmInput == null)
-        {
-            throw new ArgumentNullException(nameof(pcmInput));
-        }
+        ArgumentNullException.ThrowIfNull(pcmInput);
 
         string query = request.BuildQueryString();
         using HttpRequestMessage httpRequest = new(HttpMethod.Post, _client.BuildUri("v1/audio/speech/live", query));
@@ -177,7 +159,7 @@ public sealed class SpeechClient
         await foreach (SseEvent evt in reader.EnumerateAsync(cancellationToken).ConfigureAwait(false))
         {
             SseReader.ThrowIfErrorEvent(evt.Data);
-            yield return SpeechStreamEvent.Parse(evt.Data);
+            yield return Json.Deserialize<SpeechStreamEvent>(evt.Data);
         }
     }
 
@@ -190,10 +172,7 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed or an SSE error event arrives.</exception>
     public async Task SpeakLiveAsync(LiveSpeechRequest request, Stream pcmInput, Func<SpeechStreamEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
-        if (onEvent == null)
-        {
-            throw new ArgumentNullException(nameof(onEvent));
-        }
+        ArgumentNullException.ThrowIfNull(onEvent);
 
         await foreach (SpeechStreamEvent evt in SpeakLiveAsync(request, pcmInput, cancellationToken).ConfigureAwait(false))
         {
@@ -224,10 +203,11 @@ public sealed class SpeechClient
             throw new ArgumentException("streaming speech only supports response_format=pcm");
         }
 
+        request.Validate();
         HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
         try
         {
-            httpRequest.Content = AudioCppClient.CreateJsonContent(writer => request.WriteTo(writer));
+            httpRequest.Content = AudioCppClient.CreateJsonContent(request);
             HttpResponseMessage response = await _client.OpenStreamedResponseAsync(httpRequest, cancellationToken).ConfigureAwait(false);
             Stream stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
             return new SseReader(stream);

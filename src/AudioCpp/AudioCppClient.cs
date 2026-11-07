@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 
 using Mabs.AudioCpp.Http;
 using Mabs.AudioCpp.Models;
+using Mabs.AudioCpp.Utils;
 
 namespace Mabs.AudioCpp;
 
@@ -41,10 +42,7 @@ public sealed class AudioCppClient
     /// </param>
     public AudioCppClient(Uri baseUrl, HttpClient? httpClient = null, string? apiKey = null)
     {
-        if (baseUrl == null)
-        {
-            throw new ArgumentNullException(nameof(baseUrl));
-        }
+        ArgumentNullException.ThrowIfNull(baseUrl);
 
         _baseUri = baseUrl;
         _http = httpClient ?? new HttpClient();
@@ -89,20 +87,7 @@ public sealed class AudioCppClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<AudioCppHealth> GetHealthAsync(CancellationToken cancellationToken = default)
     {
-        return await SendJsonAsync(HttpMethod.Get, "health", writeBody: null, root =>
-        {
-            return new AudioCppHealth
-            {
-                Status = SseReader.ReadString(root, "status"),
-                Backend = SseReader.ReadString(root, "backend"),
-                Models = SseReader.ReadInt(root, "models") ?? 0,
-                Ui = SseReader.ReadBool(root, "ui") ?? false,
-                UiManagement = SseReader.ReadBool(root, "ui_management") ?? false,
-                Version = SseReader.ReadString(root, "version"),
-                Git = SseReader.ReadString(root, "git"),
-                GitDate = SseReader.ReadString(root, "git_date"),
-            };
-        }, cancellationToken).ConfigureAwait(false);
+        return await SendJsonAsync<AudioCppHealth>(HttpMethod.Get, "health", body: null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -129,20 +114,8 @@ public sealed class AudioCppClient
             query.Add("include_session_options", "true");
         }
 
-        return await SendJsonAsync(HttpMethod.Get, "v1/models" + query, writeBody: null, root =>
-        {
-            List<AudioCppModel> models = [];
-            if (root.TryGetProperty("data", out JsonElement data) &&
-                data.ValueKind == JsonValueKind.Array)
-            {
-                foreach (JsonElement element in data.EnumerateArray())
-                {
-                    models.Add(ParseModel(element));
-                }
-            }
-
-            return (IReadOnlyList<AudioCppModel>)models;
-        }, cancellationToken).ConfigureAwait(false);
+        ModelListEnvelope envelope = await SendJsonAsync<ModelListEnvelope>(HttpMethod.Get, "v1/models" + query, body: null, cancellationToken).ConfigureAwait(false);
+        return envelope.Data ?? Array.Empty<AudioCppModel>();
     }
 
     /// <summary>
@@ -158,23 +131,8 @@ public sealed class AudioCppClient
     {
         QueryBuilder query = new();
         query.Add("model", model);
-        return await SendJsonAsync(HttpMethod.Get, "v1/audio/voices" + query, writeBody: null, root =>
-        {
-            List<string> voices = [];
-            if (root.TryGetProperty("voices", out JsonElement array) &&
-                array.ValueKind == JsonValueKind.Array)
-            {
-                foreach (JsonElement element in array.EnumerateArray())
-                {
-                    if (element.ValueKind == JsonValueKind.String)
-                    {
-                        voices.Add(element.GetString()!);
-                    }
-                }
-            }
-
-            return (IReadOnlyList<string>)voices;
-        }, cancellationToken).ConfigureAwait(false);
+        VoicesEnvelope envelope = await SendJsonAsync<VoicesEnvelope>(HttpMethod.Get, "v1/audio/voices" + query, body: null, cancellationToken).ConfigureAwait(false);
+        return envelope.Voices ?? Array.Empty<string>();
     }
 
     /// <summary>Unload specific models from memory; unknown ids are reported, not an error.</summary>
@@ -184,28 +142,9 @@ public sealed class AudioCppClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<UnloadModelsResult> UnloadModelsAsync(IEnumerable<string> modelIds, CancellationToken cancellationToken = default)
     {
-        if (modelIds == null)
-        {
-            throw new ArgumentNullException(nameof(modelIds));
-        }
+        ArgumentNullException.ThrowIfNull(modelIds);
 
-        return await SendJsonAsync(
-            HttpMethod.Post,
-            "v1/tasks/unload_models",
-            writer =>
-            {
-                writer.WriteStartObject();
-                writer.WriteStartArray("model_ids");
-                foreach (string id in modelIds)
-                {
-                    writer.WriteStringValue(id);
-                }
-
-                writer.WriteEndArray();
-                writer.WriteEndObject();
-            },
-            SseParsers.UnloadResult,
-            cancellationToken).ConfigureAwait(false);
+        return await SendJsonAsync<UnloadModelsResult>(HttpMethod.Post, "v1/tasks/unload_models", new UnloadModelsBody { ModelIds = modelIds }, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>Unload every currently loaded model.</summary>
@@ -214,7 +153,7 @@ public sealed class AudioCppClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<UnloadModelsResult> UnloadAllModelsAsync(CancellationToken cancellationToken = default)
     {
-        return await SendJsonAsync(HttpMethod.Post, "v1/tasks/unload_all_models", writeBody: null, SseParsers.UnloadResult, cancellationToken).ConfigureAwait(false);
+        return await SendJsonAsync<UnloadModelsResult>(HttpMethod.Post, "v1/tasks/unload_all_models", body: null, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -228,13 +167,10 @@ public sealed class AudioCppClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<ModelLoadResult> LoadModelAsync(ModelLoadRequest request, CancellationToken cancellationToken = default)
     {
-        if (request == null)
-        {
-            throw new ArgumentNullException(nameof(request));
-        }
+        ArgumentNullException.ThrowIfNull(request);
 
         request.Validate();
-        return await SendJsonAsync(HttpMethod.Post, "v1/models/load", request.WriteTo, SseParsers.ModelLoadResult, cancellationToken).ConfigureAwait(false);
+        return await SendJsonAsync<ModelLoadResult>(HttpMethod.Post, "v1/models/load", request, cancellationToken).ConfigureAwait(false);
     }
 
     /// <summary>List available recipes from <c>GET /v1/recipes</c>.</summary>
@@ -243,121 +179,16 @@ public sealed class AudioCppClient
     /// <exception cref="AudioCppException">The request failed.</exception>
     public async Task<IReadOnlyList<RecipeEntry>> ListRecipesAsync(CancellationToken cancellationToken = default)
     {
-        return await SendJsonAsync(HttpMethod.Get, "v1/recipes", writeBody: null, root =>
-        {
-            List<RecipeEntry> recipes = [];
-            if (root.TryGetProperty("data", out JsonElement data) &&
-                data.ValueKind == JsonValueKind.Array)
-            {
-                foreach (JsonElement element in data.EnumerateArray())
-                {
-                    List<RecipeRole> roles = [];
-                    if (element.TryGetProperty("roles", out JsonElement roleArray) &&
-                        roleArray.ValueKind == JsonValueKind.Array)
-                    {
-                        foreach (JsonElement role in roleArray.EnumerateArray())
-                        {
-                            roles.Add(new RecipeRole
-                            {
-                                Name = SseReader.ReadString(role, "name"),
-                                Task = SseReader.ReadString(role, "task"),
-                                Mode = SseReader.ReadString(role, "mode"),
-                            });
-                        }
-                    }
-
-                    recipes.Add(new RecipeEntry
-                    {
-                        Id = SseReader.ReadString(element, "id"),
-                        Description = SseReader.ReadString(element, "description"),
-                        Roles = roles,
-                    });
-                }
-            }
-
-            return (IReadOnlyList<RecipeEntry>)recipes;
-        }, cancellationToken).ConfigureAwait(false);
+        RecipeListEnvelope envelope = await SendJsonAsync<RecipeListEnvelope>(HttpMethod.Get, "v1/recipes", body: null, cancellationToken).ConfigureAwait(false);
+        return envelope.Data ?? Array.Empty<RecipeEntry>();
     }
 
-    /// <summary>Parses one model entry from the <c>data</c> array.</summary>
-    /// <param name="element">The JSON model object.</param>
-    /// <returns>The parsed model.</returns>
-    internal static AudioCppModel ParseModel(JsonElement element)
-    {
-        Dictionary<string, string>? sessionOptions = null;
-        if (element.TryGetProperty("session_options", out JsonElement options) &&
-            options.ValueKind == JsonValueKind.Object)
-        {
-            sessionOptions = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (JsonProperty property in options.EnumerateObject())
-            {
-                sessionOptions[property.Name] = property.Value.ValueKind == JsonValueKind.String
-                    ? property.Value.GetString()!
-                    : property.Value.GetRawText();
-            }
-        }
-
-        List<AudioCppModelParam>? @params = null;
-        if (element.TryGetProperty("params", out JsonElement paramsElement) &&
-            paramsElement.ValueKind == JsonValueKind.Array)
-        {
-            @params = [];
-            foreach (JsonElement row in paramsElement.EnumerateArray())
-            {
-                List<string>? values = null;
-                if (row.TryGetProperty("values", out JsonElement valuesElement) &&
-                    valuesElement.ValueKind == JsonValueKind.Array)
-                {
-                    values = [];
-                    foreach (JsonElement value in valuesElement.EnumerateArray())
-                    {
-                        values.Add(value.ValueKind == JsonValueKind.String
-                            ? value.GetString()!
-                            : value.GetRawText());
-                    }
-                }
-
-                @params.Add(new AudioCppModelParam
-                {
-                    Name = SseReader.ReadString(row, "name"),
-                    Type = SseReader.ReadString(row, "type"),
-                    Required = SseReader.ReadBool(row, "required") ?? false,
-                    Description = SseReader.ReadString(row, "description"),
-                    Default = ElementOrNull(row, "default"),
-                    Min = ElementOrNull(row, "min"),
-                    Max = ElementOrNull(row, "max"),
-                    Values = values,
-                });
-            }
-        }
-
-        return new AudioCppModel
-        {
-            Id = SseReader.ReadString(element, "id"),
-            Object = SseReader.ReadString(element, "object"),
-            Configured = SseReader.ReadBool(element, "configured") ?? false,
-            Device = SseReader.ReadInt(element, "device"),
-            Loaded = SseReader.ReadBool(element, "loaded") ?? false,
-            Family = SseReader.ReadString(element, "family"),
-            Path = SseReader.ReadString(element, "path"),
-            Task = SseReader.ReadString(element, "task"),
-            SessionOptions = sessionOptions,
-            Params = @params,
-        };
-    }
-
-    /// <summary>Builds a JSON content body from a writer callback.</summary>
-    /// <param name="writeBody">Callback that writes the JSON body.</param>
+    /// <summary>Builds a JSON content body from a request record.</summary>
+    /// <param name="body">The request record to serialize.</param>
     /// <returns>The <c>application/json</c> content.</returns>
-    internal static StringContent CreateJsonContent(Action<Utf8JsonWriter> writeBody)
+    internal static StringContent CreateJsonContent(object body)
     {
-        using MemoryStream stream = new();
-        using (Utf8JsonWriter writer = new(stream))
-        {
-            writeBody(writer);
-        }
-
-        return new StringContent(Encoding.UTF8.GetString(stream.ToArray()), Encoding.UTF8, "application/json");
+        return new StringContent(Json.Serialize(body), Encoding.UTF8, "application/json");
     }
 
     /// <summary>
@@ -426,21 +257,6 @@ public sealed class AudioCppClient
         return new AudioCppTiming { WallMs = wall, AudioDurationMs = duration, Rtf = rtf };
     }
 
-    /// <summary>Reads a property as a cloned element, or <see langword="null"/> when absent or JSON null.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The element, or <see langword="null"/>.</returns>
-    private static JsonElement? ElementOrNull(JsonElement obj, string property)
-    {
-        if (!obj.TryGetProperty(property, out JsonElement value) ||
-            value.ValueKind == JsonValueKind.Null)
-        {
-            return null;
-        }
-
-        return value.Clone();
-    }
-
     /// <summary>Sends one request through the transport, adding the auth header first.</summary>
     /// <param name="request">The request to send.</param>
     /// <param name="completion">Completion option (buffered vs headers-read).</param>
@@ -502,28 +318,26 @@ public sealed class AudioCppClient
         return new HttpRequestMessage(method, BuildUri(path));
     }
 
-    /// <summary>Sends a JSON request and parses the JSON response (validates the body writer callback once).</summary>
+    /// <summary>Sends a JSON request and deserializes the JSON response.</summary>
     /// <typeparam name="T">The parsed response type.</typeparam>
     /// <param name="method">The HTTP method.</param>
     /// <param name="path">Path below the base URL, with an optional query string.</param>
-    /// <param name="writeBody">Body writer callback, or <see langword="null"/> for a bodyless request.</param>
-    /// <param name="parse">Parser applied to the response root.</param>
+    /// <param name="body">The request record to serialize, or <see langword="null"/> for a bodyless request.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The parsed response.</returns>
+    /// <returns>The deserialized response.</returns>
     /// <exception cref="AudioCppException">The response failed.</exception>
-    internal async Task<T> SendJsonAsync<T>(HttpMethod method, string path, Action<Utf8JsonWriter>? writeBody, Func<JsonElement, T> parse, CancellationToken cancellationToken)
+    internal async Task<T> SendJsonAsync<T>(HttpMethod method, string path, object? body, CancellationToken cancellationToken)
     {
         using HttpRequestMessage request = NewRequest(method, path);
-        if (writeBody != null)
+        if (body != null)
         {
-            request.Content = CreateJsonContent(writeBody);
+            request.Content = CreateJsonContent(body);
         }
 
         using HttpResponseMessage response = await SendAsync(request, HttpCompletionOption.ResponseContentRead, cancellationToken).ConfigureAwait(false);
-        string body = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
-        EnsureSuccess(response, body);
-        using JsonDocument doc = JsonDocument.Parse(body);
-        return parse(doc.RootElement);
+        string responseBody = await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        EnsureSuccess(response, responseBody);
+        return Json.Deserialize<T>(responseBody);
     }
 
     /// <summary>Sends a request and returns the response body text (throws on failure).</summary>
@@ -542,18 +356,16 @@ public sealed class AudioCppClient
         }
     }
 
-    /// <summary>Sends a request, parses the JSON body, and returns the parsed value.</summary>
+    /// <summary>Sends a request, deserializes the JSON body, and returns the parsed value.</summary>
     /// <typeparam name="T">The parsed response type.</typeparam>
     /// <param name="request">The request to send; disposed by this method.</param>
-    /// <param name="parse">Parser applied to the response root.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The parsed response.</returns>
+    /// <returns>The deserialized response.</returns>
     /// <exception cref="AudioCppException">The response failed.</exception>
-    internal async Task<T> ReadJsonAsync<T>(HttpRequestMessage request, Func<JsonElement, T> parse, CancellationToken cancellationToken)
+    internal async Task<T> ReadJsonAsync<T>(HttpRequestMessage request, CancellationToken cancellationToken)
     {
         string body = await ReadBodyAsync(request, cancellationToken).ConfigureAwait(false);
-        using JsonDocument doc = JsonDocument.Parse(body);
-        return parse(doc.RootElement);
+        return Json.Deserialize<T>(body);
     }
 
     /// <summary>

@@ -6,12 +6,12 @@ Working notes for agents in this repository. Read before editing.
 
 `AudioCpp` — a NuGet-packable .NET client library for the **audio.cpp** server protocol
 (https://github.com/0xShug0/audio.cpp). It speaks the audio.cpp wire protocol (HTTP + SSE)
-directly; there is **no OpenAI dependency**. Namespaces: `MabsDk.AudioCpp`,
-`MabsDk.AudioCpp.Http`, `MabsDk.AudioCpp.Models`.
+directly; there is **no OpenAI dependency**. Namespaces: `Mabs.AudioCpp`,
+`Mabs.AudioCpp.Http`, `Mabs.AudioCpp.Models` (the `RootNamespace` in the csproj; the package id is
+`Mabs.AudioCppClient`).
 
-Target frameworks: `netstandard2.0;net10.0`. Only library dependencies are
-`System.Text.Json` and (netstandard2.0 only) `Microsoft.Bcl.AsyncInterfaces`, both pinned to
-`9.0.8`. Current package version `0.0.3`.
+Target frameworks: `net10.0`. No library dependencies — `System.Text.Json` is in-box on
+`net10.0`. Current package version `0.0.3`.
 
 ## Layout
 
@@ -23,7 +23,6 @@ src/AudioCpp/                 library (13 .cs files)
   TaskClients.cs              AlignmentClient, TaskClient (run/stream/batch), RecipeClient
   Http/                       SseReader (+SseEvent), SseParsers (internal), AudioCppException, AudioRawResponse (internal)
   Models/                     Common.cs, Speech.cs, Transcription.cs, Tasks.cs — request/response types + JSON writers/parsers
-  Polyfills.cs                netstandard2.0 IsExternalInit (records without `required`)
 tests/AudioCpp.Tests/         xunit + FakeItEasy; FakeHandler.cs is the fake transport
 examples/AudioCpp.Demo/       Program.cs CLI proving each behavior against a live server
 Directory.Build.props         LangVersion latest, Nullable enable, ImplicitUsings false, Deterministic
@@ -44,8 +43,8 @@ bin/coverage.sh                                                              # t
 dotnet pack src/AudioCpp -c Release --nologo      # -> src/AudioCpp/bin/Release/Mabs.AudioCppClient.0.0.2.nupkg
 ```
 
-`dotnet` is 10.0.401. Expect **0 warnings, 0 errors** — the library builds clean on both
-TFMs and the suite is 75 tests, no network. Coverage (coverlet.msbuild, test project only):
+`dotnet` is 10.0.401. Expect **0 warnings, 0 errors** — the library builds clean on `net10.0`
+and the suite is 79 tests, no network. Coverage (coverlet.msbuild, test project only):
 ~74% line / ~65% branch as of 2026-11-07; `.github/workflows/coverage.yml` runs it on every
 push and on PRs only when a maintainer comments `/coverage` (posts the summary back on the PR,
 uploads the cobertura report as an artifact).
@@ -148,5 +147,5 @@ Use the `audiocpp-api-update` skill (`skill://audiocpp-api-update`): probe the r
 source for the exact wire shape first, then thread it through Models → Http (if new SSE family)
 → client method → tests → demo → README (README is part of the deliverable: endpoint table row
 per route, caveats, runnable snippets, and header facts re-derived from the csproj and a real
-test/pack run), and re-verify (build both library TFMs, tests on `net10.0`, live E2E, pack).
+test/pack run), and re-verify (build the library on `net10.0`, run the tests, live E2E, pack).
 Report every deviation from the plan doc — the live server wins.

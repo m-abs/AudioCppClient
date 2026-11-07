@@ -5,8 +5,8 @@
 protocol directly (HTTP + SSE); there is no OpenAI dependency.
 
 - Package: `Mabs.AudioCppClient`
-- Target frameworks: `netstandard2.0` and `net10.0`
-- Dependencies: `System.Text.Json` (plus `Microsoft.Bcl.AsyncInterfaces` on netstandard2.0)
+- Target frameworks: `net10.0`
+- Dependencies: none (`System.Text.Json` is in-box on `net10.0`)
 
 One `AudioCppClient` instance maps to one server base URL, is thread-safe, and should be
 shared. Endpoint groups sit on sub-clients: `Speech`, `Transcriptions`, `Alignments`,

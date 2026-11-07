@@ -4,11 +4,15 @@
     "contentfiles",
     "devcontainers",
     "dotnet",
+    "ipascalcase",
     "mabs",
     "moreutils",
     "noninteractive",
     "TMPDIR",
     "tmpfs",
+    "tpascalcase",
+    "ttft",
+    "Ttft",
     "Xunit"
   ]
 }

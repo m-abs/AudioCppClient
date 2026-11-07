@@ -15,6 +15,25 @@ dotnet add package Mabs.AudioCppClient
 
 This feed token is only for NuGet restore; it is not the client's `apiKey` bearer token.
 
+### Troubleshooting
+
+If restore warns instead of failing:
+
+```text
+/usr/lib/dotnet/sdk/10.0.114/NuGet.targets(196,5): warning Your request could not be
+authenticated by the GitHub Packages service. Please ensure your access token is valid
+and has the appropriate scopes configured.
+```
+
+The token is missing the `read:packages` scope. Grant it with the GitHub CLI:
+
+```bash
+gh auth login --scope read:packages
+```
+
+Then re-run the `dotnet nuget add source` command above — the password stored in the
+NuGet source is the old token, so re-adding it picks up the re-scoped one.
+
 ## Create a client
 
 ```csharp

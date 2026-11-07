@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
+using Mabs.AudioCpp.Enums;
 using Mabs.AudioCpp.Http;
 
 using Mabs.AudioCpp.Models;
@@ -167,11 +167,7 @@ public class TransportTests
         using FakeHandler handler = new();
         handler.QueueJson("{\"error\":{\"message\":\"audio alignment requests must use multipart/form-data\",\"type\":\"invalid_request_error\"}}", HttpStatusCode.BadRequest);
         AudioCppException ex = await Assert.ThrowsAsync<AudioCppException>(() =>
-            NewClient(handler).SendJsonAsync(HttpMethod.Post, "v1/audio/alignments", w =>
-            {
-                w.WriteStartObject();
-                w.WriteEndObject();
-            }, _ => new object(), CancellationToken.None));
+            NewClient(handler).SendJsonAsync<object>(HttpMethod.Post, "v1/audio/alignments", new object(), CancellationToken.None));
         Assert.Equal(400, ex.StatusCode);
         Assert.Equal("invalid_request_error", ex.ErrorType);
     }
@@ -277,7 +273,7 @@ public class TransportTests
 
         handler.QueueJson("{\"text\":\"uploaded\",\"timing\":{\"wall_ms\":1.0}}");
         TranscriptionResult viaUpload = await NewClient(handler).Transcriptions.TranscribeAsync(
-            new TranscriptionRequest { Model = "asr", AudioFile = new MemoryStream(new byte[] { 1, 2, 3 }), AudioFileName = "a.wav" });
+            new TranscriptionRequest { Model = "asr", AudioFile = new MemoryStream([1, 2, 3]), AudioFileName = "a.wav" });
         Assert.Equal("uploaded", viaUpload.Text);
         Assert.Contains("multipart/form-data", handler.Last.ContentType);
         string body = handler.Last.ContentText();
@@ -303,7 +299,7 @@ public class TransportTests
             Model = "al",
             Text = "hello there",
             Language = "English",
-            AudioFile = new byte[] { 9 },
+            AudioFile = [9],
             AudioFileName = "in.wav",
         });
         string body = handler.Last.ContentText();
@@ -470,7 +466,7 @@ public class TransportTests
     [Fact]
     public async Task StreamPcmForcesAudioFormatAndReturnsRawBytes()
     {
-        byte[] pcm = new byte[] { 1, 2, 3, 4 };
+        byte[] pcm = [1, 2, 3, 4];
         using FakeHandler handler = new();
         handler.QueueBytes(pcm, "application/octet-stream");
         using Stream stream = await NewClient(handler).Speech.StreamPcmAsync(
@@ -490,7 +486,7 @@ public class TransportTests
     {
         using FakeHandler handler = new();
         handler.QueueSse("data: {\"type\":\"speech.text.delta\",\"delta\":\"hi\"}\n\ndata: [DONE]\n\n");
-        using MemoryStream pcm = new(new byte[] { 5, 6, 7 });
+        using MemoryStream pcm = new([5, 6, 7]);
         List<SpeechStreamEvent> events = await NewClient(handler).Speech.SpeakLiveAsync(
             new LiveSpeechRequest { Model = "live-tts" }, pcm).ToListAsync();
         Assert.Equal(SpeechStreamEventKind.TextDelta, Assert.Single(events).Kind);
@@ -543,7 +539,7 @@ public class TransportTests
         /// <summary>Wraps a small buffer and the token source to cancel on first read.</summary>
         /// <param name="cts">Token source to cancel after the first read.</param>
         public CancelAfterFirstRead(CancellationTokenSource cts)
-            : base(new byte[] { 1, 2, 3 })
+            : base([1, 2, 3])
         {
             _cts = cts;
         }
@@ -562,24 +558,5 @@ public class TransportTests
 
             return read;
         }
-    }
-}
-
-/// <summary>Drains async enumerables into lists for assertions.</summary>
-internal static class AsyncEnumerableTestExtensions
-{
-    /// <summary>Collects every element yielded by the source.</summary>
-    /// <typeparam name="T">The element type.</typeparam>
-    /// <param name="source">The async enumerable to drain.</param>
-    /// <returns>A list of all elements in enumeration order.</returns>
-    internal static async Task<List<T>> ToListAsync<T>(this IAsyncEnumerable<T> source)
-    {
-        List<T> items = [];
-        await foreach (T item in source)
-        {
-            items.Add(item);
-        }
-
-        return items;
     }
 }

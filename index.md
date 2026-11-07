@@ -7,7 +7,7 @@ _layout: landing
 A NuGet-packable .NET client for the [audio.cpp](https://github.com/0xShug0/audio.cpp)
 server protocol — speech synthesis, transcription, forced alignment, generic tasks,
 recipes, and the live duplex routes. It speaks the wire protocol directly (HTTP + SSE),
-has no OpenAI dependency, and targets `netstandard2.0` and `net10.0`.
+has no OpenAI dependency, and targets `net10.0`.
 
 - [Getting Started](docs/getting-started.md) — install (GitHub Packages feed), create a client
 - [Common Tasks](docs/common-tasks.md) — one page per task area with runnable examples:

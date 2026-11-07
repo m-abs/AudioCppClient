@@ -1,0 +1,6 @@
+bash:
+  patterns:
+    - match: "dotnet build AudioCpp.slnx -v q --nologo"
+      approval: allow
+    - match: "dotnet test *"
+      approval: allow

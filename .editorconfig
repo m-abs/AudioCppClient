@@ -390,10 +390,17 @@ dotnet_naming_style.s_camelcase.required_suffix =
 dotnet_naming_style.s_camelcase.word_separator = 
 dotnet_naming_style.s_camelcase.capitalization = camel_case
 
+# IDE diagnostics
 dotnet_diagnostic.IDE0001.severity = warning
 dotnet_diagnostic.IDE0002.severity = warning
 dotnet_diagnostic.IDE0003.severity = warning
+dotnet_diagnostic.IDE0066.severity = warning
 dotnet_diagnostic.IDE0028.severity = warning
+dotnet_diagnostic.IDE0300.severity = warning
+dotnet_diagnostic.IDE0301.severity = warning
+dotnet_diagnostic.IDE0290.severity = none
+dotnet_diagnostic.CA2231.severity = warning
+dotnet_diagnostic.CA1510.severity = warning
 
 # StyleCop rules
 dotnet_diagnostic.SA0000.severity = warning
@@ -417,9 +424,6 @@ dotnet_diagnostic.SA1619.severity = warning
 dotnet_diagnostic.SA1623.severity = none
 dotnet_diagnostic.SA1633.severity = none
 dotnet_diagnostic.SA1648.severity = warning
-# Repo convention groups several types per Models file (AGENTS.md); SA1402/SA1649 would split ~84 types into 84 files.
-dotnet_diagnostic.SA1402.severity = none
-dotnet_diagnostic.SA1649.severity = none
 # SA1642 mandates "Initializes a new instance of the X class." boilerplate; repo doc bar requires meaningful summaries.
 dotnet_diagnostic.SA1642.severity = none
 dotnet_diagnostic.SX1101.severity = error

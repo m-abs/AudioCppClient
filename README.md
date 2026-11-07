@@ -5,8 +5,8 @@ text-to-speech, transcription, alignment, live (duplex) routes, generic task exe
 batches, recipes, voices, and model management.
 
 - NuGet: `Mabs.AudioCppClient` (0.0.2)
-- Target frameworks: `netstandard2.0`, `net10.0`
-- Dependencies: `System.Text.Json` only (`Microsoft.Bcl.AsyncInterfaces` on netstandard2.0)
+- Target frameworks: `net10.0`
+- Dependencies: none (`System.Text.Json` is in-box on `net10.0`)
 - No OpenAI dependency; speaks the audio.cpp wire protocol directly
 - Server default port is `8080` (`--port`); the examples below assume a server on that port.
 
@@ -64,8 +64,7 @@ await foreach (SpeechStreamEvent evt in client.Speech.StreamAsync(new SpeechStre
 }
 ```
 
-On `netstandard2.0`, `IAsyncEnumerable` streaming is available via `Microsoft.Bcl.AsyncInterfaces`,
-and every streaming method also has a callback overload (`Func<TEvent, Task> onEvent`) for
+Every streaming method also has a callback overload (`Func<TEvent, Task> onEvent`) for
 callers without `await foreach` language support.
 
 ## Endpoints
@@ -124,7 +123,8 @@ callers without `await foreach` language support.
   sidecar cache keyed by the analyzed audio needs no private JSON parsing:
   `AlignmentResult result = AlignmentResult.Parse(File.ReadAllText(sidecarPath));`.
   Base64 audio, named outputs and artifacts decode as on the live path. Model load/unload
-  results have no `Parse` — they describe server state, which a cache cannot answer.
+  results have no `Parse` — they describe server state, which a cache cannot answer. Parsing is
+  strict: a field of the wrong type throws `JsonException` instead of quietly yielding `null`.
 
 ## Demo CLI
 

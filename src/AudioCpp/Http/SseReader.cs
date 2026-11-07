@@ -8,8 +8,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
-using Mabs.AudioCpp.Models;
-
 namespace Mabs.AudioCpp.Http;
 
 /// <summary>
@@ -17,7 +15,8 @@ namespace Mabs.AudioCpp.Http;
 /// concatenated <c>data:</c> payload. The audio.cpp server puts the discriminating
 /// <c>"type"</c> inside the JSON payload, so <see cref="EventType"/> is generally
 /// <see langword="null"/>; the <c>[DONE]</c> sentinel terminates the stream and is
-/// never surfaced as an event.
+/// never surfaced as an event. Callers parse <see cref="Data"/> themselves, typically
+/// via <c>Json.Deserialize&lt;T&gt;</c> from <c>Mabs.AudioCpp.Models</c>.
 /// </summary>
 public readonly struct SseEvent
 {
@@ -39,6 +38,8 @@ public readonly struct SseEvent
 
 /// <summary>
 /// Incremental reader for the audio.cpp server's <c>text/event-stream</c> responses.
+/// The reader performs SSE framing only; event payloads are surfaced as raw JSON text
+/// for callers to deserialize.
 /// </summary>
 /// <remarks>
 /// <para>
@@ -98,7 +99,8 @@ public sealed class SseReader
     /// <summary>
     /// Throws <see cref="AudioCppException"/> when <paramref name="data"/> is an SSE
     /// error event (<c>{"type":"error","error":{"message":…}}</c>). SSE errors carry no
-    /// error type or HTTP status per the server contract.
+    /// error type or HTTP status per the server contract, and the server closes the
+    /// connection after an error event without writing <c>[DONE]</c>.
     /// </summary>
     /// <param name="data">The <c>data:</c> payload of one event.</param>
     public static void ThrowIfErrorEvent(string data)
@@ -141,10 +143,7 @@ public sealed class SseReader
     /// <returns>Completes when the stream terminates or the callback stops consuming events.</returns>
     public async Task ReadEventsAsync(Func<SseEvent, Task> onEvent, CancellationToken cancellationToken = default)
     {
-        if (onEvent == null)
-        {
-            throw new ArgumentNullException(nameof(onEvent));
-        }
+        ArgumentNullException.ThrowIfNull(onEvent);
 
         while (true)
         {
@@ -159,8 +158,8 @@ public sealed class SseReader
     }
 
     /// <summary>
-    /// Enumerates events lazily. Available on all target frameworks because the
-    /// library references <c>Microsoft.Bcl.AsyncInterfaces</c> on netstandard2.0.
+    /// Enumerates events lazily. Every streaming method also has a callback overload
+    /// for callers without <c>await foreach</c> language support.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token observed while reading the stream.</param>
     /// <returns>The event sequence; iteration ends when <c>[DONE]</c> or connection close is observed.</returns>
@@ -253,294 +252,6 @@ public sealed class SseReader
         }
 
         return new SseEvent(eventType, data);
-    }
-
-    /// <summary>Parses a timing object; returns <see langword="null"/> when the property is absent or not an object.</summary>
-    /// <param name="root">The JSON object carrying the timing property.</param>
-    /// <param name="property">The property name, usually <c>timing</c>.</param>
-    /// <returns>The parsed timing, or <see langword="null"/>.</returns>
-    internal static AudioCppTiming? ReadTiming(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement timing) ||
-            timing.ValueKind != JsonValueKind.Object)
-        {
-            return null;
-        }
-
-        bool ttftPresent = timing.TryGetProperty("ttft_ms", out JsonElement t) &&
-            t.ValueKind != JsonValueKind.Null;
-        return new AudioCppTiming
-        {
-            WallMs = ReadDouble(timing, "wall_ms"),
-            AudioDurationMs = ReadDouble(timing, "audio_duration_ms"),
-            Rtf = ReadDouble(timing, "rtf"),
-            TtftMs = ReadDouble(timing, "ttft_ms"),
-            TtftPresent = ttftPresent,
-            FirstAudioBeforeInputEnd = ReadBool(timing, "first_audio_before_input_end"),
-            OverlapMs = ReadDouble(timing, "overlap_ms"),
-            RequestStartToFirstAudioMs = ReadDouble(timing, "request_start_to_first_audio_ms"),
-            InputEndMs = ReadDouble(timing, "input_end_ms"),
-        };
-    }
-
-    /// <summary>Reads a numeric property as a double, or <see langword="null"/> when absent or not a number.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static double? ReadDouble(JsonElement obj, string property)
-    {
-        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number ? value.GetDouble() : (double?)null;
-    }
-
-    /// <summary>Reads a numeric property as an int, or <see langword="null"/> when absent or not a number.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static int? ReadInt(JsonElement obj, string property)
-    {
-        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number ? value.GetInt32() : (int?)null;
-    }
-
-    /// <summary>Reads a numeric property as a long, or <see langword="null"/> when absent, not a number, or outside the int64 range.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static long? ReadLong(JsonElement obj, string property)
-    {
-        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out long parsed) ? parsed : (long?)null;
-    }
-
-    /// <summary>Reads a string property, or <see langword="null"/> when absent or not a string.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static string? ReadString(JsonElement obj, string property)
-    {
-        return obj.TryGetProperty(property, out JsonElement value) && value.ValueKind == JsonValueKind.String ? value.GetString() : null;
-    }
-
-    /// <summary>Reads a boolean property, or <see langword="null"/> when absent or not a bool.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The value, or <see langword="null"/>.</returns>
-    internal static bool? ReadBool(JsonElement obj, string property)
-    {
-        if (!obj.TryGetProperty(property, out JsonElement value))
-        {
-            return null;
-        }
-
-        if (value.ValueKind == JsonValueKind.True)
-        {
-            return true;
-        }
-
-        return value.ValueKind == JsonValueKind.False ? (bool?)false : null;
-    }
-
-    /// <summary>Reads a Base64 string property and decodes it, or <see langword="null"/> when absent or not a string.</summary>
-    /// <param name="obj">The JSON object to read from.</param>
-    /// <param name="property">The property name.</param>
-    /// <returns>The decoded bytes, or <see langword="null"/>.</returns>
-    internal static byte[]? ReadBase64(JsonElement obj, string property)
-    {
-        string? text = ReadString(obj, property);
-        if (text == null)
-        {
-            return null;
-        }
-
-        return ReadBase64Payload(text);
-    }
-
-    /// <summary>Decodes a bare Base64 string or a <c>data:…;base64,…</c> URI.</summary>
-    /// <param name="text">The Base64 text, with an optional data-URI prefix.</param>
-    /// <returns>The decoded bytes.</returns>
-    internal static byte[] ReadBase64Payload(string text)
-    {
-        if (text.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
-        {
-            int comma = text.IndexOf(',');
-            if (comma >= 0)
-            {
-                text = text.Substring(comma + 1);
-            }
-        }
-
-        return Convert.FromBase64String(text);
-    }
-
-    /// <summary>Reads a speaker-turn array property, or <see langword="null"/> when absent or not an array.</summary>
-    /// <param name="root">The JSON object to read from.</param>
-    /// <param name="property">The property name, usually <c>speaker_turns</c>.</param>
-    /// <returns>The parsed turns, or <see langword="null"/>.</returns>
-    internal static List<AudioCppSpeakerTurn>? ReadSpeakerTurns(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement array) ||
-            array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        List<AudioCppSpeakerTurn> turns = [];
-        foreach (JsonElement element in array.EnumerateArray())
-        {
-            turns.Add(new AudioCppSpeakerTurn
-            {
-                StartSample = ReadLong(element, "start_sample"),
-                EndSample = ReadLong(element, "end_sample"),
-                SpeakerId = ReadString(element, "speaker_id"),
-                Confidence = ReadDouble(element, "confidence"),
-                Text = ReadString(element, "text"),
-            });
-        }
-
-        return turns;
-    }
-
-    /// <summary>Reads a segment array property, or <see langword="null"/> when absent or not an array.</summary>
-    /// <param name="root">The JSON object to read from.</param>
-    /// <param name="property">The property name, usually <c>segments</c>.</param>
-    /// <returns>The parsed segments, or <see langword="null"/>.</returns>
-    internal static List<AudioCppSegment>? ReadSegments(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement array) ||
-            array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        List<AudioCppSegment> segments = [];
-        foreach (JsonElement element in array.EnumerateArray())
-        {
-            segments.Add(new AudioCppSegment
-            {
-                StartSample = ReadLong(element, "start_sample"),
-                EndSample = ReadLong(element, "end_sample"),
-                Confidence = ReadDouble(element, "confidence"),
-                Text = ReadString(element, "text"),
-            });
-        }
-
-        return segments;
-    }
-
-    /// <summary>Reads a word-timestamp array property, or <see langword="null"/> when absent or not an array.</summary>
-    /// <param name="root">The JSON object to read from.</param>
-    /// <param name="property">The property name, usually <c>words</c> or <c>word_timestamps</c>.</param>
-    /// <returns>The parsed words, or <see langword="null"/>.</returns>
-    internal static List<AudioCppWord>? ReadWords(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement array) ||
-            array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        List<AudioCppWord> words = [];
-        foreach (JsonElement element in array.EnumerateArray())
-        {
-            words.Add(new AudioCppWord
-            {
-                Word = ReadString(element, "word"),
-                Start = ReadDouble(element, "start"),
-                End = ReadDouble(element, "end"),
-                StartSample = ReadLong(element, "start_sample"),
-                EndSample = ReadLong(element, "end_sample"),
-                Confidence = ReadDouble(element, "confidence"),
-            });
-        }
-
-        return words;
-    }
-
-    /// <summary>Reads an artifact array property, or <see langword="null"/> when absent or not an array.</summary>
-    /// <param name="root">The JSON object to read from.</param>
-    /// <param name="property">The property name, usually <c>artifacts</c>.</param>
-    /// <returns>The parsed artifacts, or <see langword="null"/>.</returns>
-    internal static List<AudioArtifact>? ReadArtifacts(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement array) ||
-            array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        List<AudioArtifact> artifacts = [];
-        foreach (JsonElement element in array.EnumerateArray())
-        {
-            Dictionary<string, string>? meta = null;
-            if (element.TryGetProperty("meta", out JsonElement metaElement) &&
-                metaElement.ValueKind == JsonValueKind.Object)
-            {
-                meta = new Dictionary<string, string>(StringComparer.Ordinal);
-                foreach (JsonProperty field in metaElement.EnumerateObject())
-                {
-                    meta[field.Name] = field.Value.ValueKind == JsonValueKind.String
-                        ? field.Value.GetString()!
-                        : field.Value.GetRawText();
-                }
-            }
-
-            artifacts.Add(new AudioArtifact
-            {
-                Id = ReadString(element, "id") ?? string.Empty,
-                Kind = ReadString(element, "kind") ?? "custom",
-                Payload = ReadBase64(element, "payload") ?? Array.Empty<byte>(),
-                Meta = meta,
-            });
-        }
-
-        return artifacts;
-    }
-
-    /// <summary>Reads a named-audio-output array property, or <see langword="null"/> when absent or not an array.</summary>
-    /// <param name="root">The JSON object to read from.</param>
-    /// <param name="property">The property name, usually <c>named_audio_outputs</c>.</param>
-    /// <returns>The parsed outputs, or <see langword="null"/>.</returns>
-    internal static List<NamedAudioOutput>? ReadNamedAudioOutputs(JsonElement root, string property)
-    {
-        if (!root.TryGetProperty(property, out JsonElement array) ||
-            array.ValueKind != JsonValueKind.Array)
-        {
-            return null;
-        }
-
-        List<NamedAudioOutput> outputs = [];
-        foreach (JsonElement element in array.EnumerateArray())
-        {
-            outputs.Add(new NamedAudioOutput
-            {
-                Id = ReadString(element, "id") ?? string.Empty,
-                Audio = ReadBase64(element, "audio"),
-                SampleRate = ReadInt(element, "sample_rate"),
-                Channels = ReadInt(element, "channels"),
-                Format = ReadString(element, "format"),
-            });
-        }
-
-        return outputs;
-    }
-
-    /// <summary>Parses a task result object (the shape shared by results and stream done events).</summary>
-    /// <param name="element">The JSON result object.</param>
-    /// <returns>The parsed task result.</returns>
-    internal static TaskResult ReadTaskResult(JsonElement element)
-    {
-        return new TaskResult
-        {
-            Text = ReadString(element, "text"),
-            Language = ReadString(element, "language"),
-            Audio = ReadBase64(element, "audio"),
-            SampleRate = ReadInt(element, "sample_rate"),
-            Channels = ReadInt(element, "channels"),
-            NamedAudioOutputs = ReadNamedAudioOutputs(element, "named_audio_outputs"),
-            Artifacts = ReadArtifacts(element, "artifacts"),
-            Segments = ReadSegments(element, "segments"),
-            SpeakerTurns = ReadSpeakerTurns(element, "speaker_turns"),
-            Words = ReadWords(element, "words"),
-            Timing = ReadTiming(element, "timing"),
-        };
     }
 
     /// <summary>Splits one line into SSE fields on <c>\r</c> (defensive; the server writes one field per line).</summary>
