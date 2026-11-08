@@ -10,55 +10,55 @@ namespace Mabs.AudioCpp.Models.Design;
 public sealed record Voxcpm2DesignRequest : DesignRequest
 {
     /// <summary>Minimum generated audio tokens.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 2;
 
     /// <summary>Maximum generated audio tokens. Zero resolves to model max_length; requires min_tokens &lt;= resolved max_tokens &lt;= model limit.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 4096;
 
     /// <summary>Flow sampling steps. Must be positive.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Classifier-free guidance scale. Must be nonnegative.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Retry detected bad generations. Offline only; streaming requires false.</summary>
-    public bool? RetryBadcase { get; init; }
+    public bool? RetryBadcase { get; init; } = true;
 
     /// <summary>Total attempts including the initial attempt, not extra retries; must be positive.</summary>
-    public long? RetryBadcaseMaxTimes { get; init; }
+    public long? RetryBadcaseMaxTimes { get; init; } = 3;
 
     /// <summary>Bad-case audio/text length ratio threshold. Must be positive.</summary>
-    public double? RetryBadcaseRatioThreshold { get; init; }
+    public double? RetryBadcaseRatioThreshold { get; init; } = 6;
 
     /// <summary>Sampling seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <summary>Precomputed flow noise file.</summary>
     public string? CfmNoiseFile { get; init; }
 
     /// <summary>Streaming decoder cadence: grow emits one patch first, then doubles toward stream_frames_per_event; fixed uses the configured size. Ignored offline.</summary>
-    public Voxcpm2StreamChunkPolicy? StreamChunkPolicy { get; init; }
+    public Voxcpm2StreamChunkPolicy? StreamChunkPolicy { get; init; } = Voxcpm2StreamChunkPolicy.Grow;
 
     /// <summary>Maximum generated latent patches per streaming decoder event. Set to 1 for one-patch emission. Ignored offline.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 4;
 
     /// <summary>Previous patches decoded as streaming left context.</summary>
-    public long? StreamLeftContext { get; init; }
+    public long? StreamLeftContext { get; init; } = 3;
 
     /// <summary>Use the voice reference itself as the continuation prompt. Requires reference audio and reference_text or prompt_text; cannot be combined with explicit prompt audio.</summary>
-    public bool? UltimateClone { get; init; }
+    public bool? UltimateClone { get; init; } = false;
 
     /// <summary>Transcript for continuation prompt audio, distinct from the base voice reference.</summary>
     public string? PromptText { get; init; }
 
     /// <summary>Long-form continuation or independent generation per chunk. Offline only.</summary>
-    public Voxcpm2ChunkStrategy? ChunkStrategy { get; init; }
+    public Voxcpm2ChunkStrategy? ChunkStrategy { get; init; } = Voxcpm2ChunkStrategy.Continuation;
 
     /// <summary>Framework long-form text chunk size. Offline only.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 2048;
 
     /// <summary>Framework text chunking mode. Offline only.</summary>
-    public Voxcpm2TextChunkMode? TextChunkMode { get; init; }
+    public Voxcpm2TextChunkMode? TextChunkMode { get; init; } = Voxcpm2TextChunkMode.TagAware;
 
     /// <inheritdoc />
     public override string? ComposedText()

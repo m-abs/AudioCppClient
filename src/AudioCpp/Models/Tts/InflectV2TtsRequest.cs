@@ -10,19 +10,19 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record InflectV2TtsRequest : TtsRequest
 {
     /// <summary>Speech speed multiplier mapped directly to Inflect speed; default 1.0.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Latent Gaussian variation; default 0.667.</summary>
-    public double? Variation { get; init; }
+    public double? Variation { get; init; } = 0.667;
 
     /// <summary>Non-negative latent noise seed; default 0.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Long-form text chunking mode.</summary>
-    public InflectV2TextChunkMode? TextChunkMode { get; init; }
+    public InflectV2TextChunkMode? TextChunkMode { get; init; } = InflectV2TextChunkMode.WordBudget;
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 280.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 280;
 
     /// <inheritdoc />
     public override void Validate()

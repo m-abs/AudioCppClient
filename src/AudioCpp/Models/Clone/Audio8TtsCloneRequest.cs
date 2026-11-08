@@ -14,22 +14,22 @@ public sealed record Audio8TtsCloneRequest : CloneRequest
     public string? MultiReferenceCond { get; init; }
 
     /// <summary>Maximum semantic tokens to generate; default 1024. Zero selects the default.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1024;
 
     /// <summary>Maximum characters per generated text chunk; default 200.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>Framework text chunking mode.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <summary>Top-p sampling value in (0, 1]; default 0.8.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.9;
 
     /// <summary>Top-k sampling value; default 30.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Semantic-token sampling temperature in (0, 2); default 0.8.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.7;
 
     /// <summary>Sampling seed for reproducible output; omitted uses a random seed.</summary>
     public string? Seed { get; init; }
@@ -98,17 +98,17 @@ public sealed record Audio8TtsCloneRequest : CloneRequest
             options["text_chunk_mode"] = TextChunkMode;
         }
 
-        if (TopP != null && TopP != 0.9)
+        if (TopP != null && TopP != 0.8)
         {
             options["top_p"] = TopP.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopK != null && TopK != 50)
+        if (TopK != null && TopK != 30)
         {
             options["top_k"] = TopK.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (Temperature != null && Temperature != 0.7)
+        if (Temperature != null && Temperature != 0.8)
         {
             options["temperature"] = Temperature.Value.ToString(CultureInfo.InvariantCulture);
         }

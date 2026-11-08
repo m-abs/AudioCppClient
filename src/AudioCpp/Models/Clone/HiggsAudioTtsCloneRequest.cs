@@ -10,43 +10,43 @@ namespace Mabs.AudioCpp.Models.Clone;
 public sealed record HiggsAudioTtsCloneRequest : CloneRequest
 {
     /// <summary>Streaming codec frames per event; grow starts at one and increases to this cap. Each frame is 40 ms of audio.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 32;
 
     /// <summary>Streaming chunk schedule. The non-causal codec always retains ten frames of left and right context.</summary>
-    public HiggsAudioTtsStreamChunkPolicy? StreamChunkPolicy { get; init; }
+    public HiggsAudioTtsStreamChunkPolicy? StreamChunkPolicy { get; init; } = HiggsAudioTtsStreamChunkPolicy.Grow;
 
     /// <summary>Maximum generated AR tokens; zero uses the default. Must not exceed the configured context length.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 2048;
 
     /// <summary>Return generated audio with a warning instead of failing when max_tokens is reached before EOC. Audio may be truncated or contain silence/noise.</summary>
-    public bool? AllowIncompleteGeneration { get; init; }
+    public bool? AllowIncompleteGeneration { get; init; } = false;
 
     /// <summary>AR sampling temperature. Must be positive.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>AR nucleus sampling probability. Must be positive.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>AR top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 30;
 
     /// <summary>Filter NaN and infinity during greedy and stochastic top-k selection. All-invalid logits still fail.</summary>
-    public bool? FilterNanLogits { get; init; }
+    public bool? FilterNanLogits { get; init; } = false;
 
     /// <summary>Accepted for Python API compatibility; audio sampling does not consume this value. Compatibility-only, but must be finite and positive.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Torch sampling seed; omitted chooses a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Transcript accompanying reference audio.</summary>
-    public string? ReferenceText { get; init; }
+    public string? ReferenceText { get; init; } = string.Empty;
 
     /// <summary>Framework long-form text chunk size.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 1024;
 
     /// <summary>Framework text chunking mode.</summary>
-    public HiggsAudioTtsTextChunkMode? TextChunkMode { get; init; }
+    public HiggsAudioTtsTextChunkMode? TextChunkMode { get; init; } = HiggsAudioTtsTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

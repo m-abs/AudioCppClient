@@ -10,40 +10,40 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MossTtsLocalTtsRequest : TtsRequest
 {
     /// <summary>Maximum generated audio frames.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 4096;
 
     /// <summary>Enable sampling.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Audio sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1.7;
 
     /// <summary>Audio nucleus sampling probability.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Audio top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Audio repetition penalty. Must be finite and positive when token history is nonempty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1;
 
     /// <summary>Text sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 1;
 
     /// <summary>Text nucleus sampling probability.</summary>
-    public double? TextTopP { get; init; }
+    public double? TextTopP { get; init; } = 1;
 
     /// <summary>Text top-k sampling limit.</summary>
-    public long? TextTopK { get; init; }
+    public long? TextTopK { get; init; } = 50;
 
     /// <summary>Sampling seed; omitted chooses a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Framework long-form text chunk size.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 2048;
 
     /// <summary>Framework text chunking mode.</summary>
-    public MossTtsLocalTextChunkMode? TextChunkMode { get; init; }
+    public MossTtsLocalTextChunkMode? TextChunkMode { get; init; } = MossTtsLocalTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

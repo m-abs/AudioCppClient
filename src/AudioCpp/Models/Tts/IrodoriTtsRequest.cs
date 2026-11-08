@@ -10,16 +10,16 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record IrodoriTtsRequest : TtsRequest
 {
     /// <summary>Codec latent frames per streaming audio event; default 12 (0.48 seconds at 25 Hz).</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 12;
 
     /// <summary>Text language code; Irodori-TTS supports Japanese only.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "ja";
 
     /// <summary>Natural-language voice or style instruction describing target voice identity, style, or emotion; supported only by caption-conditioned checkpoints. Legacy instruction and caption are accepted as aliases.</summary>
     public string? Instruct { get; init; }
 
     /// <summary>Use no-reference generation; default true unless a speaker reference is provided.</summary>
-    public bool? NoRef { get; init; }
+    public bool? NoRef { get; init; } = true;
 
     /// <summary>Speaker Inversion embedding (*.speaker.safetensors written by Irodori-TTS training) used as the speaker condition instead of reference audio; use it with the base checkpoint it was trained on. Cannot be combined with reference audio or no_ref=true.</summary>
     public string? SpeakerEmbeddingFile { get; init; }
@@ -28,58 +28,58 @@ public sealed record IrodoriTtsRequest : TtsRequest
     public double? ReferenceDurationSec { get; init; }
 
     /// <summary>RF Euler timestep schedule: linear or sway; default linear.</summary>
-    public string? TScheduleMode { get; init; }
+    public string? TScheduleMode { get; init; } = "linear";
 
     /// <summary>Sway Sampling coefficient; must be finite and produce strictly decreasing timesteps. Default -1.0.</summary>
-    public double? SwayCoeff { get; init; }
+    public double? SwayCoeff { get; init; } = -1;
 
     /// <summary>Sampling steps; omitted uses 40 for RF checkpoints or 4 for MeanFlow checkpoints.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 40;
 
     /// <summary>Target duration in seconds; omitted or nonpositive values select predicted duration.</summary>
-    public double? DurationSec { get; init; }
+    public double? DurationSec { get; init; } = 0;
 
     /// <summary>Predicted-duration multiplier; must be &gt; 0 when set; default 1.0.</summary>
-    public double? DurationScale { get; init; }
+    public double? DurationScale { get; init; } = 1;
 
     /// <summary>Text chunk policy; word_budget also accepts the legacy spelling default.</summary>
-    public IrodoriTtsTextChunkMode? TextChunkMode { get; init; }
+    public IrodoriTtsTextChunkMode? TextChunkMode { get; init; } = IrodoriTtsTextChunkMode.Endline;
 
     /// <summary>Maximum characters per text chunk; default 100, or the model text-token window if smaller.</summary>
     public long? TextChunkSize { get; init; }
 
     /// <summary>Minimum generated duration in seconds; must be &gt; 0 and no greater than max_duration_sec; default 0.5.</summary>
-    public double? MinDurationSec { get; init; }
+    public double? MinDurationSec { get; init; } = 0.5;
 
     /// <summary>Maximum generated duration in seconds; must be at least min_duration_sec; default 30. Must be &gt; 0.</summary>
-    public double? MaxDurationSec { get; init; }
+    public double? MaxDurationSec { get; init; } = 30;
 
     /// <summary>Text classifier-free guidance scale; default 3.0. Nonpositive values disable the corresponding CFG branch.</summary>
-    public double? TextGuidanceScale { get; init; }
+    public double? TextGuidanceScale { get; init; } = 3;
 
     /// <summary>Speaker classifier-free guidance scale; default 5.0. Nonpositive values disable the corresponding CFG branch.</summary>
-    public double? SpeakerGuidanceScale { get; init; }
+    public double? SpeakerGuidanceScale { get; init; } = 5;
 
     /// <summary>Caption classifier-free guidance scale; default 3.0. Nonpositive values disable the corresponding CFG branch.</summary>
-    public double? CaptionGuidanceScale { get; init; }
+    public double? CaptionGuidanceScale { get; init; } = 3;
 
     /// <summary>Override all classifier-free guidance scales when set. Nonpositive values disable the corresponding CFG branch.</summary>
     public double? GuidanceScale { get; init; }
 
     /// <summary>Classifier-free guidance combination mode; default independent.</summary>
-    public IrodoriTtsGuidanceMode? GuidanceMode { get; init; }
+    public IrodoriTtsGuidanceMode? GuidanceMode { get; init; } = IrodoriTtsGuidanceMode.Independent;
 
     /// <summary>Minimum diffusion timestep value where guidance is active; default 0.5. The parser does not enforce a nonnegative bound.</summary>
-    public double? GuidanceMinT { get; init; }
+    public double? GuidanceMinT { get; init; } = 0.5;
 
     /// <summary>Maximum diffusion timestep value where guidance is active; default 1.0. The parser does not enforce a nonnegative bound.</summary>
-    public double? GuidanceMaxT { get; init; }
+    public double? GuidanceMaxT { get; init; } = 1;
 
     /// <summary>Unsigned 32-bit generation seed in [0, 4294967295]; omitted uses a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Trim trailing silence-like samples; default true.</summary>
-    public bool? TrimTail { get; init; }
+    public bool? TrimTail { get; init; } = true;
 
     /// <inheritdoc />
     public override void Validate()
@@ -167,12 +167,12 @@ public sealed record IrodoriTtsRequest : TtsRequest
             options["sway_coeff"] = SwayCoeff.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (NumInferenceSteps != null && NumInferenceSteps != 40)
+        if (NumInferenceSteps != null)
         {
             options["num_inference_steps"] = NumInferenceSteps.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (DurationSec != null && DurationSec != 0)
+        if (DurationSec != null)
         {
             options["duration_sec"] = DurationSec.Value.ToString(CultureInfo.InvariantCulture);
         }

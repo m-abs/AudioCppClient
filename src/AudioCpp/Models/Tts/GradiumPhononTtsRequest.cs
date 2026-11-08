@@ -8,25 +8,25 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record GradiumPhononTtsRequest : TtsRequest
 {
     /// <summary>Frames kept after EOS, counting the EOS frame; -1 keeps 4 for texts of up to four words and 2 otherwise, as the reference does.</summary>
-    public long? FramesAfterEos { get; init; }
+    public long? FramesAfterEos { get; init; } = -1;
 
     /// <summary>Maximum generated audio frames; zero estimates the cap from text length. Captured during session preparation.</summary>
-    public long? MaxFrames { get; init; }
+    public long? MaxFrames { get; init; } = 0;
 
     /// <summary>Tokenizer tokens per text chunk; must be positive, default 50. Set during preparation and overridable per request.</summary>
-    public long? TextChunkTokens { get; init; }
+    public long? TextChunkTokens { get; init; } = 50;
 
     /// <summary>Positive flow noise temperature. Captured during session preparation.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.3;
 
     /// <summary>Noise seed; omitted chooses a random seed. Captured during session preparation.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Noise clamp; a negative value disables clamping. Captured during session preparation.</summary>
-    public double? NoiseClamp { get; init; }
+    public double? NoiseClamp { get; init; } = -1;
 
     /// <summary>EOS detection threshold on the EOS logit. Captured during session preparation.</summary>
-    public double? EosThreshold { get; init; }
+    public double? EosThreshold { get; init; } = 4;
 
     /// <summary>Precomputed noise schedule, raw float32 [frames, 32], used as given. Captured during session preparation.</summary>
     public string? NoiseFile { get; init; }

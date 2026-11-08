@@ -8,13 +8,13 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record PocketTtsSmallTtsRequest : TtsRequest
 {
     /// <summary>Extra frames after EOS; -1 uses the model-derived value.</summary>
-    public long? FramesAfterEos { get; init; }
+    public long? FramesAfterEos { get; init; } = -1;
 
     /// <summary>Maximum generated audio frames; zero estimates the cap from text length. Captured during session preparation.</summary>
-    public long? MaxFrames { get; init; }
+    public long? MaxFrames { get; init; } = 0;
 
     /// <summary>Tokenizer tokens per text chunk; must be positive, default 50. Set during preparation and overridable per request.</summary>
-    public long? TextChunkTokens { get; init; }
+    public long? TextChunkTokens { get; init; } = 50;
 
     /// <summary>Positive flow noise temperature; defaults to the model configuration. Captured during session preparation.</summary>
     public double? Temperature { get; init; }
@@ -23,10 +23,10 @@ public sealed record PocketTtsSmallTtsRequest : TtsRequest
     public string? Seed { get; init; }
 
     /// <summary>Noise clamp; a negative value disables clamping. Captured during session preparation.</summary>
-    public double? NoiseClamp { get; init; }
+    public double? NoiseClamp { get; init; } = -1;
 
     /// <summary>EOS detection threshold; defaults to the checkpoint recommendation.</summary>
-    public double? EosThreshold { get; init; }
+    public double? EosThreshold { get; init; } = -1;
 
     /// <summary>Precomputed noise schedule file. Captured during session preparation.</summary>
     public string? NoiseFile { get; init; }
@@ -35,7 +35,7 @@ public sealed record PocketTtsSmallTtsRequest : TtsRequest
     public string? VoiceEmbeddingFile { get; init; }
 
     /// <summary>Truncate voice clone audio. Captured during session preparation.</summary>
-    public bool? TruncateCloneAudio { get; init; }
+    public bool? TruncateCloneAudio { get; init; } = false;
 
     /// <summary>Optional per-request character chunk size; otherwise use sentence/token budgeting.</summary>
     public long? TextChunkSize { get; init; }

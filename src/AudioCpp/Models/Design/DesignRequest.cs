@@ -41,11 +41,13 @@ public record DesignRequest
     public string? Instruction { get; set; }
 
     /// <summary>
-    /// shortcut: an explicit set equal to the default is indistinguishable from unset; values
-    /// equal to the default are omitted — the server applies its own default, so the wire is
-    /// equivalent. Upgrade when a server stops applying spec defaults.
+    /// shortcut: an explicit set equal to the spec default is indistinguishable from unset;
+    /// values equal to the spec default are omitted — the server applies its own default, so
+    /// the wire is equivalent. A web-ui default that conflicts with the spec default is
+    /// serialized, so the documented default wins. Upgrade when a server stops applying spec
+    /// defaults.
     /// </summary>
-    /// <returns>The options set to a value different from the resolved default.</returns>
+    /// <returns>The options set to a value different from the spec default.</returns>
     public virtual Dictionary<string, string> BuildOptions()
     {
         return [];

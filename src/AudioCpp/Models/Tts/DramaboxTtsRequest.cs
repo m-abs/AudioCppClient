@@ -11,40 +11,40 @@ public sealed record DramaboxTtsRequest : TtsRequest
     public string? TargetVoice { get; init; }
 
     /// <summary>Negative text conditioning used when guidance_scale enables classifier-free guidance; omitted uses the built-in quality prompt.</summary>
-    public string? NegativePrompt { get; init; }
+    public string? NegativePrompt { get; init; } = string.Empty;
 
     /// <summary>Explicit target duration in seconds; default 0 uses the prompt-duration estimator. Above audio_chunk_threshold_sec, long-form generation uses estimated per-chunk durations instead of this explicit target.</summary>
-    public double? DurationSec { get; init; }
+    public double? DurationSec { get; init; } = 0;
 
     /// <summary>Diffusion sampling step count; default comes from config.json, 30 in the current package.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 30;
 
     /// <summary>Classifier-free guidance scale; default comes from config.json, 2.5 in the current package. Values greater than 1 enable CFG. Negative values disable this guidance branch.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2.5;
 
     /// <summary>Spatio-temporal guidance scale; default comes from config.json, 1.5 in the current package. Values greater than 0 enable STG. Negative values disable this guidance branch.</summary>
-    public double? SpatioTemporalGuidanceScale { get; init; }
+    public double? SpatioTemporalGuidanceScale { get; init; } = 1.5;
 
     /// <summary>Multiplier applied to the estimated prompt duration when duration_sec is 0; default comes from config.json, 1.1 in the current package. The resulting duration has a 3-second floor.</summary>
-    public double? DurationScale { get; init; }
+    public double? DurationScale { get; init; } = 1.1;
 
     /// <summary>Reference voice crop/repeat duration in seconds; default comes from config.json, 10.0 in the current package. Must be &gt; 0.</summary>
-    public double? ReferenceDurationSec { get; init; }
+    public double? ReferenceDurationSec { get; init; } = 10;
 
     /// <summary>Guidance rescale: auto or any negative value derives it from guidance_scale; nonnegative numeric values select an explicit rescale.</summary>
-    public string? GuidanceRescale { get; init; }
+    public string? GuidanceRescale { get; init; } = "auto";
 
     /// <summary>Estimated duration threshold that switches a request to long-form chunking; default 45.0 seconds. Must be &gt; 0.</summary>
-    public double? AudioChunkThresholdSec { get; init; }
+    public double? AudioChunkThresholdSec { get; init; } = 45;
 
     /// <summary>Target estimated duration for each long-form chunk; default 37.0 seconds. Must be &gt; 0.</summary>
-    public double? AudioChunkDurationSec { get; init; }
+    public double? AudioChunkDurationSec { get; init; } = 37;
 
     /// <summary>Equal-power cross-fade between long-form chunks in seconds; default 0.05. Zero still overlaps one sample.</summary>
-    public double? CrossFadeDurationSec { get; init; }
+    public double? CrossFadeDurationSec { get; init; } = 0.05;
 
     /// <summary>Torch-compatible CUDA noise seed for diffusion sampling; default 42.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "42";
 
     /// <inheritdoc />
     public override void Validate()
@@ -92,7 +92,7 @@ public sealed record DramaboxTtsRequest : TtsRequest
             options["target_voice"] = TargetVoice;
         }
 
-        if (NegativePrompt != null && NegativePrompt != string.Empty)
+        if (NegativePrompt != null)
         {
             options["negative_prompt"] = NegativePrompt;
         }

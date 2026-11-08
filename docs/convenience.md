@@ -8,8 +8,10 @@ one sealed client class and one sealed request record bound to the matching task
 
 Each record exposes one typed property per spec option — enums for closed value sets,
 `long?`/`double?`/`bool?`/`string?` otherwise — pre-initialized to the web-ui default
-(`model_params.json` wins over the spec default on conflicts). Options equal to the default
-are not serialized: the server applies its own default, so the wire is equivalent.
+(`model_params.json` wins over the spec default on conflicts; capability-gated options are
+not pre-initialized, since any set value fails `Validate()`). Options equal to the spec
+default are not serialized — the server applies its own default, so the wire is equivalent;
+a conflicting web-ui default is serialized.
 `Validate()` enforces required options, min/max bounds, enum membership, and capability gates
 (`voice_id` only where the task declares `built_in_voices`, `voice_ref` only where it declares
 `speaker_reference`).
@@ -19,6 +21,7 @@ are not serialized: the server applies its own default, so the wire is equivalen
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Enums;
+using Mabs.AudioCpp.Models.Tasks;
 using Mabs.AudioCpp.Tts;
 
 AudioCppClient client = new AudioCppClient("http://127.0.0.1:8080");

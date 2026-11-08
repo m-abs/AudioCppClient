@@ -8,34 +8,34 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record VibevoiceTtsRequest : TtsRequest
 {
     /// <summary>Comma-separated reference WAV paths ordered by speaker ID; cannot be combined with voice_ref.</summary>
-    public string? VoiceSamples { get; init; }
+    public string? VoiceSamples { get; init; } = string.Empty;
 
     /// <summary>Diffusion steps; defaults to the checkpoint configuration.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Classifier-free guidance scale.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 1.3;
 
     /// <summary>Positive generation length multiplier.</summary>
-    public double? MaxLengthTimes { get; init; }
+    public double? MaxLengthTimes { get; init; } = 2;
 
     /// <summary>Maximum generated tokens; zero uses the model-derived limit.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 0;
 
     /// <summary>Enable sampling.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = false;
 
     /// <summary>Positive sampling temperature.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>Top-k sampling limit; zero disables filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Nucleus probability in (0, 1].</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 1;
 
     /// <summary>Sampling seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <summary>F32 prompt acoustic noise file.</summary>
     public string? PromptNoiseFile { get; init; }
@@ -74,12 +74,12 @@ public sealed record VibevoiceTtsRequest : TtsRequest
     {
         Dictionary<string, string> options = [];
 
-        if (VoiceSamples != null && VoiceSamples != string.Empty)
+        if (VoiceSamples != null)
         {
             options["voice_samples"] = VoiceSamples;
         }
 
-        if (NumInferenceSteps != null && NumInferenceSteps != 10)
+        if (NumInferenceSteps != null)
         {
             options["num_inference_steps"] = NumInferenceSteps.Value.ToString(CultureInfo.InvariantCulture);
         }

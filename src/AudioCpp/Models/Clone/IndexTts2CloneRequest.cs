@@ -16,49 +16,49 @@ public sealed record IndexTts2CloneRequest : CloneRequest
     public new string? Language { get; init; }
 
     /// <summary>Emotion conditioning blend strength.</summary>
-    public double? EmotionAlpha { get; init; }
+    public double? EmotionAlpha { get; init; } = 1;
 
     /// <summary>Eight comma-separated finite emotion strengths.</summary>
     public string? EmotionVector { get; init; }
 
     /// <summary>Use text-derived emotion conditioning.</summary>
-    public bool? UseEmotionText { get; init; }
+    public bool? UseEmotionText { get; init; } = false;
 
     /// <summary>Emotion description.</summary>
-    public string? EmotionText { get; init; }
+    public string? EmotionText { get; init; } = string.Empty;
 
     /// <summary>Use random emotion conditioning.</summary>
-    public bool? UseRandomEmotion { get; init; }
+    public bool? UseRandomEmotion { get; init; } = false;
 
     /// <summary>Silence between generated segments in milliseconds.</summary>
-    public long? IntervalSilenceMs { get; init; }
+    public long? IntervalSilenceMs { get; init; } = 200;
 
     /// <summary>Enable sampling.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Nucleus sampling probability. Must be in (0, 1].</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 30;
 
     /// <summary>Sampling temperature. Must be positive.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Beam search length penalty.</summary>
-    public double? LengthPenalty { get; init; }
+    public double? LengthPenalty { get; init; } = 0;
 
     /// <summary>Beam search width.</summary>
-    public long? NumBeams { get; init; }
+    public long? NumBeams { get; init; } = 3;
 
     /// <summary>Sampling repetition penalty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 10;
 
     /// <summary>Maximum generated mel tokens.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1500;
 
     /// <summary>Positive waveform duration rescaling, supported by both IndexTTS2 and IndexTTS2.5.</summary>
-    public double? DurationScale { get; init; }
+    public double? DurationScale { get; init; } = 1;
 
     /// <summary>Sampling seed; omitted chooses a random seed.</summary>
     public string? Seed { get; init; }
@@ -67,7 +67,7 @@ public sealed record IndexTts2CloneRequest : CloneRequest
     public long? TextChunkSize { get; init; }
 
     /// <summary>Framework text chunking mode.</summary>
-    public IndexTts2TextChunkMode? TextChunkMode { get; init; }
+    public IndexTts2TextChunkMode? TextChunkMode { get; init; } = IndexTts2TextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()
@@ -130,7 +130,7 @@ public sealed record IndexTts2CloneRequest : CloneRequest
             options["use_emotion_text"] = UseEmotionText.Value ? "true" : "false";
         }
 
-        if (EmotionText != null && EmotionText != string.Empty)
+        if (EmotionText != null)
         {
             options["emotion_text"] = EmotionText;
         }

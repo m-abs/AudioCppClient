@@ -8,7 +8,7 @@ namespace Mabs.AudioCpp.Models.Clone;
 public sealed record FishDrama3CloneRequest : CloneRequest
 {
     /// <summary>Prepare reference VQ codes without generating speech. Use the task API to receive drama3_reference_v1 acoustic-token artifacts.</summary>
-    public bool? EncodeReferenceOnly { get; init; }
+    public bool? EncodeReferenceOnly { get; init; } = false;
 
     /// <summary>Transcript of inline reference audio.</summary>
     public string? ReferenceText { get; init; }
@@ -26,25 +26,25 @@ public sealed record FishDrama3CloneRequest : CloneRequest
     public string? PreviousTakesFile { get; init; }
 
     /// <summary>Maximum generated acoustic frames per text chunk (about 21.5 frames/second).</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1024;
 
     /// <summary>Maximum characters per long-form chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 128;
 
     /// <summary>Skip text chunks that emit EOS before producing audio, matching upstream. The request fails if all chunks are empty.</summary>
-    public bool? SkipEmptyChunks { get; init; }
+    public bool? SkipEmptyChunks { get; init; } = false;
 
     /// <summary>Framework text chunking mode.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "tag_aware";
 
     /// <summary>Main and residual sampling temperature. Zero makes the initial draws greedy; semantic repeat redraws retain the fixed Drama 3 RAS settings.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>Inclusive nucleus cutoff before top-k filtering, matching Drama 3.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.9;
 
     /// <summary>Top-k candidate count. The default 4097 keeps every candidate (no cap), as Fish's Drama 3 Space does; 30 can stall in long silences.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 4097;
 
     /// <summary>Reproducible native sampling seed.</summary>
     public string? Seed { get; init; }

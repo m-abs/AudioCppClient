@@ -10,34 +10,34 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Lfm3AudioTtsRequest : TtsRequest
 {
     /// <summary>ASR: ISO code of the spoken language (prompt 'Perform ASR in &lt;English name&gt;.'); auto lets the model infer it ('Perform ASR.'). TTS: picks the default voice of that language when no voice is given.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "auto";
 
     /// <summary>ASR: text tokens per audio chunk (max(512, 8 per second of audio); chat 512, or 2048 with enable_thinking). TTS: audio frames (80 ms) per text chunk (512). S2S: text tokens and frames of the reply together (1024).</summary>
     public long? MaxTokens { get; init; }
 
     /// <summary>ASR chunking, as lfm2_audio.</summary>
-    public Lfm3AudioAudioChunkMode? AudioChunkMode { get; init; }
+    public Lfm3AudioAudioChunkMode? AudioChunkMode { get; init; } = Lfm3AudioAudioChunkMode.Auto;
 
     /// <summary>ASR: longest chunk in seconds; auto keeps input up to this long whole and splits longer input at VAD pauses.</summary>
-    public double? AudioChunkDurationSec { get; init; }
+    public double? AudioChunkDurationSec { get; init; } = 300;
 
     /// <summary>S2S: most audio frames after the reply text ends before the turn is closed with an end-of-audio frame; 0 disables the cap.</summary>
-    public long? MaxAudioTailFrames { get; init; }
+    public long? MaxAudioTailFrames { get; init; } = 375;
 
     /// <summary>TTS and S2S: audio code temperature; 0 picks the most likely code. The default is the checkpoint's generation_config.json audio_temperature.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>TTS and S2S: sample audio codes from the k most likely; 0 keeps all. The default is the checkpoint's audio_top_k.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 128;
 
     /// <summary>TTS and S2S: audio repetition penalty over the last 4096 frames (the checkpoint's audio_repetition_window) of each codebook; must be positive, 1 disables it. The default is the checkpoint's audio_repetition_penalty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>ASR and S2S: text token temperature; 0 is greedy.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 0;
 
     /// <summary>ASR and S2S: sample text tokens from the k most likely; 0 keeps all.</summary>
-    public long? TextTopK { get; init; }
+    public long? TextTopK { get; init; } = 0;
 
     /// <summary>Sampling seed (random when absent); TTS text chunk i uses seed + i.</summary>
     public string? Seed { get; init; }
@@ -46,19 +46,19 @@ public sealed record Lfm3AudioTtsRequest : TtsRequest
     public Lfm3AudioTextChunkMode? TextChunkMode { get; init; }
 
     /// <summary>TTS: target characters per text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>TTS and S2S streaming: audio frames per event.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 1;
 
     /// <summary>S2S: return the lfm3_audio.reply artifact a client sends back with the next turn.</summary>
-    public bool? ReturnCodes { get; init; }
+    public bool? ReturnCodes { get; init; } = false;
 
     /// <summary>ASR task: answer the spoken input as a text chat reply instead of transcribing it.</summary>
-    public bool? Chat { get; init; }
+    public bool? Chat { get; init; } = false;
 
     /// <summary>ASR chat: let the model think first; only the text after &lt;/think&gt; is returned.</summary>
-    public bool? EnableThinking { get; init; }
+    public bool? EnableThinking { get; init; } = false;
 
     /// <inheritdoc />
     public override void Validate()

@@ -10,10 +10,10 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record KittenTts2TtsRequest : TtsRequest
 {
     /// <summary>Prepared voice name available in the loaded package. A supplied reference clip takes precedence.</summary>
-    public new KittenTts2VoiceId? VoiceId { get; init; }
+    public new KittenTts2VoiceId? VoiceId { get; init; } = KittenTts2VoiceId.Bruno;
 
     /// <summary>Upstream sampling preset.</summary>
-    public KittenTts2Preset? Preset { get; init; }
+    public KittenTts2Preset? Preset { get; init; } = KittenTts2Preset.Stable;
 
     /// <summary>Sampling temperature; zero selects greedy decoding. Otherwise defaults to the preset.</summary>
     public double? Temperature { get; init; }
@@ -28,7 +28,7 @@ public sealed record KittenTts2TtsRequest : TtsRequest
     public double? MinP { get; init; }
 
     /// <summary>Penalty over the last 50 generated tokens; silence and ending tokens are exempt.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Speech-token budget per text chunk. Omitted budgets scale with text length, with a minimum of 200.</summary>
     public long? MaxTokens { get; init; }
@@ -37,10 +37,10 @@ public sealed record KittenTts2TtsRequest : TtsRequest
     public string? Seed { get; init; }
 
     /// <summary>Maximum Unicode codepoints per framework text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 380;
 
     /// <summary>Framework long-form text chunking mode.</summary>
-    public KittenTts2TextChunkMode? TextChunkMode { get; init; }
+    public KittenTts2TextChunkMode? TextChunkMode { get; init; } = KittenTts2TextChunkMode.TagAware;
 
     /// <summary>Transcript of the reference audio; required when cloning from a 1–30 second clip.</summary>
     public string? ReferenceText { get; init; }

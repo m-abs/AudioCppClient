@@ -8,28 +8,28 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Voxcpm1TtsRequest : TtsRequest
 {
     /// <summary>Text chunking mode; default tag_aware.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "tag_aware";
 
     /// <summary>Random seed for MiniCPM and diffusion sampling.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Maximum MiniCPM output tokens; default 4096. Zero selects model max_length; negative counts are rejected.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 4096;
 
     /// <summary>Minimum MiniCPM output tokens before an EOS stop is honored; default 2.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 2;
 
     /// <summary>CFM diffusion sampling steps; default 10. Must be positive.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>CFM classifier-free guidance rate. Must be nonnegative.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Retry when generation is detected as a bad case; defaults to true offline and false in streaming. Streaming ignores an explicit true value with a warning.</summary>
-    public bool? RetryBadcase { get; init; }
+    public bool? RetryBadcase { get; init; } = true;
 
     /// <summary>Maximum total generation attempts when retrying bad cases, including the initial attempt; default 3. Must be positive.</summary>
-    public long? RetryBadcaseMaxTimes { get; init; }
+    public long? RetryBadcaseMaxTimes { get; init; } = 3;
 
     /// <summary>Bad-case ratio threshold for retry decisions. Must be positive.</summary>
     public double? RetryBadcaseRatioThreshold { get; init; }
@@ -41,7 +41,7 @@ public sealed record Voxcpm1TtsRequest : TtsRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Maximum characters per offline text chunk; must be positive. Does not control streaming chunk cadence.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 2048;
 
     /// <summary>Language hint for Chinese-script normalization; Cantonese/yue preserves Traditional characters. Inherits structured transcript or voice language when provided.</summary>
     public new string? Language { get; init; }
@@ -92,7 +92,7 @@ public sealed record Voxcpm1TtsRequest : TtsRequest
             options["guidance_scale"] = GuidanceScale.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (RetryBadcase != null && RetryBadcase != true)
+        if (RetryBadcase != null && RetryBadcase != false)
         {
             options["retry_badcase"] = RetryBadcase.Value ? "true" : "false";
         }

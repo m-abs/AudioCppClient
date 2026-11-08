@@ -11,25 +11,25 @@ public sealed record F5TtsCloneRequest : CloneRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Habibi dialect token: UNK MSA SAU UAE ALG IRQ EGY MAR OMN TUN LEV SDN LBY; default UNK.</summary>
-    public string? Dialect { get; init; }
+    public string? Dialect { get; init; } = "UNK";
 
     /// <summary>Sway sampling coefficient for inference timesteps; default -1.0. Advertised bounds are recommended settings, not parser-enforced limits.</summary>
-    public double? SwaySamplingCoef { get; init; }
+    public double? SwaySamplingCoef { get; init; } = -1;
 
     /// <summary>Speech speed multiplier for duration estimation; default 1.0. Generated text chunks shorter than 10 characters use 0.3 instead. Advertised bounds are recommended settings, not parser-enforced limits.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Non-negative noise seed; omitted selects a random seed. Explicit zero is deterministic.</summary>
     public string? Seed { get; init; }
 
     /// <summary>CFM Euler steps (NFE); default 32. The parser rejects nonpositive counts.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 32;
 
     /// <summary>Classifier-free guidance strength; default 2.0. Advertised bounds are recommended settings, not parser-enforced limits.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Strip Arabic combining marks (harakat/tanwin/shadda/tatweel) before synthesis; Habibi is trained on undiacritized ASR transcripts and garbles diacritized input. Default true.</summary>
-    public bool? StripDiacritics { get; init; }
+    public bool? StripDiacritics { get; init; } = true;
 
     /// <inheritdoc />
     public override void Validate()

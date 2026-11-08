@@ -8,37 +8,37 @@ namespace Mabs.AudioCpp.Models.Design;
 public sealed record MossVoicegenDesignRequest : DesignRequest
 {
     /// <summary>Minimum generated audio frames per text chunk; nonpositive values derive a text-length-based floor.</summary>
-    public long? MinFrames { get; init; }
+    public long? MinFrames { get; init; } = 0;
 
     /// <summary>Generated audio-frame ceiling per text chunk; nonpositive values derive a text-length-based ceiling. Runtime raises it to at least the effective min_frames plus the number of codebooks.</summary>
-    public long? MaxFrames { get; init; }
+    public long? MaxFrames { get; init; } = 0;
 
     /// <summary>Text-token sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 1.5;
 
     /// <summary>Optional full language name, such as English or Chinese; not an ISO language code.</summary>
     public new string? Language { get; init; }
 
     /// <summary>Generation seed; later text chunks add their chunk index. Parsed as signed 32-bit integer then converted to uint32; negative values wrap.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Audio-token sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1.5;
 
     /// <summary>Audio-token nucleus sampling cutoff.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.6;
 
     /// <summary>Audio-token top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Audio-token repetition penalty. Must be finite and positive when history is nonempty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Maximum characters per generated text chunk; must be positive.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>Text chunking policy.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <inheritdoc />
     public override void Validate()

@@ -99,11 +99,13 @@ callers without `await foreach` language support.
 Generated per family-task pair from the vendored model specs (106 pairs across `tts`,
 `clone`, `design`): typed properties with web-ui defaults, enum value sets, and capability
 validation, riding `Tasks.RunAsync` through `ITtsClient`/`ICloneClient`/`IDesignClient`.
-Values equal to the resolved default are omitted on the wire.
+Values equal to the spec default are omitted on the wire; a web-ui default that conflicts
+with the spec default is serialized, so the documented default wins.
 
 ```csharp
 using Mabs.AudioCpp;
 using Mabs.AudioCpp.Enums;
+using Mabs.AudioCpp.Models.Tasks;
 using Mabs.AudioCpp.Tts;
 
 AudioCppClient client = new AudioCppClient("http://127.0.0.1:8080");

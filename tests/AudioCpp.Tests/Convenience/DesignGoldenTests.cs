@@ -12,7 +12,7 @@ namespace Mabs.AudioCpp.Tests.Convenience;
 /// <summary>Golden serialization, validation and composition tests for the generated design convenience records.</summary>
 public class DesignGoldenTests
 {
-    /// <summary>Golden serialization for the generated <c>BreezeTtsDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>BreezeTtsDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void BreezeTtsGolden()
     {
@@ -21,7 +21,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"breeze_tts_2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FireredAudioDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FireredAudioDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FireredAudioGolden()
     {
@@ -30,7 +30,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"firered_audio_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts_clone\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Fireredtts3DesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Fireredtts3DesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Fireredtts3Golden()
     {
@@ -39,16 +39,16 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"fireredtts3_instruct_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"instruct_tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>IrodoriTtsDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>IrodoriTtsDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void IrodoriTtsGolden()
     {
         IrodoriTtsDesignRequest request = new() { Text = "hello", StreamFramesPerEvent = 13 };
         string json = Json.Serialize(new TaskRunRequest { Model = "irodori_tts_v4_small_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\"}}}", json);
+        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\",\"num_inference_steps\":\"40\",\"duration_sec\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Maya1DesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Maya1DesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Maya1Golden()
     {
@@ -57,7 +57,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"maya1_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\",\"max_tokens\":\"2049\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Ming3TtsDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Ming3TtsDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Ming3TtsGolden()
     {
@@ -66,7 +66,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"ming_3_0_tts_0_5b_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossVoicegenDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossVoicegenDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossVoicegenGolden()
     {
@@ -75,7 +75,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"moss_voicegen_bf16_codec_f16_decode\",\"request\":{\"text\":\"hello\",\"options\":{\"min_frames\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>OmnivoiceDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>OmnivoiceDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void OmnivoiceGolden()
     {
@@ -84,7 +84,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"omnivoice_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Qwen3TtsDesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Qwen3TtsDesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Qwen3TtsGolden()
     {
@@ -93,7 +93,7 @@ public class DesignGoldenTests
         Assert.Equal("{\"model\":\"qwen3_tts_1_7b_base_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_chunk_policy\":\"fixed\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Voxcpm2DesignRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Voxcpm2DesignRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Voxcpm2Golden()
     {
@@ -152,6 +152,15 @@ public class DesignGoldenTests
         Assert.Equal("MaxTokens", ex.ParamName);
     }
 
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Ming3TtsDesignRequest</c>.</summary>
+    [Fact]
+    public void Ming3TtsValidateVoiceId()
+    {
+        Ming3TtsDesignRequest request = new() { VoiceId = Ming3TtsVoiceId.USEmma };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("ming3_tts design does not accept voice_id (capability built_in_voices is false)", ex.Message);
+    }
+
     /// <summary>An out-of-range value fails validation for the generated <c>Ming3TtsDesignRequest</c>.</summary>
     [Fact]
     public void Ming3TtsValidate()
@@ -180,6 +189,15 @@ public class DesignGoldenTests
         ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
         Assert.Contains("omnivoice design num_inference_steps must be at least 1", ex.Message);
         Assert.Equal("NumInferenceSteps", ex.ParamName);
+    }
+
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Qwen3TtsDesignRequest</c>.</summary>
+    [Fact]
+    public void Qwen3TtsValidateVoiceId()
+    {
+        Qwen3TtsDesignRequest request = new() { VoiceId = Qwen3TtsVoiceId.Aiden };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("qwen3_tts design does not accept voice_id (capability built_in_voices is false)", ex.Message);
     }
 
     /// <summary>An out-of-range value fails validation for the generated <c>Qwen3TtsDesignRequest</c>.</summary>

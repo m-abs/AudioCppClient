@@ -8,25 +8,25 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record ChatterboxTurboTtsRequest : TtsRequest
 {
     /// <summary>Maximum generated tokens; legacy max_new_tokens remains accepted.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1000;
 
     /// <summary>T3 sampling temperature.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>T3 nucleus sampling cutoff.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.95;
 
     /// <summary>T3 top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 1000;
 
     /// <summary>T3 token repetition penalty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.2;
 
     /// <summary>Generation seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Maximum characters per text chunk; must be positive.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 128;
 
     /// <inheritdoc />
     public override void Validate()

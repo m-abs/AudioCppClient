@@ -13,16 +13,16 @@ public sealed record MiottsTtsRequest : TtsRequest
     public long? MaxTokens { get; init; }
 
     /// <summary>Generation control; defaults to the checkpoint config.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Generation control; defaults to the checkpoint config.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 1;
 
     /// <summary>Generation control; defaults to the checkpoint config.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Generation control; defaults to the checkpoint config.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1;
 
     /// <summary>Presence penalty; default 0.</summary>
     public double? PresencePenalty { get; init; }
@@ -31,16 +31,16 @@ public sealed record MiottsTtsRequest : TtsRequest
     public double? FrequencyPenalty { get; init; }
 
     /// <summary>Generation control; defaults to the checkpoint config.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = false;
 
     /// <summary>Sampling seed; omitted chooses a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Candidate count, capped by the session maximum; greater than one enables best-of-N.</summary>
-    public long? BestOfN { get; init; }
+    public long? BestOfN { get; init; } = 1;
 
     /// <summary>Override the session best-of-N setting.</summary>
-    public bool? BestOfNEnabled { get; init; }
+    public bool? BestOfNEnabled { get; init; } = false;
 
     /// <summary>ASR language used to rank candidates.</summary>
     public MiottsBestOfNLanguage? BestOfNLanguage { get; init; }
@@ -104,22 +104,22 @@ public sealed record MiottsTtsRequest : TtsRequest
             options["max_tokens"] = MaxTokens.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopK != null && TopK != 50)
+        if (TopK != null)
         {
             options["top_k"] = TopK.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopP != null && TopP != 1)
+        if (TopP != null)
         {
             options["top_p"] = TopP.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (Temperature != null && Temperature != 0.8)
+        if (Temperature != null)
         {
             options["temperature"] = Temperature.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (RepetitionPenalty != null && RepetitionPenalty != 1)
+        if (RepetitionPenalty != null)
         {
             options["repetition_penalty"] = RepetitionPenalty.Value.ToString(CultureInfo.InvariantCulture);
         }
@@ -144,7 +144,7 @@ public sealed record MiottsTtsRequest : TtsRequest
             options["seed"] = Seed;
         }
 
-        if (BestOfN != null && BestOfN != 1)
+        if (BestOfN != null)
         {
             options["best_of_n"] = BestOfN.Value.ToString(CultureInfo.InvariantCulture);
         }

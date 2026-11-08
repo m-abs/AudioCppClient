@@ -10,37 +10,37 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MossTtsNanoTtsRequest : TtsRequest
 {
     /// <summary>Transcript for reference audio; a nonempty value requires voice reference audio.</summary>
-    public string? ReferenceText { get; init; }
+    public string? ReferenceText { get; init; } = string.Empty;
 
     /// <summary>Maximum generated audio frames.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 300;
 
     /// <summary>Active codebooks; defaults to the checkpoint n_vq. Must not exceed checkpoint n_vq; omitted uses n_vq.</summary>
     public long? ActiveCodebooks { get; init; }
 
     /// <summary>Enable sampling.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Audio sampling temperature. Must be positive, including when do_sample=false.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1.7;
 
     /// <summary>Audio nucleus sampling probability.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Audio top-k sampling limit.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Audio repetition penalty. Must be positive.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1;
 
     /// <summary>Text sampling temperature. Must be positive, including when do_sample=false.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 1.5;
 
     /// <summary>Text nucleus sampling probability.</summary>
-    public double? TextTopP { get; init; }
+    public double? TextTopP { get; init; } = 1;
 
     /// <summary>Text top-k sampling limit.</summary>
-    public long? TextTopK { get; init; }
+    public long? TextTopK { get; init; } = 50;
 
     /// <summary>Sampling seed; omitted chooses a random seed.</summary>
     public string? Seed { get; init; }
@@ -49,7 +49,7 @@ public sealed record MossTtsNanoTtsRequest : TtsRequest
     public long? TextChunkSize { get; init; }
 
     /// <summary>Framework text chunking mode.</summary>
-    public MossTtsNanoTextChunkMode? TextChunkMode { get; init; }
+    public MossTtsNanoTextChunkMode? TextChunkMode { get; init; } = MossTtsNanoTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

@@ -8,10 +8,10 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record VieneuV3TurboTtsRequest : TtsRequest
 {
     /// <summary>Cap the generation budget using the chunk's phoneme count. Legacy frame_cap remains accepted.</summary>
-    public bool? AutoFrameCap { get; init; }
+    public bool? AutoFrameCap { get; init; } = true;
 
     /// <summary>Phoneme-string chunks shorter than this character count join a neighbour. Legacy text_chunk_min remains accepted.</summary>
-    public long? TextChunkMinSize { get; init; }
+    public long? TextChunkMinSize { get; init; } = 20;
 
     /// <summary>File containing a comma-separated 192-dimensional speaker embedding.</summary>
     public string? SpeakerEmbeddingFile { get; init; }
@@ -26,34 +26,34 @@ public sealed record VieneuV3TurboTtsRequest : TtsRequest
     public string? ReferenceCodesFile { get; init; }
 
     /// <summary>Clone using only the speaker embedding. Defaults to true for embedding-only input, otherwise false.</summary>
-    public bool? XVectorOnlyMode { get; init; }
+    public bool? XVectorOnlyMode { get; init; } = false;
 
     /// <summary>Encode reference audio and return an acoustic-tokens artifact without generating speech.</summary>
-    public bool? EncodeReferenceOnly { get; init; }
+    public bool? EncodeReferenceOnly { get; init; } = false;
 
     /// <summary>Maximum generated frames per text chunk; uses the checkpoint max_new_tokens setting (300 fallback). Each frame represents 80 ms.</summary>
     public long? MaxTokens { get; init; }
 
     /// <summary>Enable sampling for all codebooks unless subtalker_do_sample overrides later codebooks.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Sampling temperature for all codebooks unless overridden for the subtalker.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Top-k sampling limit for all codebooks unless overridden for the subtalker.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Nucleus cutoff within top-k candidates, unless overridden for the subtalker.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.95;
 
     /// <summary>Repetition penalty applied independently to each codebook.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.2;
 
     /// <summary>Recent frames remembered per codebook for repetition penalties; zero uses all history.</summary>
-    public long? RepetitionWindow { get; init; }
+    public long? RepetitionWindow { get; init; } = 64;
 
     /// <summary>Regenerations for short chunks that exceed their text; zero disables the guard.</summary>
-    public long? BabbleRetries { get; init; }
+    public long? BabbleRetries { get; init; } = 2;
 
     /// <summary>Temperature override for later codebooks; omitted or negative inherits temperature.</summary>
     public double? SubtalkerTemperature { get; init; }
@@ -65,13 +65,13 @@ public sealed record VieneuV3TurboTtsRequest : TtsRequest
     public double? SubtalkerTopP { get; init; }
 
     /// <summary>Sampling override for later codebooks; inherits do_sample when omitted.</summary>
-    public bool? SubtalkerDoSample { get; init; }
+    public bool? SubtalkerDoSample { get; init; } = false;
 
     /// <summary>Sampling seed; omitted draws a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Maximum character budget per phoneme-string chunk; must be positive.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <inheritdoc />
     public override void Validate()

@@ -10,7 +10,7 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record KokoroTtsRequest : TtsRequest
 {
     /// <summary>Built-in voice ID; structured voice input (CLI --voice-id) takes precedence.</summary>
-    public new KokoroTtsVoiceId? VoiceId { get; init; }
+    public new KokoroTtsVoiceId? VoiceId { get; init; } = KokoroTtsVoiceId.AfHeart;
 
     /// <summary>Language selection precedence: voice-style language, transcript language (CLI --language), request-option language, then voice prefix. Must match the first voice in a blend.</summary>
     public new string? Language { get; init; }
@@ -19,7 +19,7 @@ public sealed record KokoroTtsRequest : TtsRequest
     public string? Seed { get; init; }
 
     /// <summary>Speech speed multiplier; default 1.0. Must be finite and positive.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Kokoro-vocabulary phonemes to synthesize directly, bypassing the built-in eSpeak-ng G2P. One entry per chunk: entries are rendered in order and merged into one result, so the caller chooses the split points that only its own G2P knows. Each entry must be at most 510 symbols and must not be empty -- an entry is a chunk to speak, so drop it rather than leaving it blank. Text is still required and its language must still match the voice.</summary>
     public string? Phonemes { get; init; }
@@ -28,7 +28,7 @@ public sealed record KokoroTtsRequest : TtsRequest
     public long? TextChunkSize { get; init; }
 
     /// <summary>Report where each phoneme group lands in the output, from the durations the model predicts before vocoding. Entries are phoneme groups in Kokoro's own alphabet, not written words, and do not map one-to-one onto the input text: see docs/models/kokoro_tts.md. Default false.</summary>
-    public bool? ReturnTimestamps { get; init; }
+    public bool? ReturnTimestamps { get; init; } = false;
 
     /// <inheritdoc />
     public override void Validate()

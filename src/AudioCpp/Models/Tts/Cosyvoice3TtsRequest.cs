@@ -10,7 +10,7 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Cosyvoice3TtsRequest : TtsRequest
 {
     /// <summary>CosyVoice3 request template.</summary>
-    public Cosyvoice3TemplateName? TemplateName { get; init; }
+    public Cosyvoice3TemplateName? TemplateName { get; init; } = Cosyvoice3TemplateName.ZeroShot;
 
     /// <summary>Transcript for the prompt audio.</summary>
     public string? ReferenceText { get; init; }
@@ -19,25 +19,25 @@ public sealed record Cosyvoice3TtsRequest : TtsRequest
     public string? Instruct { get; init; }
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 600.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 600;
 
     /// <summary>Framework text chunking mode.</summary>
-    public Cosyvoice3TextChunkMode? TextChunkMode { get; init; }
+    public Cosyvoice3TextChunkMode? TextChunkMode { get; init; } = Cosyvoice3TextChunkMode.Default;
 
     /// <summary>Maximum generated speech tokens; -1 (default) selects 20 times the target text token count. Explicit limits must be positive.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = -1;
 
     /// <summary>Minimum generated speech tokens before stop is accepted; -1 (default) selects twice the target text token count. Must not exceed the resolved maximum.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 0;
 
     /// <summary>AR speech-token top-k sampling limit; default 25.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Flow decoder Euler steps; default 10.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Generation seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1986";
 
     /// <inheritdoc />
     public override void Validate()
@@ -118,7 +118,7 @@ public sealed record Cosyvoice3TtsRequest : TtsRequest
             options["max_tokens"] = MaxTokens.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (MinTokens != null && MinTokens != 0)
+        if (MinTokens != null && MinTokens != -1)
         {
             options["min_tokens"] = MinTokens.Value.ToString(CultureInfo.InvariantCulture);
         }

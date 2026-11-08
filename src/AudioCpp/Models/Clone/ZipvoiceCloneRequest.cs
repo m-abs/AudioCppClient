@@ -11,34 +11,34 @@ public sealed record ZipvoiceCloneRequest : CloneRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Maximum characters per generated text chunk; default 128.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 128;
 
     /// <summary>Framework text chunking mode.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <summary>Guidance scale; inherits the session default (3.0 for both variants). ZipVoice-Distill uses a guidance-scale embedding; ZipVoice uses batched CFG. Zero disables guidance. Any finite nonnegative value is accepted.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 3;
 
     /// <summary>Euler ODE steps; inherits the session default (8 for both variants).</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 8;
 
     /// <summary>Shift timesteps toward low SNR (smaller = stronger shift); default 0.5. Must be finite and positive.</summary>
-    public double? Shift { get; init; }
+    public double? Shift { get; init; } = 0.5;
 
     /// <summary>Speech speed multiplier applied through the prompt-duration ratio; default 1.0. Must be finite and positive.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Feature scale applied to log-mel features; default 0.1 (reference default). Must be finite and positive.</summary>
-    public double? FeatScale { get; init; }
+    public double? FeatScale { get; init; } = 0.1;
 
     /// <summary>Target RMS for prompt loudness normalization; 0 disables. Default 0.1. Negative values disable normalization; values above 1 are accepted.</summary>
-    public double? TargetRms { get; init; }
+    public double? TargetRms { get; init; } = 0.1;
 
     /// <summary>Noise seed; default 666 (reference default).</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "666";
 
     /// <summary>espeak language for phonemization; default en-us.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "en-us";
 
     /// <inheritdoc />
     public override void Validate()

@@ -19,40 +19,40 @@ public sealed record FireredAudioTtsRequest : TtsRequest
     public string? Instruct { get; init; }
 
     /// <summary>FireRedAudio generation language tag.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "zh";
 
     /// <summary>FireRedAudio DiT flow steps per generated latent patch.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>FireRedAudio DiT classifier-free guidance scale. Must be &gt; 0.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Maximum generated RedAE latent patches.</summary>
-    public long? MaxAudioSteps { get; init; }
+    public long? MaxAudioSteps { get; init; } = 750;
 
     /// <summary>Minimum generated RedAE latent patches before eosp can stop generation.</summary>
-    public long? MinAudioSteps { get; init; }
+    public long? MinAudioSteps { get; init; } = 6;
 
     /// <summary>Maximum text-mode tokens before audio mode.</summary>
-    public long? MaxTextTokens { get; init; }
+    public long? MaxTextTokens { get; init; } = 512;
 
     /// <summary>Output token budget; defaults to 300, or 1024 for understand with enable_thinking=true.</summary>
     public long? MaxTokens { get; init; }
 
     /// <summary>Leave the understanding think block open for chain-of-thought style answers.</summary>
-    public bool? EnableThinking { get; init; }
+    public bool? EnableThinking { get; init; } = false;
 
     /// <summary>Text sampling top-k for understanding.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 20;
 
     /// <summary>Text sampling top-p for understanding.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Text sampling temperature for understanding. Understanding-mode sampling requires a positive value; zero does not select greedy decoding.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.7;
 
     /// <summary>Unsigned 32-bit generation seed in [0, 4294967295]; default 1234.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <inheritdoc />
     public override void Validate()

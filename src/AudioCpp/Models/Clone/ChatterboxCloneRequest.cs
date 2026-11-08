@@ -8,37 +8,37 @@ namespace Mabs.AudioCpp.Models.Clone;
 public sealed record ChatterboxCloneRequest : CloneRequest
 {
     /// <summary>Emotion exaggeration. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? Exaggeration { get; init; }
+    public double? Exaggeration { get; init; } = 0.5;
 
     /// <summary>T3 classifier-free guidance scale. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 0.5;
 
     /// <summary>T3 sampling temperature. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>T3 repetition penalty. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.2;
 
     /// <summary>Minimum sampling probability. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? MinP { get; init; }
+    public double? MinP { get; init; } = 0.05;
 
     /// <summary>Nucleus sampling probability. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 1;
 
     /// <summary>S3Gen flow guidance scale. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public double? FlowGuidanceScale { get; init; }
+    public double? FlowGuidanceScale { get; init; } = 0.7;
 
     /// <summary>Maximum generated speech tokens. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 384;
 
     /// <summary>Enable sampling. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Stop token generation on EOS. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
-    public bool? StopOnEos { get; init; }
+    public bool? StopOnEos { get; init; } = true;
 
     /// <summary>Voice conversion flow steps; max_steps is also accepted.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Sampling seed; omitted chooses a random seed. Captured during clone preparation; changing it on the same prepared session is rejected.</summary>
     public string? Seed { get; init; }
@@ -50,7 +50,7 @@ public sealed record ChatterboxCloneRequest : CloneRequest
     public string? TargetVoice { get; init; }
 
     /// <summary>Framework long-form text chunk size.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 128;
 
     /// <inheritdoc />
     public override void Validate()

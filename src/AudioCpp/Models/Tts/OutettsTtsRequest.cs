@@ -23,10 +23,10 @@ public sealed record OutettsTtsRequest : TtsRequest
     public double? MinP { get; init; }
 
     /// <summary>Windowed repetition penalty; must be &gt; 0, default 1.1.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Recent-token penalty window; default 64.</summary>
-    public long? RepetitionWindow { get; init; }
+    public long? RepetitionWindow { get; init; } = 64;
 
     /// <summary>Sampling seed; cloning defaults to 4099 for native weights and 42 for quantized weights.</summary>
     public string? Seed { get; init; }
@@ -38,10 +38,10 @@ public sealed record OutettsTtsRequest : TtsRequest
     public string? ReferenceLanguage { get; init; }
 
     /// <summary>Maximum UTF-8 codepoints per long-form text chunk; default 256. Chunks are split further when required by max_tokens or context budget.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 256;
 
     /// <summary>Framework long-form text chunking mode; default word_budget.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <inheritdoc />
     public override void Validate()

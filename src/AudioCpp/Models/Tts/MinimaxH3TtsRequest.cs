@@ -10,64 +10,64 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MinimaxH3TtsRequest : TtsRequest
 {
     /// <summary>Positive joint DiT denoising step count; default 50.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 12;
 
     /// <summary>Unsigned 32-bit generation seed in [0, 4294967295] for deterministic initial latents; default 42.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "42";
 
     /// <summary>Target video canvas height used by the joint T2VA latent layout; omitted or nonpositive values use 768. Smaller positive sizes are rounded up to the supported geometry.</summary>
-    public long? Height { get; init; }
+    public long? Height { get; init; } = 768;
 
     /// <summary>Target video canvas width used by the joint T2VA latent layout; omitted or nonpositive values use 1344. Smaller positive sizes are rounded up to the supported geometry.</summary>
-    public long? Width { get; init; }
+    public long? Width { get; init; } = 1344;
 
     /// <summary>Target video frame count before H3 alignment; omitted or nonpositive values use 124. MiniMax-H3 video is 24 fps; positive counts are rounded to the supported temporal geometry.</summary>
-    public long? NumFrames { get; init; }
+    public long? NumFrames { get; init; } = 241;
 
     /// <summary>Classifier-free guidance scale; 1.0 matches the baseline T2VA audio run.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 1;
 
     /// <summary>Joint DiT sampler: euler, res_multistep, dpmpp_2m, or unipc.</summary>
-    public MinimaxH3SamplerMode? SamplerMode { get; init; }
+    public MinimaxH3SamplerMode? SamplerMode { get; init; } = MinimaxH3SamplerMode.Euler;
 
     /// <summary>Negative prompt used by classifier-free guidance when guidance_scale is not 1.0.</summary>
-    public string? NegativePrompt { get; init; }
+    public string? NegativePrompt { get; init; } = " ";
 
     /// <summary>Video FlowMatch scheduler shift.</summary>
-    public double? FlowShift { get; init; }
+    public double? FlowShift { get; init; } = 12;
 
     /// <summary>Audio FlowMatch scheduler shift.</summary>
-    public double? AudioFlowShift { get; init; }
+    public double? AudioFlowShift { get; init; } = 3;
 
     /// <summary>Decode and return RGB24 video frames as an output artifact.</summary>
-    public bool? ReturnVideo { get; init; }
+    public bool? ReturnVideo { get; init; } = false;
 
     /// <summary>Run the prompt encoder with scoped layer-group weights instead of a full prompt encoder weight store.</summary>
-    public bool? TextLayerwise { get; init; }
+    public bool? TextLayerwise { get; init; } = false;
 
     /// <summary>Prompt encoder layer-group size when text_layerwise is enabled.</summary>
-    public long? TextLayerwiseBatch { get; init; }
+    public long? TextLayerwiseBatch { get; init; } = 1;
 
     /// <summary>Run the DiT denoiser with scoped prelude, block-group, and final weights instead of a full DiT weight store.</summary>
-    public bool? DitLayerwise { get; init; }
+    public bool? DitLayerwise { get; init; } = false;
 
     /// <summary>DiT block-group size when dit_layerwise is enabled.</summary>
-    public long? DitLayerwiseBatch { get; init; }
+    public long? DitLayerwiseBatch { get; init; } = 1;
 
     /// <summary>Token chunk size for the per-token DiT MLP in layerwise high-resolution mode. Zero disables chunking.</summary>
-    public long? DitMlpChunkTokens { get; init; }
+    public long? DitMlpChunkTokens { get; init; } = 0;
 
     /// <summary>Optional DiT acceleration mode: none, first_block_cache, or spectrum. Requires dit_layerwise=false and sampler_mode=euler; Spectrum additionally requires guidance_scale=1.</summary>
-    public string? DitAcceleration { get; init; }
+    public string? DitAcceleration { get; init; } = "none";
 
     /// <summary>First-block cache residual-difference threshold.</summary>
-    public double? FirstBlockCacheThreshold { get; init; }
+    public double? FirstBlockCacheThreshold { get; init; } = 0.1;
 
     /// <summary>Denoising progress fraction where first-block caching begins; must be below end_percent. Used to derive the sigma window when explicit sigma endpoints are omitted.</summary>
-    public double? FirstBlockCacheStartPercent { get; init; }
+    public double? FirstBlockCacheStartPercent { get; init; } = 0.1;
 
     /// <summary>Denoising progress fraction where first-block caching ends; must exceed start_percent. Used to derive the sigma window when explicit sigma endpoints are omitted.</summary>
-    public double? FirstBlockCacheEndPercent { get; init; }
+    public double? FirstBlockCacheEndPercent { get; init; } = 0.95;
 
     /// <summary>Largest video sigma where first-block cache may be used. Supply together with first_block_cache_end_sigma; otherwise both endpoints are derived from the denoising progress fractions and schedule.</summary>
     public double? FirstBlockCacheStartSigma { get; init; }
@@ -76,25 +76,25 @@ public sealed record MinimaxH3TtsRequest : TtsRequest
     public double? FirstBlockCacheEndSigma { get; init; }
 
     /// <summary>Maximum consecutive first-block cache hits before forcing a full DiT step.</summary>
-    public long? FirstBlockCacheMaxConsecutive { get; init; }
+    public long? FirstBlockCacheMaxConsecutive { get; init; } = 2;
 
     /// <summary>Full DiT warmup steps before spectrum forecasting may skip steps.</summary>
-    public long? SpectrumWarmupSteps { get; init; }
+    public long? SpectrumWarmupSteps { get; init; } = 1;
 
     /// <summary>Initial spectrum forecast scheduling window.</summary>
-    public double? SpectrumInitialWindow { get; init; }
+    public double? SpectrumInitialWindow { get; init; } = 2;
 
     /// <summary>Spectrum forecast window growth after actual DiT steps.</summary>
-    public double? SpectrumFlexWindow { get; init; }
+    public double? SpectrumFlexWindow { get; init; } = 0.75;
 
     /// <summary>Chebyshev polynomial degree for spectrum forecasting.</summary>
-    public long? SpectrumDegree { get; init; }
+    public long? SpectrumDegree { get; init; } = 1;
 
     /// <summary>Maximum spectrum forecast history rows.</summary>
-    public long? SpectrumHistorySize { get; init; }
+    public long? SpectrumHistorySize { get; init; } = 8;
 
     /// <summary>Ridge regularization for spectrum forecasting.</summary>
-    public double? SpectrumRidgeLambda { get; init; }
+    public double? SpectrumRidgeLambda { get; init; } = 0.1;
 
     /// <inheritdoc />
     public override void Validate()
@@ -177,7 +177,7 @@ public sealed record MinimaxH3TtsRequest : TtsRequest
     {
         Dictionary<string, string> options = [];
 
-        if (NumInferenceSteps != null && NumInferenceSteps != 12)
+        if (NumInferenceSteps != null && NumInferenceSteps != 50)
         {
             options["num_inference_steps"] = NumInferenceSteps.Value.ToString(CultureInfo.InvariantCulture);
         }
@@ -197,7 +197,7 @@ public sealed record MinimaxH3TtsRequest : TtsRequest
             options["width"] = Width.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (NumFrames != null && NumFrames != 241)
+        if (NumFrames != null && NumFrames != 124)
         {
             options["num_frames"] = NumFrames.Value.ToString(CultureInfo.InvariantCulture);
         }

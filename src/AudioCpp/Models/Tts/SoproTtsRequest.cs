@@ -8,19 +8,19 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record SoproTtsRequest : TtsRequest
 {
     /// <summary>Language tag (en, pt, fr, de); omitted inherits transcript language, then the session default.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = string.Empty;
 
     /// <summary>Semantic sampling temperature; nonpositive selects greedy decoding. Omitted uses checkpoint generation.temperature.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Semantic nucleus cutoff; values outside [0,1] are disabled/clamped by the sampler. Omitted uses checkpoint generation.top_p.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.9;
 
     /// <summary>Semantic top-k; nonpositive disables filtering. Omitted uses checkpoint generation.top_k.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Positive acoustic sampling steps; omitted uses checkpoint generation.steps.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 2;
 
     /// <summary>Positive maximum segment duration; must be &gt;= min_duration_sec. Omitted uses checkpoint generation.max_seconds.</summary>
     public double? MaxDurationSec { get; init; }
@@ -32,7 +32,7 @@ public sealed record SoproTtsRequest : TtsRequest
     public double? ReferenceDurationSec { get; init; }
 
     /// <summary>Positive codepoint budget per segment; omitted uses checkpoint generation.max_segment_chars.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Non-negative seed for semantic sampling and the acoustic noise prior; omit for a random seed.</summary>
     public string? Seed { get; init; }
@@ -63,27 +63,27 @@ public sealed record SoproTtsRequest : TtsRequest
     {
         Dictionary<string, string> options = [];
 
-        if (Language != null && Language != string.Empty)
+        if (Language != null)
         {
             options["language"] = Language;
         }
 
-        if (Temperature != null && Temperature != 0.8)
+        if (Temperature != null)
         {
             options["temperature"] = Temperature.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopP != null && TopP != 0.9)
+        if (TopP != null)
         {
             options["top_p"] = TopP.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopK != null && TopK != 25)
+        if (TopK != null)
         {
             options["top_k"] = TopK.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (NumInferenceSteps != null && NumInferenceSteps != 2)
+        if (NumInferenceSteps != null)
         {
             options["num_inference_steps"] = NumInferenceSteps.Value.ToString(CultureInfo.InvariantCulture);
         }
@@ -103,7 +103,7 @@ public sealed record SoproTtsRequest : TtsRequest
             options["reference_duration_sec"] = ReferenceDurationSec.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TextChunkSize != null && TextChunkSize != 300)
+        if (TextChunkSize != null)
         {
             options["text_chunk_size"] = TextChunkSize.Value.ToString(CultureInfo.InvariantCulture);
         }

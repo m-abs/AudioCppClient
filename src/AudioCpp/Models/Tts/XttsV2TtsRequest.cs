@@ -8,31 +8,31 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record XttsV2TtsRequest : TtsRequest
 {
     /// <summary>Source language for text conditioning (e.g. 'en'); also selects tokenizer normalization.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "en";
 
     /// <summary>AR sampling temperature; official default 0.75.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.75;
 
     /// <summary>AR top-k sampling; official default 50.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>AR nucleus sampling threshold; official default 0.85.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.85;
 
     /// <summary>AR repetition penalty; official default 10.0.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 10;
 
     /// <summary>Maximum mel codes to generate; official default 605.</summary>
-    public long? MaxMelTokens { get; init; }
+    public long? MaxMelTokens { get; init; } = 605;
 
     /// <summary>Sampling seed; omitted selects a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Maximum Unicode codepoints per framework text chunk; default 256.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 256;
 
     /// <summary>Framework text chunking mode.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <inheritdoc />
     public override void Validate()

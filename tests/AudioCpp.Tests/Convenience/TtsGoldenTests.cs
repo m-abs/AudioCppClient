@@ -12,16 +12,16 @@ namespace Mabs.AudioCpp.Tests.Convenience;
 /// <summary>Golden serialization, validation and composition tests for the generated tts convenience records.</summary>
 public class TtsGoldenTests
 {
-    /// <summary>Golden serialization for the generated <c>Audio8TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Audio8TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Audio8Golden()
     {
         Audio8TtsRequest request = new() { Text = "hello", ReferenceText = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "audio8_tts_preview_0_6b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"audio8_tts_preview_0_6b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"audio8_tts_preview_0_6b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"top_p\":\"0.9\",\"top_k\":\"50\",\"temperature\":\"0.7\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>AukTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>AukTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void AukGolden()
     {
@@ -30,7 +30,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"auk_base_f32\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>BreezeTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>BreezeTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void BreezeGolden()
     {
@@ -39,7 +39,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"breeze_tts_2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>ChatterboxTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>ChatterboxTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void ChatterboxGolden()
     {
@@ -48,7 +48,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"chatterbox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"exaggeration\":\"1.5\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>ChatterboxTurboTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>ChatterboxTurboTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void ChatterboxTurboGolden()
     {
@@ -57,7 +57,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"chatterbox_turbo_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1001\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Confucius4TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Confucius4TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Confucius4Golden()
     {
@@ -66,16 +66,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"confucius4_tts_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Cosyvoice3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Cosyvoice3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Cosyvoice3Golden()
     {
         Cosyvoice3TtsRequest request = new() { Text = "hello", TemplateName = Cosyvoice3TemplateName.CrossLingual };
         string json = Json.Serialize(new TaskRunRequest { Model = "cosyvoice3_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"cosyvoice3_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"cross_lingual\"}}}", json);
+        Assert.Equal("{\"model\":\"cosyvoice3_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"cross_lingual\",\"min_tokens\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>DotsTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>DotsTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void DotsGolden()
     {
@@ -84,16 +84,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"dots_tts_soar_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>DramaboxTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>DramaboxTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void DramaboxGolden()
     {
         DramaboxTtsRequest request = new() { Text = "hello", TargetVoice = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "dramabox_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"dramabox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"target_voice\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"dramabox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"target_voice\":\"x\",\"negative_prompt\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>EchoTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>EchoTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void EchoGolden()
     {
@@ -102,7 +102,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"echo_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_size\":\"301\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>F5TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>F5TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void F5Golden()
     {
@@ -111,7 +111,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"habibi_unified\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"dialect\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FireredAudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FireredAudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FireredAudioGolden()
     {
@@ -120,7 +120,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"firered_audio_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts_clone\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Fireredtts3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Fireredtts3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Fireredtts3Golden()
     {
@@ -129,7 +129,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"fireredtts3_instruct_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"instruct_tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FishAudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FishAudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FishAudioGolden()
     {
@@ -138,7 +138,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"fish_audio_s2_pro_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FishDrama3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FishDrama3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FishDrama3Golden()
     {
@@ -147,7 +147,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"fish_drama3_q4_experts_q8_backbone\",\"request\":{\"text\":\"hello\",\"options\":{\"encode_reference_only\":\"true\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>GlmTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>GlmTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void GlmGolden()
     {
@@ -156,7 +156,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"glm_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"max_tokens\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>GradiumPhononTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>GradiumPhononTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void GradiumPhononGolden()
     {
@@ -165,7 +165,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"gradium_phonon_31m_en_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"frames_after_eos\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>HiggsAudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>HiggsAudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void HiggsAudioGolden()
     {
@@ -174,16 +174,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"higgs_audio_tts_4b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"33\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>IndexTts2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>IndexTts2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void IndexTts2Golden()
     {
         IndexTts2TtsRequest request = new() { Text = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "index_tts2_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"index_tts2_q8_0\",\"request\":{\"options\":{\"text\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"index_tts2_q8_0\",\"request\":{\"options\":{\"text\":\"x\",\"emotion_text\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>InflectV2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>InflectV2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void InflectV2Golden()
     {
@@ -192,16 +192,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"inflect_micro_v2_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"speed\":\"2\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>IrodoriTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>IrodoriTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void IrodoriGolden()
     {
         IrodoriTtsRequest request = new() { Text = "hello", StreamFramesPerEvent = 13 };
         string json = Json.Serialize(new TaskRunRequest { Model = "irodori_tts_v4_small_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\"}}}", json);
+        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\",\"num_inference_steps\":\"40\",\"duration_sec\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>KittenTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>KittenTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void KittenGolden()
     {
@@ -210,7 +210,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"kitten_tts_mini_0_8_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"Bella\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>KittenTts2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>KittenTts2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void KittenTts2Golden()
     {
@@ -219,7 +219,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"kitten_tts2_20261021_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"Bella\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>KokoroTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>KokoroTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void KokoroGolden()
     {
@@ -228,7 +228,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"kokoro_82m_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"af_alloy\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>KugelaudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>KugelaudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void KugelaudioGolden()
     {
@@ -237,16 +237,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"kugelaudio_0_open_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"num_inference_steps\":\"21\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Lfm2AudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Lfm2AudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Lfm2AudioGolden()
     {
         Lfm2AudioTtsRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "lfm2_audio_1_5b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"lfm2_audio_1_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"lfm2_audio_1_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"max_tokens\":\"512\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Lfm3AudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Lfm3AudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Lfm3AudioGolden()
     {
@@ -255,16 +255,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"lfm3_audio_2b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MagpieTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MagpieTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MagpieGolden()
     {
         MagpieTtsRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "magpie_tts_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"magpie_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"magpie_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"text_chunk_size\":\"300\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Maya1TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Maya1TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Maya1Golden()
     {
@@ -273,7 +273,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"maya1_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\",\"max_tokens\":\"2049\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Ming3AudioTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Ming3AudioTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Ming3AudioGolden()
     {
@@ -282,7 +282,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"ming3_audio_tiny_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"system_prompt\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Ming3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Ming3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Ming3Golden()
     {
@@ -291,25 +291,25 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"ming_3_0_tts_0_5b_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MinimaxH3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MinimaxH3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MinimaxH3Golden()
     {
         MinimaxH3TtsRequest request = new() { Text = "hello", NumInferenceSteps = 13 };
         string json = Json.Serialize(new TaskRunRequest { Model = "minimax_h3_q4_k", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"minimax_h3_q4_k\",\"request\":{\"text\":\"hello\",\"options\":{\"num_inference_steps\":\"13\"}}}", json);
+        Assert.Equal("{\"model\":\"minimax_h3_q4_k\",\"request\":{\"text\":\"hello\",\"options\":{\"num_inference_steps\":\"13\",\"num_frames\":\"241\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MiottsTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MiottsTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MiottsGolden()
     {
         MiottsTtsRequest request = new() { Text = "hello", MaxTokens = 1 };
         string json = Json.Serialize(new TaskRunRequest { Model = "miotts_1_7b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"miotts_1_7b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\"}}}", json);
+        Assert.Equal("{\"model\":\"miotts_1_7b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\",\"top_k\":\"50\",\"top_p\":\"1\",\"temperature\":\"0.8\",\"repetition_penalty\":\"1\",\"best_of_n\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MiraTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MiraTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MiraGolden()
     {
@@ -318,7 +318,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"mira_tts\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1025\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsLocalTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsLocalTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsLocalGolden()
     {
@@ -327,7 +327,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"moss_tts_local_v1_5_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"4097\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsNanoTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsNanoTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsNanoGolden()
     {
@@ -336,25 +336,25 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"moss_tts_nano_100m_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsV15TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsV15TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsV15Golden()
     {
         MossTtsV15TtsRequest request = new() { Text = "hello", MinFrames = 1 };
         string json = Json.Serialize(new TaskRunRequest { Model = "moss_tts_v15_q8_0_codec_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"moss_tts_v15_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"min_frames\":\"1\"}}}", json);
+        Assert.Equal("{\"model\":\"moss_tts_v15_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"min_frames\":\"1\",\"instruct\":\"\",\"language\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsdTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsdTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsdGolden()
     {
         MossTtsdTtsRequest request = new() { Text = "hello", VoiceSamples = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "moss_ttsd_q8_0_codec_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"moss_ttsd_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"moss_ttsd_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\",\"instruct\":\"\",\"max_frames\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>NeuttsTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>NeuttsTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void NeuttsGolden()
     {
@@ -363,16 +363,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"neutts_2e_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"dave\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>OmnivoiceTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>OmnivoiceTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void OmnivoiceGolden()
     {
         OmnivoiceTtsRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "omnivoice_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"omnivoice_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"omnivoice_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"instruct\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>OutettsTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>OutettsTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void OutettsGolden()
     {
@@ -381,7 +381,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"outetts_1_0_1b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PiperTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PiperTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PiperGolden()
     {
@@ -390,7 +390,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"piper_lessac_medium_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"speed\":\"2\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PlapreTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PlapreTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PlapreGolden()
     {
@@ -399,7 +399,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"plapre_3_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"ida\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PocketTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PocketTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PocketGolden()
     {
@@ -408,7 +408,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"pocket_tts_english_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"frames_after_eos\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PocketTtsSmallTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PocketTtsSmallTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PocketTtsSmallGolden()
     {
@@ -417,16 +417,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"pocket_tts_small_english_18m_refl_f32\",\"request\":{\"text\":\"hello\",\"options\":{\"frames_after_eos\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Qwen3TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Qwen3TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Qwen3Golden()
     {
         Qwen3TtsRequest request = new() { Text = "hello", StreamChunkPolicy = Qwen3TtsStreamChunkPolicy.Fixed };
         string json = Json.Serialize(new TaskRunRequest { Model = "qwen3_tts_1_7b_base_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"qwen3_tts_1_7b_base_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_chunk_policy\":\"fixed\"}}}", json);
+        Assert.Equal("{\"model\":\"qwen3_tts_1_7b_base_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_chunk_policy\":\"fixed\",\"instruct\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>SanottsTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>SanottsTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void SanottsGolden()
     {
@@ -435,7 +435,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"sanotts_heart_nano_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"speed\":\"2\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>SopranoTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>SopranoTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void SopranoGolden()
     {
@@ -444,16 +444,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"soprano_1_1_80m_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"513\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>SoproTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>SoproTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void SoproGolden()
     {
         SoproTtsRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "sopro_v2_turbo_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"sopro_v2_turbo_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"sopro_v2_turbo_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"temperature\":\"0.8\",\"top_p\":\"0.9\",\"top_k\":\"25\",\"num_inference_steps\":\"2\",\"text_chunk_size\":\"300\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>SupertonicTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>SupertonicTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void SupertonicGolden()
     {
@@ -462,25 +462,25 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"supertonic_3_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"M2\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Vevo2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Vevo2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Vevo2Golden()
     {
         Vevo2TtsRequest request = new() { Text = "hello", Route = Vevo2Route.ZeroShotTts };
         string json = Json.Serialize(new TaskRunRequest { Model = "vevo2_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"vevo2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"route\":\"zero_shot_tts\"}}}", json);
+        Assert.Equal("{\"model\":\"vevo2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"route\":\"zero_shot_tts\",\"temperature\":\"0.7\",\"top_k\":\"20\",\"top_p\":\"0.8\",\"audio_chunk_duration_sec\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>VibevoiceTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>VibevoiceTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void VibevoiceGolden()
     {
         VibevoiceTtsRequest request = new() { Text = "hello", VoiceSamples = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "vibevoice_1_5b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"vibevoice_1_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"vibevoice_1_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\",\"num_inference_steps\":\"10\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>VieneuV3TurboTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>VieneuV3TurboTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void VieneuV3TurboGolden()
     {
@@ -489,16 +489,16 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"vieneu_v3_turbo_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"auto_frame_cap\":\"false\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Voxcpm1TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Voxcpm1TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Voxcpm1Golden()
     {
         Voxcpm1TtsRequest request = new() { Text = "hello", TextChunkMode = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "voxcpm1_0_5b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"voxcpm1_0_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_mode\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"voxcpm1_0_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_mode\":\"x\",\"retry_badcase\":\"true\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Voxcpm2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Voxcpm2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Voxcpm2Golden()
     {
@@ -507,7 +507,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"voxcpm2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"min_tokens\":\"3\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>VoxtralTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>VoxtralTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void VoxtralGolden()
     {
@@ -516,7 +516,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"voxtral_4b_tts_2603_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_id\":\"casual_female\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>XttsV2TtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>XttsV2TtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void XttsV2Golden()
     {
@@ -525,7 +525,7 @@ public class TtsGoldenTests
         Assert.Equal("{\"model\":\"xtts_v2_gguf_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>ZipvoiceTtsRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>ZipvoiceTtsRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void ZipvoiceGolden()
     {
@@ -774,6 +774,15 @@ public class TtsGoldenTests
         Assert.Equal("TextChunkSize", ex.ParamName);
     }
 
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>KugelaudioTtsRequest</c>.</summary>
+    [Fact]
+    public void KugelaudioValidateVoiceId()
+    {
+        KugelaudioTtsRequest request = new() { VoiceId = KugelaudioVoiceId.Default };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("kugelaudio tts does not accept voice_id (capability built_in_voices is false)", ex.Message);
+    }
+
     /// <summary>An out-of-range value fails validation for the generated <c>KugelaudioTtsRequest</c>.</summary>
     [Fact]
     public void KugelaudioValidate()
@@ -802,6 +811,15 @@ public class TtsGoldenTests
         ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
         Assert.Contains("lfm3_audio tts max_tokens must be at least 1", ex.Message);
         Assert.Equal("MaxTokens", ex.ParamName);
+    }
+
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>MagpieTtsRequest</c>.</summary>
+    [Fact]
+    public void MagpieValidateVoiceId()
+    {
+        MagpieTtsRequest request = new() { VoiceId = MagpieTtsVoiceId.Aria };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("magpie_tts tts does not accept voice_id (capability built_in_voices is false)", ex.Message);
     }
 
     /// <summary>An out-of-range value fails validation for the generated <c>MagpieTtsRequest</c>.</summary>
@@ -982,6 +1000,15 @@ public class TtsGoldenTests
         ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
         Assert.Contains("pocket_tts_small tts frames_after_eos must be at least -1", ex.Message);
         Assert.Equal("FramesAfterEos", ex.ParamName);
+    }
+
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Qwen3TtsRequest</c>.</summary>
+    [Fact]
+    public void Qwen3ValidateVoiceId()
+    {
+        Qwen3TtsRequest request = new() { VoiceId = Qwen3TtsVoiceId.Aiden };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("qwen3_tts tts does not accept voice_id (capability built_in_voices is false)", ex.Message);
     }
 
     /// <summary>An out-of-range value fails validation for the generated <c>Qwen3TtsRequest</c>.</summary>

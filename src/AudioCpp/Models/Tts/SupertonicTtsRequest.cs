@@ -10,22 +10,22 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record SupertonicTtsRequest : TtsRequest
 {
     /// <summary>Built-in voice preset; --voice-id takes precedence.</summary>
-    public new SupertonicVoiceId? VoiceId { get; init; }
+    public new SupertonicVoiceId? VoiceId { get; init; } = SupertonicVoiceId.M1;
 
     /// <summary>Flow denoising steps.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 8;
 
     /// <summary>Positive speech speed multiplier; voice.style.speaking_rate takes precedence.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1.05;
 
     /// <summary>Noise seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <summary>Framework text chunk size; defaults to 120 for Korean/Japanese, otherwise 300.</summary>
     public long? TextChunkSize { get; init; }
 
     /// <summary>Framework text chunking mode.</summary>
-    public SupertonicTextChunkMode? TextChunkMode { get; init; }
+    public SupertonicTextChunkMode? TextChunkMode { get; init; } = SupertonicTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

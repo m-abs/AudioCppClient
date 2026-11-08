@@ -10,49 +10,49 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Confucius4TtsRequest : TtsRequest
 {
     /// <summary>Target synthesis language code used by the text frontend; default zh when no request transcript language or style language is provided.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "zh";
 
     /// <summary>T2S sampling temperature; must be &gt; 0, default 0.8.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>T2S nucleus sampling probability; must be in (0, 1], default 0.8.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>T2S top-k sampling limit; must be positive, default 30.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 30;
 
     /// <summary>T2S beam count; default 3. Set 1 for single-beam sampling.</summary>
-    public long? NumBeams { get; init; }
+    public long? NumBeams { get; init; } = 3;
 
     /// <summary>T2S repetition penalty; must be &gt; 0, default 10.0.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 10;
 
     /// <summary>Maximum T2S semantic sequence length including prompt tokens; default 1520.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1520;
 
     /// <summary>S2A flow-matching step count; default 25.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 25;
 
     /// <summary>S2A classifier-free guidance scale; default 0.7. Negative values select the no-CFG path.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 0.7;
 
     /// <summary>Maximum text tokens per generated segment; default 80.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 80;
 
     /// <summary>word_budget/default selects model-local official_segments. Other modes use the framework splitter with a codepoint budget.</summary>
-    public Confucius4TtsTextChunkMode? TextChunkMode { get; init; }
+    public Confucius4TtsTextChunkMode? TextChunkMode { get; init; } = Confucius4TtsTextChunkMode.Default;
 
     /// <summary>Cross-fade duration between generated segments in seconds; default 0.3.</summary>
-    public double? CrossFadeDurationSec { get; init; }
+    public double? CrossFadeDurationSec { get; init; } = 0.3;
 
     /// <summary>Fade duration applied at segment edges in seconds; default 0.1. Currently validated but not applied to generated audio.</summary>
-    public double? EdgeFadeDurationSec { get; init; }
+    public double? EdgeFadeDurationSec { get; init; } = 0.1;
 
     /// <summary>Silence padding applied at segment edges in seconds; default 0.1. Currently validated but not applied to generated audio.</summary>
-    public double? EdgePadDurationSec { get; init; }
+    public double? EdgePadDurationSec { get; init; } = 0.1;
 
     /// <summary>Seed for T2S sampling and S2A noise initialization; default 1234.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <inheritdoc />
     public override void Validate()

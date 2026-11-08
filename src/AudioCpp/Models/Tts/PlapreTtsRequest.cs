@@ -10,13 +10,13 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record PlapreTtsRequest : TtsRequest
 {
     /// <summary>Built-in speaker.</summary>
-    public new PlapreVoiceId? VoiceId { get; init; }
+    public new PlapreVoiceId? VoiceId { get; init; } = PlapreVoiceId.Tor;
 
     /// <summary>Transcript of the reference audio, used for voice cloning.</summary>
-    public string? ReferenceText { get; init; }
+    public string? ReferenceText { get; init; } = string.Empty;
 
     /// <summary>Use only the reference speaker embedding, without the reference transcript/audio-token prefix.</summary>
-    public bool? XVectorOnlyMode { get; init; }
+    public bool? XVectorOnlyMode { get; init; } = false;
 
     /// <summary>JSON array of per-word integer durations, from 0 to 399 frames at 25 Hz. Duration-controlled text is generated in one chunk.</summary>
     public string? WordDurationFrames { get; init; }
@@ -28,7 +28,7 @@ public sealed record PlapreTtsRequest : TtsRequest
     public string? ContextAudioFile { get; init; }
 
     /// <summary>Whether context_text belongs to the target speaker.</summary>
-    public bool? SameSpeaker { get; init; }
+    public bool? SameSpeaker { get; init; } = true;
 
     /// <summary>Ordered JSON array of pronunciation references: [{"word":"morgen","audio_file":"morgen.wav"}]. Up to 10 references, 60 codes each and 200 total codes are used.</summary>
     public string? Pronunciations { get; init; }
@@ -40,31 +40,31 @@ public sealed record PlapreTtsRequest : TtsRequest
     public long? EditEndFrame { get; init; }
 
     /// <summary>Maximum generated tokens per text chunk; each audio token represents 40 ms.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 500;
 
     /// <summary>Minimum generated tokens before a stop token can be selected.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 0;
 
     /// <summary>Sampling temperature; zero selects greedy decoding.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Nucleus sampling probability in (0, 1].</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.95;
 
     /// <summary>Top-k sampling; -1 or zero disables filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Sampling and vocoder noise seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Framework text chunking policy.</summary>
-    public PlapreTextChunkMode? TextChunkMode { get; init; }
+    public PlapreTextChunkMode? TextChunkMode { get; init; } = PlapreTextChunkMode.Default;
 
     /// <summary>Silence inserted between text chunks.</summary>
-    public double? SilenceDurationSec { get; init; }
+    public double? SilenceDurationSec { get; init; } = 0.1;
 
     /// <inheritdoc />
     public override void Validate()

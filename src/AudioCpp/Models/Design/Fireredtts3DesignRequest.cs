@@ -16,22 +16,22 @@ public sealed record Fireredtts3DesignRequest : DesignRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Language tag used by FireRedTTS3.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "Chinese";
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 80 when hanzi, kana and Hangul outnumber other letters and digits (except edits), otherwise 600.</summary>
     public long? TextChunkSize { get; init; }
 
     /// <summary>Framework text chunking mode.</summary>
-    public Fireredtts3TextChunkMode? TextChunkMode { get; init; }
+    public Fireredtts3TextChunkMode? TextChunkMode { get; init; } = Fireredtts3TextChunkMode.Default;
 
     /// <summary>FireRed DiT flow steps per generated latent patch.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Positive guidance scale; defaults to 1.2 for voice-design/semantic-edit/acoustic-edit templates and 2 otherwise.</summary>
     public double? GuidanceScale { get; init; }
 
     /// <summary>Stop probability threshold for AR patch generation.</summary>
-    public double? StopThreshold { get; init; }
+    public double? StopThreshold { get; init; } = 0.5;
 
     /// <summary>Unsigned 32-bit sampling seed in [0, 4294967295]; defaults to 2 for voice design and 1234 otherwise.</summary>
     public string? Seed { get; init; }

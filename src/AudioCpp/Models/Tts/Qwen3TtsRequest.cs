@@ -10,43 +10,43 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Qwen3TtsRequest : TtsRequest
 {
     /// <summary>Streaming codec chunk schedule: grow starts with one frame and doubles to stream_frames_per_event; fixed uses that size throughout.</summary>
-    public Qwen3TtsStreamChunkPolicy? StreamChunkPolicy { get; init; }
+    public Qwen3TtsStreamChunkPolicy? StreamChunkPolicy { get; init; } = Qwen3TtsStreamChunkPolicy.Grow;
 
     /// <summary>Codec frames per fixed streaming event, or the maximum for growing events. Smaller values reduce chunk latency but increase decoding overhead.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 12;
 
     /// <summary>Target synthesis language code or label; default auto lets the model infer from text and voice settings.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "auto";
 
     /// <summary>Maximum generated codec frames per text chunk; omitted uses the checkpoint generation_config.json (2048 when absent).</summary>
     public long? MaxTokens { get; init; }
 
     /// <summary>Sample the main codec stream instead of greedy decoding; default true.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = true;
 
     /// <summary>Main codec sampling temperature; must be &gt; 0 when do_sample=true. Ignored when do_sample=false; default 0.9.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.9;
 
     /// <summary>Main codec top-k sampling limit; default 50, 0 disables top-k filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Main codec nucleus sampling limit; default 1.0.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 1;
 
     /// <summary>Main codec repetition penalty; must be &gt; 0, default 1.05.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.05;
 
     /// <summary>Enable subtalker sampling for the remaining audio codebooks instead of greedy decoding; default true.</summary>
-    public bool? SubtalkerDoSample { get; init; }
+    public bool? SubtalkerDoSample { get; init; } = true;
 
     /// <summary>Subtalker sampling temperature; must be &gt; 0 when subtalker_do_sample=true. Ignored when subtalker_do_sample=false; default 0.9.</summary>
-    public double? SubtalkerTemperature { get; init; }
+    public double? SubtalkerTemperature { get; init; } = 0.9;
 
     /// <summary>Subtalker top-k sampling limit; default 50, 0 disables top-k filtering.</summary>
-    public long? SubtalkerTopK { get; init; }
+    public long? SubtalkerTopK { get; init; } = 50;
 
     /// <summary>Subtalker nucleus sampling limit; default 1.0.</summary>
-    public double? SubtalkerTopP { get; init; }
+    public double? SubtalkerTopP { get; init; } = 1;
 
     /// <summary>Codec sampling seed; omitted requests choose a random seed.</summary>
     public string? Seed { get; init; }
@@ -55,16 +55,16 @@ public sealed record Qwen3TtsRequest : TtsRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Use only the speaker embedding for voice cloning instead of ICL reference codec prompting; default false.</summary>
-    public bool? XVectorOnlyMode { get; init; }
+    public bool? XVectorOnlyMode { get; init; } = false;
 
     /// <summary>Optional natural-language voice or style instruction for VoiceDesign and CustomVoice variants; empty instructions are accepted.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = string.Empty;
 
     /// <summary>Named preset speaker from the CustomVoice checkpoint. Legacy speaker remains accepted.</summary>
     public new Qwen3TtsVoiceId? VoiceId { get; init; }
 
     /// <summary>Maximum UTF-8 codepoints per long-form text chunk; default 8192.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 8192;
 
     /// <inheritdoc />
     public override void Validate()
@@ -217,7 +217,7 @@ public sealed record Qwen3TtsRequest : TtsRequest
             options["x_vector_only_mode"] = XVectorOnlyMode.Value ? "true" : "false";
         }
 
-        if (Instruct != null && Instruct != string.Empty)
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }

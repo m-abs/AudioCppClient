@@ -10,31 +10,31 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record NeuttsTtsRequest : TtsRequest
 {
     /// <summary>Built-in NeuTTS speaker prompt; default emily.</summary>
-    public new NeuttsVoiceId? VoiceId { get; init; }
+    public new NeuttsVoiceId? VoiceId { get; init; } = NeuttsVoiceId.Emily;
 
     /// <summary>Optional emotion token inserted between reference text and target text; neutral inserts no emotion token.</summary>
-    public NeuttsEmotion? Emotion { get; init; }
+    public NeuttsEmotion? Emotion { get; init; } = NeuttsEmotion.Neutral;
 
     /// <summary>Maximum generated speech-token count for the autoregressive generator; 0 uses the remaining model context, default 0. Total generation context is capped at min(checkpoint context, 2048).</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 0;
 
     /// <summary>Minimum generated speech-token count before EOS may stop generation; default 50.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 50;
 
     /// <summary>Autoregressive sampling temperature; must be &gt; 0, default 1.0.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>Autoregressive top-k sampling limit; default 50.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Autoregressive sampling seed; omitted requests choose a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Framework text chunking mode for long-form synthesis.</summary>
-    public NeuttsTextChunkMode? TextChunkMode { get; init; }
+    public NeuttsTextChunkMode? TextChunkMode { get; init; } = NeuttsTextChunkMode.Default;
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 600.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 600;
 
     /// <inheritdoc />
     public override void Validate()

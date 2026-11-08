@@ -49,43 +49,43 @@ public sealed record Ming3TtsCloneRequest : CloneRequest
     public string? ExportSpeakerEmbeddingFile { get; init; }
 
     /// <summary>Condition on the reference speaker embedding.</summary>
-    public bool? UseSpeakerEmbedding { get; init; }
+    public bool? UseSpeakerEmbedding { get; init; } = true;
 
     /// <summary>Use a zero projected speaker row instead of reference audio conditioning.</summary>
-    public bool? ZeroSpeakerEmbedding { get; init; }
+    public bool? ZeroSpeakerEmbedding { get; init; } = false;
 
     /// <summary>Maximum generated acoustic patches per text chunk, also limited by the 512-position generation context.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1000;
 
     /// <summary>Flow guidance: conditioned prediction plus guidance_scale times its difference from the null prediction.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Flow SDE noise scale.</summary>
-    public double? Sigma { get; init; }
+    public double? Sigma { get; init; } = 0.25;
 
     /// <summary>Flow sampling temperature; zero still uses seeded initial noise.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0;
 
     /// <summary>Reference-posterior and generation noise seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1895";
 
     /// <summary>Send the text as one synthesis fragment without frontend chunking.</summary>
-    public bool? RawText { get; init; }
+    public bool? RawText { get; init; } = false;
 
     /// <summary>Framework long-form chunk budget in Unicode codepoints; default 50 when hanzi, kana and Hangul outnumber other letters and digits, otherwise 300; multi-chunk generation without speaker conditioning is capped at 120, including explicit overrides, and anchors later chunks to the first generated voice. Smaller overrides, single-chunk inputs and explicitly conditioned voices retain their chunk size.</summary>
     public long? TextChunkSize { get; init; }
 
     /// <summary>Framework text chunking policy.</summary>
-    public Ming3TtsTextChunkMode? TextChunkMode { get; init; }
+    public Ming3TtsTextChunkMode? TextChunkMode { get; init; } = Ming3TtsTextChunkMode.TagAware;
 
     /// <summary>Trim trailing low-energy 100-ms frames per fragment, retaining a 300-ms tail.</summary>
-    public bool? TrimSilence { get; init; }
+    public bool? TrimSilence { get; init; } = true;
 
     /// <summary>Maximum latent patches per streaming audio decode.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 4;
 
     /// <summary>Streaming audio chunk schedule.</summary>
-    public Ming3TtsStreamChunkPolicy? StreamChunkPolicy { get; init; }
+    public Ming3TtsStreamChunkPolicy? StreamChunkPolicy { get; init; } = Ming3TtsStreamChunkPolicy.Grow;
 
     /// <inheritdoc />
     public override void Validate()

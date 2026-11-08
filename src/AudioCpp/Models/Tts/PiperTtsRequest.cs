@@ -10,22 +10,22 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record PiperTtsRequest : TtsRequest
 {
     /// <summary>Speech speed multiplier; larger values produce faster speech.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Acoustic latent noise scale.</summary>
-    public double? Variation { get; init; }
+    public double? Variation { get; init; } = 0.667;
 
     /// <summary>Stochastic duration noise scale.</summary>
-    public double? DurationVariation { get; init; }
+    public double? DurationVariation { get; init; } = 0.8;
 
     /// <summary>Non-negative generation seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <summary>Long-form text chunking mode.</summary>
-    public PiperTtsTextChunkMode? TextChunkMode { get; init; }
+    public PiperTtsTextChunkMode? TextChunkMode { get; init; } = PiperTtsTextChunkMode.Default;
 
     /// <summary>Maximum Unicode codepoints per long-form chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 280;
 
     /// <inheritdoc />
     public override void Validate()

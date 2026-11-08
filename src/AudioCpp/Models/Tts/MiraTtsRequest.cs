@@ -10,28 +10,28 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MiraTtsRequest : TtsRequest
 {
     /// <summary>Maximum autoregressive speech tokens; default 1024.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1024;
 
     /// <summary>Sampling temperature; default 0.8. Must be positive.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Top-k sampling cutoff; default 50.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Nucleus sampling probability; default 0.95. Must be positive.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.95;
 
     /// <summary>Minimum probability relative to the most likely token; default 0.05.</summary>
-    public double? MinP { get; init; }
+    public double? MinP { get; init; } = 0.05;
 
     /// <summary>Autoregressive repetition penalty; default 1.2.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.2;
 
     /// <summary>Maximum codepoints per progressively emitted streaming segment; default 160.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 160;
 
     /// <summary>Framework text chunking mode used by streaming synthesis.</summary>
-    public MiraTtsTextChunkMode? TextChunkMode { get; init; }
+    public MiraTtsTextChunkMode? TextChunkMode { get; init; } = MiraTtsTextChunkMode.Default;
 
     /// <summary>Sampling seed; omitted requests choose a random seed.</summary>
     public string? Seed { get; init; }

@@ -10,46 +10,46 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record BreezeTtsRequest : TtsRequest
 {
     /// <summary>BreezeTTS generation instruction.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = "Speak clearly and naturally.";
 
     /// <summary>Transcript for prompt/reference audio; required when reference audio codes are used, for either tts or clon.</summary>
     public string? ReferenceText { get; init; }
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 600.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 600;
 
     /// <summary>Framework text chunking mode.</summary>
-    public BreezeTtsTextChunkMode? TextChunkMode { get; init; }
+    public BreezeTtsTextChunkMode? TextChunkMode { get; init; } = BreezeTtsTextChunkMode.Default;
 
     /// <summary>Maximum generated BreezeTTS acoustic frames.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1500;
 
     /// <summary>Classifier-free guidance scale.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 1;
 
     /// <summary>Backbone first-codebook sampling temperature. Must be &gt; 0.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.9;
 
     /// <summary>Depth decoder codebook sampling temperature. Must be &gt; 0.</summary>
-    public double? DepthTemperature { get; init; }
+    public double? DepthTemperature { get; init; } = 0.9;
 
     /// <summary>Top-k sampling limit; 0 disables top-k filtering. Nonpositive values disable top-k filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Positive nucleus sampling cutoff; values &gt;=1 disable nucleus filtering.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 1;
 
     /// <summary>Generation seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Maximum generated codec frames per streaming audio event; fixed size with stream_chunk_policy=fixed.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 16;
 
     /// <summary>Additional trailing codec frames buffered before streaming emission. The decoder is causal; zero minimizes latency.</summary>
-    public long? StreamLookaheadMargin { get; init; }
+    public long? StreamLookaheadMargin { get; init; } = 0;
 
     /// <summary>Streaming chunk schedule: grow emits 1, 2, 4, ... frames up to stream_frames_per_event; fixed uses that size from the first event.</summary>
-    public BreezeTtsStreamChunkPolicy? StreamChunkPolicy { get; init; }
+    public BreezeTtsStreamChunkPolicy? StreamChunkPolicy { get; init; } = BreezeTtsStreamChunkPolicy.Grow;
 
     /// <inheritdoc />
     public override void Validate()

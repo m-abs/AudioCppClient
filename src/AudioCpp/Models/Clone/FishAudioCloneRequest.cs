@@ -14,22 +14,22 @@ public sealed record FishAudioCloneRequest : CloneRequest
     public string? MultiReferenceCond { get; init; }
 
     /// <summary>Maximum Fish Audio semantic tokens to generate; default 1024. Zero selects the default token budget.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 1024;
 
     /// <summary>Maximum characters per generated text chunk; default 200.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>Framework text chunking mode; default word_budget.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "word_budget";
 
     /// <summary>Top-p sampling value in (0, 1]; default 0.8.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Top-k sampling value; default 30.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 30;
 
     /// <summary>Semantic-token sampling temperature in (0, 2); default 0.8.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.8;
 
     /// <summary>Sampling seed for reproducible output; omitted uses a random seed.</summary>
     public string? Seed { get; init; }

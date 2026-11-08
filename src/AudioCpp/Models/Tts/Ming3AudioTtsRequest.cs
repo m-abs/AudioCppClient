@@ -13,16 +13,16 @@ public sealed record Ming3AudioTtsRequest : TtsRequest
     public string? SystemPrompt { get; init; }
 
     /// <summary>Enable the Thinker chat template's detailed thinking mode.</summary>
-    public bool? EnableThinking { get; init; }
+    public bool? EnableThinking { get; init; } = false;
 
     /// <summary>Thinker instruction accompanying the input audio; omitted ASR requests use the official transcription prompt.</summary>
     public string? Prompt { get; init; }
 
     /// <summary>Maximum generated Thinker text tokens.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 256;
 
     /// <summary>Maximum generated Talker acoustic patches per text fragment.</summary>
-    public long? MaxAudioTokens { get; init; }
+    public long? MaxAudioTokens { get; init; } = 1000;
 
     /// <summary>Talker built-in voice name; ignored when reference audio is supplied.</summary>
     public new Ming3AudioVoiceId? VoiceId { get; init; }
@@ -34,28 +34,28 @@ public sealed record Ming3AudioTtsRequest : TtsRequest
     public new string? Language { get; init; }
 
     /// <summary>Talker flow and reference-posterior sampling seed. Thinker generation is greedy.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "42";
 
     /// <summary>Talker conditioned prediction plus guidance_scale times its difference from the null prediction.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Talker flow SDE noise scale.</summary>
-    public double? Sigma { get; init; }
+    public double? Sigma { get; init; } = 0.25;
 
     /// <summary>Talker flow sampling temperature; zero still uses seeded initial noise.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0;
 
     /// <summary>Synthesize text as one fragment without framework text chunking.</summary>
-    public bool? RawText { get; init; }
+    public bool? RawText { get; init; } = false;
 
     /// <summary>Trim trailing low-energy 100-ms frames per Talker fragment, retaining a 300-ms tail.</summary>
-    public bool? TrimSilence { get; init; }
+    public bool? TrimSilence { get; init; } = true;
 
     /// <summary>Talker text chunk budget in Unicode codepoints.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 100;
 
     /// <summary>Framework Talker text chunking policy.</summary>
-    public Ming3AudioTextChunkMode? TextChunkMode { get; init; }
+    public Ming3AudioTextChunkMode? TextChunkMode { get; init; } = Ming3AudioTextChunkMode.TagAware;
 
     /// <inheritdoc />
     public override void Validate()

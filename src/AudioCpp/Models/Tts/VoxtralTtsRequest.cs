@@ -10,25 +10,25 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record VoxtralTtsRequest : TtsRequest
 {
     /// <summary>Embedded preset voice; the released checkpoint does not contain the encoder needed for reference-audio cloning.</summary>
-    public new VoxtralTtsVoiceId? VoiceId { get; init; }
+    public new VoxtralTtsVoiceId? VoiceId { get; init; } = VoxtralTtsVoiceId.CasualMale;
 
     /// <summary>Maximum generated audio frames per text chunk; each frame represents 80 ms.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 2048;
 
     /// <summary>Euler integration steps for the per-frame acoustic flow model.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 7;
 
     /// <summary>Acoustic classifier-free guidance scale; the AR backbone does not use CFG.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 1.2;
 
     /// <summary>Acoustic noise seed; omitted requests select a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Maximum Unicode codepoints per framework long-form text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Framework text chunking mode.</summary>
-    public VoxtralTtsTextChunkMode? TextChunkMode { get; init; }
+    public VoxtralTtsTextChunkMode? TextChunkMode { get; init; } = VoxtralTtsTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

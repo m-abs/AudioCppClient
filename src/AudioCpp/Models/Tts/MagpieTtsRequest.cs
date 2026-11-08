@@ -10,31 +10,31 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MagpieTtsRequest : TtsRequest
 {
     /// <summary>Target synthesis language code used by the Magpie text frontend; default en.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "en";
 
     /// <summary>Packaged MagpieTTS voice name; default Aria. Numeric speaker index strings are also accepted within the checkpoint speaker count.</summary>
     public new MagpieTtsVoiceId? VoiceId { get; init; }
 
     /// <summary>Autoregressive audio-token sampling temperature; default 0.6 from the v2607 model config.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.6;
 
     /// <summary>Autoregressive audio-token top-k sampling limit; default 80.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 80;
 
     /// <summary>Classifier-free guidance scale for Magpie decoder logits; default 2.5.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2.5;
 
     /// <summary>Maximum Magpie decoder frames per text segment; default 500 from the v2607 model config.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 500;
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 100 for zh and ko, otherwise 300.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Framework text chunking mode.</summary>
-    public MagpieTtsTextChunkMode? TextChunkMode { get; init; }
+    public MagpieTtsTextChunkMode? TextChunkMode { get; init; } = MagpieTtsTextChunkMode.Default;
 
     /// <summary>Seed for audio-token sampling; default 0.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <inheritdoc />
     public override void Validate()
@@ -115,7 +115,7 @@ public sealed record MagpieTtsRequest : TtsRequest
             options["max_tokens"] = MaxTokens.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TextChunkSize != null && TextChunkSize != 300)
+        if (TextChunkSize != null)
         {
             options["text_chunk_size"] = TextChunkSize.Value.ToString(CultureInfo.InvariantCulture);
         }

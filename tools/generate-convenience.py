@@ -78,6 +78,11 @@ def kind_of(opt):
     return {"int": "long", "float": "double", "bool": "bool", "enum": "enum"}.get(opt["type"], "string")
 
 
+def clean_enum_default(value, values):
+    # A default outside the enum values (e.g. "") cannot be a member: treat as no default.
+    return value if value in values else None
+
+
 def load_specs():
     specs = {}
     for path in sorted(glob.glob(os.path.join(SPECS_DIR, "*.json"))):
@@ -99,25 +104,39 @@ def resolved_default(family, opt, params):
     return opt.get("default")
 
 
+def literal(kind, enum_name, value):
+    if kind == "enum":
+        return f"{enum_name}.{member(value)}" if value is not None else None
+    if kind == "bool":
+        return "true" if value else "false"
+    if kind in ("long", "double"):
+        return fmt_num(value) if isinstance(value, (int, float)) else None
+    return csharp_string(value) if value is not None else None
+
+
+def matches_spec_default(info, value):
+    if info["spec_init"] is None:
+        return False
+    if info["kind"] == "bool":
+        return bool(value) == bool(info["spec_default"])
+    return value == info["spec_default"]
+
+
 def option_info(family, task, opt, params, caps):
     kind = kind_of(opt)
     values = opt.get("values")
     if kind == "enum" and not values:
         kind = "string"
     default = resolved_default(family, opt, params)
-    # A default outside the enum values (e.g. "") cannot be a member: treat as no default.
-    if kind == "enum" and default is not None and default not in values:
-        default = None
+    if kind == "enum":
+        default = clean_enum_default(default, values)
     routed = task == "design" and opt["name"] in DESIGN_ROUTED
     enum_name = pascal(family) + pascal(opt["name"]) if kind == "enum" else None
-    if kind == "enum":
-        init = f"{enum_name}.{member(default)}" if default is not None else None
-    elif kind == "bool":
-        init = "true" if default else "false"
-    elif kind in ("long", "double"):
-        init = fmt_num(default) if isinstance(default, (int, float)) else None
-    else:
-        init = csharp_string(default) if default is not None else None
+    spec_default = clean_enum_default(opt.get("default"), values) if kind == "enum" else opt.get("default")
+    init = literal(kind, enum_name, default)
+    # The omission guard compares against the spec default: the server applies the spec
+    # default, so a web-ui default that conflicts with it must travel on the wire.
+    spec_init = literal(kind, enum_name, spec_default)
     return {
         "name": opt["name"],
         "prop": BASE_PROP.get(opt["name"], pascal(opt["name"])),
@@ -125,6 +144,8 @@ def option_info(family, task, opt, params, caps):
         "type": enum_name if enum_name else kind,
         "init": init,
         "default": default,
+        "spec_default": spec_default,
+        "spec_init": spec_init,
         "values": values,
         "required": opt.get("required", False),
         "min": opt.get("min"),
@@ -182,8 +203,8 @@ def build_options_body(family, task, infos):
     for info in infos:
         target = "Instruction" if info["routed"] else info["prop"]
         cond = f"{target} != null"
-        if info["init"] is not None:
-            cond += f" && {target} != {info['init']}"
+        if info["spec_init"] is not None:
+            cond += f" && {target} != {info['spec_init']}"
         if info["kind"] == "enum":
             arms = ",\n".join(f"            {info['enum_name']}.{member(v)} => {q(v)}" for v in info["values"])
             value = (f"{target} switch\n            {{\n{arms},\n"
@@ -271,6 +292,11 @@ def model_default(family, spec):
     return ui.get("recommended_package") or family
 
 
+WIRE_FIELD = {"text": "text", "language": "language", "audio": "audio_path",
+             "audio_base64": "audio_base64", "voice_id": "voice_id",
+             "voice_ref": "voice_ref", "artifacts": "artifacts"}
+
+
 def golden_entry(family, task, infos, default_model):
     set_values = {}
     for info in infos:
@@ -288,18 +314,32 @@ def golden_entry(family, task, infos, default_model):
     if picked is None:
         return None
     by_name = {info["name"]: info for info in infos}
+    # Effective property values as the C# object sees them: explicit in the initializer,
+    # else the record initializer (gated and routed properties stay null).
+    effective = {}
+    for info in infos:
+        if info["name"] in set_values:
+            effective[info["name"]] = set_values[info["name"]]
+        elif info["name"] == "text":
+            effective[info["name"]] = "hello"
+        elif not info["gated"] and not info["routed"] and info["init"] is not None:
+            effective[info["name"]] = info["default"]
     options = {}
     for info in infos:
-        if info["name"] in set_values and set_values[info["name"]] != info["default"]:
-            options[info["name"]] = wire_value(info, set_values[info["name"]])
+        if info["name"] in effective and not matches_spec_default(info, effective[info["name"]]):
+            options[info["name"]] = wire_value(info, effective[info["name"]])
     request = {}
-    for field in ("text", "language", "audio", "audio_base64", "voice_id", "voice_ref", "artifacts"):
-        if field in options:
+    for field, opt_name in WIRE_FIELD.items():
+        info = by_name.get(opt_name)
+        if info is None:
+            if field == "text":
+                request[field] = "hello"
             continue
-        if field in set_values:
-            request[field] = wire_value(by_name[field], set_values[field])
-        elif field == "text":
-            request[field] = "hello"
+        if opt_name in options:
+            continue
+        # BASE_PROP options are shadowed by `new` properties: the golden initializer
+        # sets the derived property, the base wire field stays null, so only the
+        # options map can carry these values.
     if options:
         request["options"] = options
     initializer = []
@@ -319,30 +359,47 @@ def golden_entry(family, task, infos, default_model):
 
 
 def validate_entry(family, task, infos):
+    entries = []
+    for info in infos:
+        if info["gated"]:
+            name = "Instruction" if info["routed"] else info["prop"]
+            entries.append({
+                "family": family,
+                "name": base_name(family, task),
+                "method": f"{base_name(family, task)}Validate{pascal(info['name'])}",
+                "initializer": [f"{name} = {csharp_literal(info, required_value(info))}"],
+                "message": gate_message(family, task, info["name"]),
+                "param": None,
+                "opt": info["name"],
+                "uses_enum": info["kind"] == "enum",
+                "gate": True,
+            })
     target = None
     for info in infos:
-        if info["gated"] or info["kind"] not in ("long", "double") or (info["min"] is None and info["max"] is None):
+        if info["kind"] not in ("long", "double") or (info["min"] is None and info["max"] is None):
             continue
         target = info
         break
-    if target is None:
-        return None
-    bad = target["min"] - 1 if target["min"] is not None else target["max"] + 1
-    initializer = []
-    for info in infos:
-        if info["required"] and info is not target:
-            rname = "Instruction" if info["routed"] else info["prop"]
-            initializer.append(f"{rname} = {csharp_literal(info, required_value(info))}")
-    name = "Instruction" if target["routed"] else target["prop"]
-    initializer.append(f"{name} = {csharp_literal(target, bad)}")
-    return {
-        "family": family,
-        "name": base_name(family, task),
-        "initializer": initializer,
-        "message": bounds_message(family, task, target),
-        "param": name,
-        "uses_enum": target["kind"] == "enum",
-    }
+    if target is not None:
+        bad = target["min"] - 1 if target["min"] is not None else target["max"] + 1
+        name = "Instruction" if target["routed"] else target["prop"]
+        initializer = []
+        for info in infos:
+            if info["required"] and info is not target:
+                rname = "Instruction" if info["routed"] else info["prop"]
+                initializer.append(f"{rname} = {csharp_literal(info, required_value(info))}")
+        initializer.append(f"{name} = {csharp_literal(target, bad)}")
+        entries.append({
+            "family": family,
+            "name": base_name(family, task),
+            "method": f"{base_name(family, task)}Validate",
+            "initializer": initializer,
+            "message": bounds_message(family, task, target),
+            "param": name,
+            "gate": False,
+            "uses_enum": target["kind"] == "enum",
+        })
+    return entries
 
 
 def prefix_entry(family, task, infos):
@@ -368,7 +425,7 @@ def test_file(task, entries, validate_entries, prefix_entries):
             f"/// <summary>Golden serialization, validation and composition tests for the generated {task} convenience records.</summary>",
             f"public class {task.capitalize()}GoldenTests", "{"]
     for entry in entries:
-        lines.append(f"    /// <summary>Golden serialization for the generated <c>{entry['name']}{task.capitalize()}Request</c> (set options emitted in spec order).</summary>")
+        lines.append(f"    /// <summary>Golden serialization for the generated <c>{entry['name']}{task.capitalize()}Request</c> (set and pre-initialized options emitted in spec order).</summary>")
         lines.append("    [Fact]")
         lines.append(f"    public void {entry['name']}Golden()")
         lines.append("    {")
@@ -379,14 +436,18 @@ def test_file(task, entries, validate_entries, prefix_entries):
         lines.append("    }")
         lines.append("")
     for entry in validate_entries:
-        lines.append(f"    /// <summary>An out-of-range value fails validation for the generated <c>{entry['name']}{task.capitalize()}Request</c>.</summary>")
+        if entry["gate"]:
+            lines.append(f"    /// <summary>A set <c>{entry['opt']}</c> fails the capability gate for the generated <c>{entry['name']}{task.capitalize()}Request</c>.</summary>")
+        else:
+            lines.append(f"    /// <summary>An out-of-range value fails validation for the generated <c>{entry['name']}{task.capitalize()}Request</c>.</summary>")
         lines.append("    [Fact]")
-        lines.append(f"    public void {entry['name']}Validate()")
+        lines.append(f"    public void {entry['method']}()")
         lines.append("    {")
         lines.append(f"        {entry['name']}{task.capitalize()}Request request = new() {{ {', '.join(entry['initializer'])} }};")
         lines.append("        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());")
         lines.append(f"        Assert.Contains({q(entry['message'])}, ex.Message);")
-        lines.append(f"        Assert.Equal({q(entry['param'])}, ex.ParamName);")
+        if entry["param"] is not None:
+            lines.append(f"        Assert.Equal({q(entry['param'])}, ex.ParamName);")
         lines.append("    }")
         lines.append("")
     for entry in prefix_entries:
@@ -438,7 +499,10 @@ def record_file(family, task, infos, default_model):
             continue
         shadow = "new " if info["name"] in BASE_PROP else ""
         summary = xml_escape(info["description"]) if info["description"] else f"Option <c>{info['name']}</c>."
-        props.append(f"    /// <summary>{summary}</summary>\n    public {shadow}{info['type']}? {info['prop']} {{ get; init; }}")
+        # Gated options get no initializer: Validate() rejects any set value, so a
+        # pre-initialized default would make every request throw.
+        init_part = f" = {info['init']};" if info["init"] is not None and not info["gated"] else ""
+        props.append(f"    /// <summary>{summary}</summary>\n    public {shadow}{info['type']}? {info['prop']} {{ get; init; }}{init_part}")
     body = ["\n\n".join(props)]
     if task == "design" and not any(info["routed"] for info in infos):
         body.append("    /// <inheritdoc />\n    public override string? ComposedText()\n    {\n        return Instruction == null ? Text : $\"({Instruction}) {Text}\";\n    }")
@@ -554,8 +618,7 @@ def main():
         if g:
             test_entries[task].append(g)
         v = validate_entry(family, task, infos)
-        if v:
-            validate_entries[task].append(v)
+        validate_entries[task].extend(v)
         p = prefix_entry(family, task, infos)
         if p:
             prefix_entries[task].append(p)

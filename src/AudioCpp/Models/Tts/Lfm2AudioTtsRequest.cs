@@ -10,16 +10,16 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Lfm2AudioTtsRequest : TtsRequest
 {
     /// <summary>Must match the checkpoint's language (en or ja) when given; each published checkpoint transcribes and speaks one language.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "auto";
 
     /// <summary>ASR: transcript tokens per audio chunk, 512 by default. TTS: audio frames (80 ms each) per text chunk, 512 by default. S2S: text tokens and audio frames of the reply together, 1024 by default. A transcript, a text chunk's speech or a reply that reaches it is cut off there, with a warning on stderr.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 512;
 
     /// <summary>Audio chunking mode. auto transcribes input up to audio_chunk_duration_sec whole and splits longer input at pauses found by the bundled VAD (fixed chunks when the VAD model is absent); vad always splits at pauses and skips silence; fixed cuts every audio_chunk_duration_sec; none transcribes the whole input at once.</summary>
-    public Lfm2AudioAudioChunkMode? AudioChunkMode { get; init; }
+    public Lfm2AudioAudioChunkMode? AudioChunkMode { get; init; } = Lfm2AudioAudioChunkMode.Auto;
 
     /// <summary>Longest chunk in seconds, at least 1. With fixed chunks, a final piece shorter than 1 second and the chunk before it split their audio evenly.</summary>
-    public double? AudioChunkDurationSec { get; init; }
+    public double? AudioChunkDurationSec { get; init; } = 30;
 
     /// <summary>TTS and S2S: audio code sampling temperature, 0.8 by default for TTS and 1.0 for S2S; 0 picks the most likely code.</summary>
     public double? Temperature { get; init; }
@@ -28,10 +28,10 @@ public sealed record Lfm2AudioTtsRequest : TtsRequest
     public long? TopK { get; init; }
 
     /// <summary>S2S: text token sampling temperature; 0, the default, picks the most likely token, as liquid-audio's README and demo do.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 0;
 
     /// <summary>S2S: with a text_temperature above 0, sample text tokens from the k most likely; 0, the default, keeps all, and 1 is greedy.</summary>
-    public long? TextTopK { get; init; }
+    public long? TextTopK { get; init; } = 0;
 
     /// <summary>TTS and S2S: sampling seed; omitted requests choose a random seed. TTS text chunk i uses seed + i. S2S text sampling draws from a stream of its own, so with the same seed a reply follows the greedy-text reply until a text token differs.</summary>
     public string? Seed { get; init; }
@@ -40,13 +40,13 @@ public sealed record Lfm2AudioTtsRequest : TtsRequest
     public Lfm2AudioTextChunkMode? TextChunkMode { get; init; }
 
     /// <summary>TTS: maximum Unicode codepoints per text chunk, each spoken as its own turn.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>TTS and S2S streaming: audio frames (80 ms each) per event; each event's audio is final. ASR runs offline only.</summary>
-    public long? StreamFramesPerEvent { get; init; }
+    public long? StreamFramesPerEvent { get; init; } = 1;
 
     /// <summary>S2S: also return the reply's text tokens and audio codes as an lfm2_audio.reply artifact, to send back as history with the conversation's next turn.</summary>
-    public bool? ReturnCodes { get; init; }
+    public bool? ReturnCodes { get; init; } = false;
 
     /// <inheritdoc />
     public override void Validate()
@@ -104,7 +104,7 @@ public sealed record Lfm2AudioTtsRequest : TtsRequest
             options["language"] = Language;
         }
 
-        if (MaxTokens != null && MaxTokens != 512)
+        if (MaxTokens != null)
         {
             options["max_tokens"] = MaxTokens.Value.ToString(CultureInfo.InvariantCulture);
         }

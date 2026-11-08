@@ -11,19 +11,19 @@ public sealed record GlmTtsRequest : TtsRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Maximum generated speech tokens; otherwise the official 2x-to-20x text-token bounds are used. Nonpositive values select the automatic text-derived budget.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 0;
 
     /// <summary>Speech-token temperature; official default 1.0. Nonpositive values select greedy decoding.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>Speech-token top-k; official default 25. Nonpositive values disable top-k filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 25;
 
     /// <summary>Speech-token nucleus threshold; official default 0.8. Out-of-range values are not rejected by the parser.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Speech-token, Flow-noise, and HiFT seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Flow Euler steps; defaults to model config, usually official default 10.</summary>
     public long? NumInferenceSteps { get; init; }
@@ -38,7 +38,7 @@ public sealed record GlmTtsRequest : TtsRequest
     public string? HiftSourceRandomFile { get; init; }
 
     /// <summary>Torch RNG value offset used before HiFT source generation; default 0.</summary>
-    public long? HiftPriorNoiseCount { get; init; }
+    public long? HiftPriorNoiseCount { get; init; } = 0;
 
     /// <inheritdoc />
     public override void Validate()

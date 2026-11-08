@@ -17,28 +17,28 @@ public sealed record MossTtsdTtsRequest : TtsRequest
     public new string? Language { get; init; }
 
     /// <summary>Free-text direction for the delivery.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = string.Empty;
 
     /// <summary>Reproduces a take exactly. Parsed as signed 32-bit integer then converted to uint32; negative values wrap.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Text-token sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 1.5;
 
     /// <summary>Audio sampling temperature; must be &gt; 0, default 1.5.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1.5;
 
     /// <summary>Audio nucleus sampling cutoff.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.6;
 
     /// <summary>Audio top-k. Nonpositive values disable filtering.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Audio repetition penalty; must be &gt; 0. Checked when token history is present; default 1.1.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Ceiling on generated codec frames at 12.5/s; 0 derives one from the dialogue length. Nonpositive values derive an automatic ceiling.</summary>
-    public long? MaxFrames { get; init; }
+    public long? MaxFrames { get; init; } = 0;
 
     /// <inheritdoc />
     public override void Validate()
@@ -81,7 +81,7 @@ public sealed record MossTtsdTtsRequest : TtsRequest
             options["language"] = Language;
         }
 
-        if (Instruct != null && Instruct != string.Empty)
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }
@@ -116,7 +116,7 @@ public sealed record MossTtsdTtsRequest : TtsRequest
             options["repetition_penalty"] = RepetitionPenalty.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (MaxFrames != null && MaxFrames != 0)
+        if (MaxFrames != null)
         {
             options["max_frames"] = MaxFrames.Value.ToString(CultureInfo.InvariantCulture);
         }

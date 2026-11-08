@@ -10,31 +10,31 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record Maya1TtsRequest : TtsRequest
 {
     /// <summary>Natural-language description of the voice, accent, timbre, age, and delivery.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = "Warm female voice with an American accent and conversational pacing.";
 
     /// <summary>Maximum generated audio-token count per text chunk; default 2048.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 2048;
 
     /// <summary>Minimum generated audio-token count before EOS may stop generation; default 28.</summary>
-    public long? MinTokens { get; init; }
+    public long? MinTokens { get; init; } = 28;
 
     /// <summary>Autoregressive sampling temperature; default 0.4. Must be &gt; 0.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.4;
 
     /// <summary>Autoregressive nucleus sampling probability; must be in (0, 1], default 0.9.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.9;
 
     /// <summary>Autoregressive repetition penalty; default 1.1. Must be &gt; 0.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Sampling and SNAC decoder noise seed; omitted requests choose a random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 300.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Framework long-form text chunking mode; tag_aware preserves inline emotion tags.</summary>
-    public Maya1TextChunkMode? TextChunkMode { get; init; }
+    public Maya1TextChunkMode? TextChunkMode { get; init; } = Maya1TextChunkMode.TagAware;
 
     /// <inheritdoc />
     public override void Validate()
@@ -82,7 +82,7 @@ public sealed record Maya1TtsRequest : TtsRequest
     {
         Dictionary<string, string> options = [];
 
-        if (Instruct != null && Instruct != "Warm female voice with an American accent and conversational pacing.")
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }

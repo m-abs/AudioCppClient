@@ -8,22 +8,22 @@ namespace Mabs.AudioCpp.Models.Clone;
 public sealed record AukCloneRequest : CloneRequest
 {
     /// <summary>TTS voice description. Without it, text carries the complete upstream instruction; editing instructions always go in text.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = string.Empty;
 
     /// <summary>Positive output duration in seconds. Required without reference audio; otherwise defaults to the valid reference duration.</summary>
     public double? DurationSec { get; init; }
 
     /// <summary>Euler sampling steps for AuK base; AuK-Flash always uses its fixed four-step schedule.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 32;
 
     /// <summary>Batched guidance strength for AuK base; AuK-Flash always disables classifier-free guidance.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Sway coefficient for AuK base; ignored by AuK-Flash.</summary>
-    public double? SwaySamplingCoef { get; init; }
+    public double? SwaySamplingCoef { get; init; } = -1;
 
     /// <summary>Nonnegative noise seed, or -1 for a random seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "-1";
 
     /// <inheritdoc />
     public override void Validate()
@@ -41,7 +41,7 @@ public sealed record AukCloneRequest : CloneRequest
     {
         Dictionary<string, string> options = [];
 
-        if (Instruct != null && Instruct != string.Empty)
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }

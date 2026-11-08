@@ -10,43 +10,43 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record MossTtsV15TtsRequest : TtsRequest
 {
     /// <summary>Minimum generated audio frames per text chunk; nonpositive values derive a text-length-based floor. Separate from duration_frames conditioning.</summary>
-    public long? MinFrames { get; init; }
+    public long? MinFrames { get; init; } = 0;
 
     /// <summary>Generated audio-frame ceiling per text chunk; nonpositive values derive a text-length-based ceiling. Runtime raises it to at least the effective min_frames plus the number of codebooks.</summary>
-    public long? MaxFrames { get; init; }
+    public long? MaxFrames { get; init; } = 0;
 
     /// <summary>Voice description. Followed only loosely on this checkpoint; a reference recording is far more reliable.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = string.Empty;
 
     /// <summary>Duration budget in codec frames at 12.5 a second, the model's own '- Tokens:' field. Nonpositive values disable duration conditioning.</summary>
     public long? DurationFrames { get; init; }
 
     /// <summary>Full language name; the model does not understand codes like 'en'.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = string.Empty;
 
     /// <summary>Reproduces a take exactly; default 0. Parsed as signed 32-bit integer then converted to uint32; negative values wrap.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Text-token sampling temperature. Must be finite and positive when sampling.</summary>
-    public double? TextTemperature { get; init; }
+    public double? TextTemperature { get; init; } = 1.5;
 
     /// <summary>Audio sampling temperature; default 1.5. Must be finite and positive when sampling.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1.5;
 
     /// <summary>Audio nucleus sampling cutoff; default 0.6.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.6;
 
     /// <summary>Audio top-k; default 50.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 50;
 
     /// <summary>Audio repetition penalty; default 1.1. Must be finite and positive when history is nonempty.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.1;
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 200.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 200;
 
     /// <summary>Text chunking policy; word_budget also accepts default.</summary>
-    public MossTtsV15TextChunkMode? TextChunkMode { get; init; }
+    public MossTtsV15TextChunkMode? TextChunkMode { get; init; } = MossTtsV15TextChunkMode.WordBudget;
 
     /// <inheritdoc />
     public override void Validate()
@@ -74,7 +74,7 @@ public sealed record MossTtsV15TtsRequest : TtsRequest
             options["max_frames"] = MaxFrames.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (Instruct != null && Instruct != string.Empty)
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }
@@ -84,7 +84,7 @@ public sealed record MossTtsV15TtsRequest : TtsRequest
             options["duration_frames"] = DurationFrames.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (Language != null && Language != string.Empty)
+        if (Language != null)
         {
             options["language"] = Language;
         }

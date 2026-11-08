@@ -14,55 +14,55 @@ public sealed record OmnivoiceTtsRequest : TtsRequest
     public string? ReferenceText { get; init; }
 
     /// <summary>Voice-design instruction such as speaker attributes, accent, style, or delivery.</summary>
-    public string? Instruct { get; init; }
+    public string? Instruct { get; init; } = string.Empty;
 
     /// <summary>Generation seed for reproducible output; omitted value keeps the session RNG state.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Diffusion language-model inference steps; default 32.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 32;
 
     /// <summary>Classifier-free guidance scale; default 2.0.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 2;
 
     /// <summary>Speech speed multiplier used for target-length estimation; default 1.0.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Target output duration in seconds; omitted uses the model's estimated duration.</summary>
     public double? DurationSec { get; init; }
 
     /// <summary>Diffusion timestep schedule shift; default 0.1.</summary>
-    public double? Shift { get; init; }
+    public double? Shift { get; init; } = 0.1;
 
     /// <summary>Add the denoise control token when reference audio is present; default true.</summary>
-    public bool? Denoise { get; init; }
+    public bool? Denoise { get; init; } = true;
 
     /// <summary>Preprocess speaker reference audio before tokenization; default true.</summary>
-    public bool? PreprocessPrompt { get; init; }
+    public bool? PreprocessPrompt { get; init; } = true;
 
     /// <summary>Apply output postprocessing and trimming; default true.</summary>
-    public bool? PostprocessOutput { get; init; }
+    public bool? PostprocessOutput { get; init; } = true;
 
     /// <summary>Layer-order penalty used while selecting masked audio-codebook positions; default 5.0.</summary>
-    public double? LayerPenaltyFactor { get; init; }
+    public double? LayerPenaltyFactor { get; init; } = 5;
 
     /// <summary>Gumbel temperature for masked-position selection; default 5.0.</summary>
-    public double? PositionTemperature { get; init; }
+    public double? PositionTemperature { get; init; } = 5;
 
     /// <summary>Audio-token class sampling temperature; default 0 for greedy class selection.</summary>
-    public double? ClassTemperature { get; init; }
+    public double? ClassTemperature { get; init; } = 0;
 
     /// <summary>Target chunk duration for automatic long-form splitting; default 15 seconds.</summary>
-    public double? AudioChunkDurationSec { get; init; }
+    public double? AudioChunkDurationSec { get; init; } = 15;
 
     /// <summary>Estimated duration above which long-form generation is split into chunks; default 30 seconds.</summary>
-    public double? AudioChunkThresholdSec { get; init; }
+    public double? AudioChunkThresholdSec { get; init; } = 30;
 
     /// <summary>Explicit long-form text chunk size in Unicode codepoints. Omitted value uses duration-based automatic chunking.</summary>
     public long? TextChunkSize { get; init; }
 
     /// <summary>Text chunking mode; default tag_aware.</summary>
-    public string? TextChunkMode { get; init; }
+    public string? TextChunkMode { get; init; } = "tag_aware";
 
     /// <inheritdoc />
     public override void Validate()
@@ -115,7 +115,7 @@ public sealed record OmnivoiceTtsRequest : TtsRequest
             options["reference_text"] = ReferenceText;
         }
 
-        if (Instruct != null && Instruct != string.Empty)
+        if (Instruct != null)
         {
             options["instruct"] = Instruct;
         }

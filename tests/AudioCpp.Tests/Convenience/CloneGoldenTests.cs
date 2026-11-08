@@ -12,16 +12,16 @@ namespace Mabs.AudioCpp.Tests.Convenience;
 /// <summary>Golden serialization, validation and composition tests for the generated clone convenience records.</summary>
 public class CloneGoldenTests
 {
-    /// <summary>Golden serialization for the generated <c>Audio8TtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Audio8TtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Audio8TtsGolden()
     {
         Audio8TtsCloneRequest request = new() { Text = "hello", ReferenceText = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "audio8_tts_preview_0_6b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"audio8_tts_preview_0_6b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"audio8_tts_preview_0_6b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"top_p\":\"0.9\",\"top_k\":\"50\",\"temperature\":\"0.7\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>AukCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>AukCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void AukGolden()
     {
@@ -30,7 +30,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"auk_base_f32\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>BreezeTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>BreezeTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void BreezeTtsGolden()
     {
@@ -39,7 +39,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"breeze_tts_2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"instruct\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>ChatterboxCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>ChatterboxCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void ChatterboxGolden()
     {
@@ -48,7 +48,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"chatterbox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"exaggeration\":\"1.5\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Confucius4TtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Confucius4TtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Confucius4TtsGolden()
     {
@@ -57,16 +57,16 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"confucius4_tts_orig\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Cosyvoice3CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Cosyvoice3CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Cosyvoice3Golden()
     {
         Cosyvoice3CloneRequest request = new() { Text = "hello", TemplateName = Cosyvoice3TemplateName.CrossLingual };
         string json = Json.Serialize(new TaskRunRequest { Model = "cosyvoice3_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"cosyvoice3_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"cross_lingual\"}}}", json);
+        Assert.Equal("{\"model\":\"cosyvoice3_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"cross_lingual\",\"min_tokens\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>DotsTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>DotsTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void DotsTtsGolden()
     {
@@ -75,16 +75,16 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"dots_tts_soar_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>DramaboxCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>DramaboxCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void DramaboxGolden()
     {
         DramaboxCloneRequest request = new() { Text = "hello", TargetVoice = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "dramabox_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"dramabox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"target_voice\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"dramabox_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"target_voice\":\"x\",\"negative_prompt\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>EchoTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>EchoTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void EchoTtsGolden()
     {
@@ -93,7 +93,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"echo_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_size\":\"301\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>F5TtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>F5TtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void F5TtsGolden()
     {
@@ -102,7 +102,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"habibi_unified\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"dialect\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FireredAudioCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FireredAudioCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FireredAudioGolden()
     {
@@ -111,7 +111,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"firered_audio_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts_clone\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Fireredtts3CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Fireredtts3CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Fireredtts3Golden()
     {
@@ -120,7 +120,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"fireredtts3_instruct_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"instruct_tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FishAudioCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FishAudioCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FishAudioGolden()
     {
@@ -129,7 +129,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"fish_audio_s2_pro_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>FishDrama3CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>FishDrama3CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void FishDrama3Golden()
     {
@@ -138,7 +138,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"fish_drama3_q4_experts_q8_backbone\",\"request\":{\"text\":\"hello\",\"options\":{\"encode_reference_only\":\"true\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>GlmTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>GlmTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void GlmTtsGolden()
     {
@@ -147,7 +147,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"glm_tts_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\",\"max_tokens\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>HiggsAudioTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>HiggsAudioTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void HiggsAudioTtsGolden()
     {
@@ -156,25 +156,25 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"higgs_audio_tts_4b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"33\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>IndexTts2CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>IndexTts2CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void IndexTts2Golden()
     {
         IndexTts2CloneRequest request = new() { Text = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "index_tts2_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"index_tts2_q8_0\",\"request\":{\"options\":{\"text\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"index_tts2_q8_0\",\"request\":{\"options\":{\"text\":\"x\",\"emotion_text\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>IrodoriTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>IrodoriTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void IrodoriTtsGolden()
     {
         IrodoriTtsCloneRequest request = new() { Text = "hello", StreamFramesPerEvent = 13 };
         string json = Json.Serialize(new TaskRunRequest { Model = "irodori_tts_v4_small_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\"}}}", json);
+        Assert.Equal("{\"model\":\"irodori_tts_v4_small_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_frames_per_event\":\"13\",\"num_inference_steps\":\"40\",\"duration_sec\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>KittenTts2CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>KittenTts2CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void KittenTts2Golden()
     {
@@ -183,7 +183,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"kitten_tts2_20261021_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"preset\":\"expressive\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Ming3AudioCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Ming3AudioCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Ming3AudioGolden()
     {
@@ -192,7 +192,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"ming3_audio_tiny_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"system_prompt\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Ming3TtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Ming3TtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Ming3TtsGolden()
     {
@@ -201,16 +201,16 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"ming_3_0_tts_0_5b_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"template_name\":\"tts\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MiottsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MiottsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MiottsGolden()
     {
         MiottsCloneRequest request = new() { Text = "hello", MaxTokens = 1 };
         string json = Json.Serialize(new TaskRunRequest { Model = "miotts_1_7b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"miotts_1_7b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\"}}}", json);
+        Assert.Equal("{\"model\":\"miotts_1_7b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\",\"top_k\":\"50\",\"top_p\":\"1\",\"temperature\":\"0.8\",\"repetition_penalty\":\"1\",\"best_of_n\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MiraTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MiraTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MiraTtsGolden()
     {
@@ -219,7 +219,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"mira_tts\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1025\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsLocalCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsLocalCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsLocalGolden()
     {
@@ -228,7 +228,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"moss_tts_local_v1_5_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"4097\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsNanoCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsNanoCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsNanoGolden()
     {
@@ -237,34 +237,34 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"moss_tts_nano_100m_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsV15CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsV15CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsV15Golden()
     {
         MossTtsV15CloneRequest request = new() { Text = "hello", MinFrames = 1 };
         string json = Json.Serialize(new TaskRunRequest { Model = "moss_tts_v15_q8_0_codec_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"moss_tts_v15_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"min_frames\":\"1\"}}}", json);
+        Assert.Equal("{\"model\":\"moss_tts_v15_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"min_frames\":\"1\",\"instruct\":\"\",\"language\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>MossTtsdCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>MossTtsdCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void MossTtsdGolden()
     {
         MossTtsdCloneRequest request = new() { Text = "hello", VoiceSamples = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "moss_ttsd_q8_0_codec_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"moss_ttsd_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"moss_ttsd_q8_0_codec_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"voice_samples\":\"x\",\"instruct\":\"\",\"max_frames\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>OmnivoiceCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>OmnivoiceCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void OmnivoiceGolden()
     {
         OmnivoiceCloneRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "omnivoice_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"omnivoice_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"omnivoice_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"instruct\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>OutettsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>OutettsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void OutettsGolden()
     {
@@ -273,7 +273,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"outetts_1_0_1b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"max_tokens\":\"1\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PlapreCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PlapreCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PlapreGolden()
     {
@@ -282,7 +282,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"plapre_3_bf16\",\"request\":{\"text\":\"hello\",\"options\":{\"reference_text\":\"x\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PocketTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PocketTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PocketTtsGolden()
     {
@@ -291,7 +291,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"pocket_tts_english_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"frames_after_eos\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>PocketTtsSmallCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>PocketTtsSmallCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void PocketTtsSmallGolden()
     {
@@ -300,25 +300,25 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"pocket_tts_small_english_18m_refl_f32\",\"request\":{\"text\":\"hello\",\"options\":{\"frames_after_eos\":\"0\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Qwen3TtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Qwen3TtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Qwen3TtsGolden()
     {
         Qwen3TtsCloneRequest request = new() { Text = "hello", StreamChunkPolicy = Qwen3TtsStreamChunkPolicy.Fixed };
         string json = Json.Serialize(new TaskRunRequest { Model = "qwen3_tts_1_7b_base_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"qwen3_tts_1_7b_base_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_chunk_policy\":\"fixed\"}}}", json);
+        Assert.Equal("{\"model\":\"qwen3_tts_1_7b_base_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"stream_chunk_policy\":\"fixed\",\"instruct\":\"\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>SoproTtsCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>SoproTtsCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void SoproTtsGolden()
     {
         SoproTtsCloneRequest request = new() { Text = "hello", Language = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "sopro_v2_turbo_f16", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"sopro_v2_turbo_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"sopro_v2_turbo_f16\",\"request\":{\"text\":\"hello\",\"options\":{\"language\":\"x\",\"temperature\":\"0.8\",\"top_p\":\"0.9\",\"top_k\":\"25\",\"num_inference_steps\":\"2\",\"text_chunk_size\":\"300\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>VieneuV3TurboCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>VieneuV3TurboCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void VieneuV3TurboGolden()
     {
@@ -327,16 +327,16 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"vieneu_v3_turbo_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"auto_frame_cap\":\"false\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Voxcpm1CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Voxcpm1CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Voxcpm1Golden()
     {
         Voxcpm1CloneRequest request = new() { Text = "hello", TextChunkMode = "x" };
         string json = Json.Serialize(new TaskRunRequest { Model = "voxcpm1_0_5b_q8_0", Request = request.ToTaskRequestBody() });
-        Assert.Equal("{\"model\":\"voxcpm1_0_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_mode\":\"x\"}}}", json);
+        Assert.Equal("{\"model\":\"voxcpm1_0_5b_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"text_chunk_mode\":\"x\",\"retry_badcase\":\"true\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>Voxcpm2CloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>Voxcpm2CloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void Voxcpm2Golden()
     {
@@ -345,7 +345,7 @@ public class CloneGoldenTests
         Assert.Equal("{\"model\":\"voxcpm2_q8_0\",\"request\":{\"text\":\"hello\",\"options\":{\"min_tokens\":\"3\"}}}", json);
     }
 
-    /// <summary>Golden serialization for the generated <c>ZipvoiceCloneRequest</c> (set options emitted in spec order).</summary>
+    /// <summary>Golden serialization for the generated <c>ZipvoiceCloneRequest</c> (set and pre-initialized options emitted in spec order).</summary>
     [Fact]
     public void ZipvoiceGolden()
     {
@@ -534,6 +534,15 @@ public class CloneGoldenTests
         Assert.Equal("StreamFramesPerEvent", ex.ParamName);
     }
 
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>KittenTts2CloneRequest</c>.</summary>
+    [Fact]
+    public void KittenTts2ValidateVoiceId()
+    {
+        KittenTts2CloneRequest request = new() { VoiceId = KittenTts2VoiceId.Bella };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("kitten_tts2 clone does not accept voice_id (capability built_in_voices is false)", ex.Message);
+    }
+
     /// <summary>An out-of-range value fails validation for the generated <c>KittenTts2CloneRequest</c>.</summary>
     [Fact]
     public void KittenTts2Validate()
@@ -544,6 +553,15 @@ public class CloneGoldenTests
         Assert.Equal("Temperature", ex.ParamName);
     }
 
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Ming3AudioCloneRequest</c>.</summary>
+    [Fact]
+    public void Ming3AudioValidateVoiceId()
+    {
+        Ming3AudioCloneRequest request = new() { VoiceId = Ming3AudioVoiceId.USJames };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("ming3_audio clone does not accept voice_id (capability built_in_voices is false)", ex.Message);
+    }
+
     /// <summary>An out-of-range value fails validation for the generated <c>Ming3AudioCloneRequest</c>.</summary>
     [Fact]
     public void Ming3AudioValidate()
@@ -552,6 +570,15 @@ public class CloneGoldenTests
         ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
         Assert.Contains("ming3_audio clone max_tokens must be at least 1", ex.Message);
         Assert.Equal("MaxTokens", ex.ParamName);
+    }
+
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Ming3TtsCloneRequest</c>.</summary>
+    [Fact]
+    public void Ming3TtsValidateVoiceId()
+    {
+        Ming3TtsCloneRequest request = new() { VoiceId = Ming3TtsVoiceId.USEmma };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("ming3_tts clone does not accept voice_id (capability built_in_voices is false)", ex.Message);
     }
 
     /// <summary>An out-of-range value fails validation for the generated <c>Ming3TtsCloneRequest</c>.</summary>
@@ -644,6 +671,15 @@ public class CloneGoldenTests
         Assert.Equal("MaxTokens", ex.ParamName);
     }
 
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>PlapreCloneRequest</c>.</summary>
+    [Fact]
+    public void PlapreValidateVoiceId()
+    {
+        PlapreCloneRequest request = new() { VoiceId = PlapreVoiceId.Tor };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("plapre clone does not accept voice_id (capability built_in_voices is false)", ex.Message);
+    }
+
     /// <summary>An out-of-range value fails validation for the generated <c>PlapreCloneRequest</c>.</summary>
     [Fact]
     public void PlapreValidate()
@@ -672,6 +708,15 @@ public class CloneGoldenTests
         ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
         Assert.Contains("pocket_tts_small clone frames_after_eos must be at least -1", ex.Message);
         Assert.Equal("FramesAfterEos", ex.ParamName);
+    }
+
+    /// <summary>A set <c>voice_id</c> fails the capability gate for the generated <c>Qwen3TtsCloneRequest</c>.</summary>
+    [Fact]
+    public void Qwen3TtsValidateVoiceId()
+    {
+        Qwen3TtsCloneRequest request = new() { VoiceId = Qwen3TtsVoiceId.Aiden };
+        ArgumentException ex = Assert.Throws<ArgumentException>(() => request.Validate());
+        Assert.Contains("qwen3_tts clone does not accept voice_id (capability built_in_voices is false)", ex.Message);
     }
 
     /// <summary>An out-of-range value fails validation for the generated <c>Qwen3TtsCloneRequest</c>.</summary>

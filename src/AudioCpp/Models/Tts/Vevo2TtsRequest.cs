@@ -31,19 +31,19 @@ public sealed record Vevo2TtsRequest : TtsRequest
     public string? StyleRefText { get; init; }
 
     /// <summary>Use prosody codes; default depends on route and requires prosody audio when enabled.</summary>
-    public bool? UseProsodyCode { get; init; }
+    public bool? UseProsodyCode { get; init; } = false;
 
     /// <summary>Align reference pitch to the target voice; default depends on route.</summary>
-    public bool? UsePitchShift { get; init; }
+    public bool? UsePitchShift { get; init; } = false;
 
     /// <summary>Manual source reference pitch shift in semitones.</summary>
-    public long? SourceShiftSteps { get; init; }
+    public long? SourceShiftSteps { get; init; } = 0;
 
     /// <summary>Manual prosody reference pitch shift in semitones.</summary>
-    public long? ProsodyShiftSteps { get; init; }
+    public long? ProsodyShiftSteps { get; init; } = 0;
 
     /// <summary>Manual style reference pitch shift in semitones.</summary>
-    public long? StyleShiftSteps { get; init; }
+    public long? StyleShiftSteps { get; init; } = 0;
 
     /// <summary>Rescale prosody-code conditioning to this duration; not a general output-length limit. Legacy target_duration_seconds is accepted.</summary>
     public double? DurationSec { get; init; }
@@ -52,37 +52,37 @@ public sealed record Vevo2TtsRequest : TtsRequest
     public double? ReferenceDurationSec { get; init; }
 
     /// <summary>Positive AR sampling temperature; default comes from the checkpoint.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.7;
 
     /// <summary>AR top-k sampling; default comes from the checkpoint.</summary>
-    public long? TopK { get; init; }
+    public long? TopK { get; init; } = 20;
 
     /// <summary>AR nucleus sampling; default comes from the checkpoint.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.8;
 
     /// <summary>Positive AR repetition penalty; default comes from the checkpoint.</summary>
     public double? RepetitionPenalty { get; init; }
 
     /// <summary>Maximum generated AR tokens.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 500;
 
     /// <summary>Flow-matching denoising steps.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 32;
 
     /// <summary>Sampling seed; random when omitted.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Character budget per text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 128;
 
     /// <summary>Source-audio chunking for style_preserved_vc/svc requires audio_chunk_duration_sec. Auto uses fixed chunks; none disables chunking.</summary>
-    public Vevo2AudioChunkMode? AudioChunkMode { get; init; }
+    public Vevo2AudioChunkMode? AudioChunkMode { get; init; } = Vevo2AudioChunkMode.Auto;
 
     /// <summary>Source-audio chunk duration for style_preserved_vc/svc; zero or omitted keeps one-shot processing.</summary>
-    public double? AudioChunkDurationSec { get; init; }
+    public double? AudioChunkDurationSec { get; init; } = 0;
 
     /// <summary>Source chunk overlap and output crossfade; must be smaller than chunk duration.</summary>
-    public double? CrossFadeDurationSec { get; init; }
+    public double? CrossFadeDurationSec { get; init; } = 1;
 
     /// <inheritdoc />
     public override void Validate()
@@ -204,17 +204,17 @@ public sealed record Vevo2TtsRequest : TtsRequest
             options["reference_duration_sec"] = ReferenceDurationSec.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (Temperature != null && Temperature != 0.7)
+        if (Temperature != null)
         {
             options["temperature"] = Temperature.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopK != null && TopK != 20)
+        if (TopK != null)
         {
             options["top_k"] = TopK.Value.ToString(CultureInfo.InvariantCulture);
         }
 
-        if (TopP != null && TopP != 0.8)
+        if (TopP != null)
         {
             options["top_p"] = TopP.Value.ToString(CultureInfo.InvariantCulture);
         }
@@ -255,7 +255,7 @@ public sealed record Vevo2TtsRequest : TtsRequest
             };
         }
 
-        if (AudioChunkDurationSec != null && AudioChunkDurationSec != 0)
+        if (AudioChunkDurationSec != null)
         {
             options["audio_chunk_duration_sec"] = AudioChunkDurationSec.Value.ToString(CultureInfo.InvariantCulture);
         }

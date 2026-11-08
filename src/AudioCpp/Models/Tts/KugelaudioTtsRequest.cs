@@ -13,28 +13,28 @@ public sealed record KugelaudioTtsRequest : TtsRequest
     public new KugelaudioVoiceId? VoiceId { get; init; }
 
     /// <summary>Diffusion steps per acoustic frame, from 1 to 1000; omitted uses the checkpoint's diffusion_head_config.ddpm_num_inference_steps.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 20;
 
     /// <summary>Diffusion classifier-free guidance; 1 disables the unconditional pass. Any finite value is accepted; negative values enter CFG arithmetic.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 3;
 
     /// <summary>Maximum autoregressive tokens per text chunk.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 2048;
 
     /// <summary>Sample autoregressive speech control tokens instead of greedy decoding.</summary>
-    public bool? DoSample { get; init; }
+    public bool? DoSample { get; init; } = false;
 
     /// <summary>Autoregressive sampling temperature when do_sample is enabled. Any finite value is accepted; negative values disable sampling.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 1;
 
     /// <summary>Random seed; -1 chooses a random seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "1234";
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 300;
 
     /// <summary>Framework long-form text splitting mode.</summary>
-    public KugelaudioTextChunkMode? TextChunkMode { get; init; }
+    public KugelaudioTextChunkMode? TextChunkMode { get; init; } = KugelaudioTextChunkMode.Default;
 
     /// <inheritdoc />
     public override void Validate()

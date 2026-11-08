@@ -16,7 +16,7 @@ public sealed record DotsTtsRequest : TtsRequest
     public double? ReferenceDurationSec { get; init; }
 
     /// <summary>DotTTS synthesis template. tts is normal text-to-speech; instruction_tts adds instruction conditioning; text_to_audio uses a sound-description template; tts_interleave uses the streaming interleave schedule; edit uses the DotTTS Edit source-audio editing schedule and is offline-only.</summary>
-    public DotsTtsTemplateName? TemplateName { get; init; }
+    public DotsTtsTemplateName? TemplateName { get; init; } = DotsTtsTemplateName.Tts;
 
     /// <summary>Source WAV path for DotTTS Edit. Required when template_name=edit unless audio_input is supplied by the caller.</summary>
     public string? SourceAudio { get; init; }
@@ -31,37 +31,37 @@ public sealed record DotsTtsRequest : TtsRequest
     public string? TargetText { get; init; }
 
     /// <summary>DotTTS Edit speaker conditioning mode. auto follows the upstream tag-based behavior; on/off force or disable source-audio speaker conditioning.</summary>
-    public DotsTtsUseXvector? UseXvector { get; init; }
+    public DotsTtsUseXvector? UseXvector { get; init; } = DotsTtsUseXvector.Auto;
 
     /// <summary>Optional target language tag. none disables language tagging; otherwise pass a language code such as en or zh.</summary>
-    public new string? Language { get; init; }
+    public new string? Language { get; init; } = "none";
 
     /// <summary>SOAR flow-matching inference step count; default 10.</summary>
-    public long? NumInferenceSteps { get; init; }
+    public long? NumInferenceSteps { get; init; } = 10;
 
     /// <summary>Classifier-free guidance scale used by SOAR flow matching. Default 1.2.</summary>
-    public double? GuidanceScale { get; init; }
+    public double? GuidanceScale { get; init; } = 1.2;
 
     /// <summary>Multiplier applied to the prompt speaker embedding; default 1.5.</summary>
-    public double? SpeakerScale { get; init; }
+    public double? SpeakerScale { get; init; } = 1.5;
 
     /// <summary>SOAR ODE solver method for flow matching. Fixed-step euler is the default and parity baseline.</summary>
-    public DotsTtsSamplerMode? SamplerMode { get; init; }
+    public DotsTtsSamplerMode? SamplerMode { get; init; } = DotsTtsSamplerMode.Euler;
 
     /// <summary>Maximum generated audio patch count per generated segment; default 500. In Edit mode source patches consume this budget; it must exceed the source-patch count.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 500;
 
     /// <summary>Maximum text codepoints per generated segment for long-form requests; default 320.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 320;
 
     /// <summary>Framework text chunking mode; default tag_aware preserves leading style/control tags across long-form chunks.</summary>
-    public DotsTtsTextChunkMode? TextChunkMode { get; init; }
+    public DotsTtsTextChunkMode? TextChunkMode { get; init; } = DotsTtsTextChunkMode.TagAware;
 
     /// <summary>Streaming vocoder latent patch merge size after the initial unmerged patches; default 4, matching the Python optimized streaming runtime default.</summary>
-    public long? VocoderMergeSteps { get; init; }
+    public long? VocoderMergeSteps { get; init; } = 4;
 
     /// <summary>Seed for prompt latent sampling and flow noise initialization; default 42.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "42";
 
     /// <inheritdoc />
     public override void Validate()

@@ -8,19 +8,19 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record SopranoTtsRequest : TtsRequest
 {
     /// <summary>Maximum generated audio frames for the autoregressive LM; default 512.</summary>
-    public long? MaxTokens { get; init; }
+    public long? MaxTokens { get; init; } = 512;
 
     /// <summary>Autoregressive sampling temperature; must be &gt; 0, default 0.3.</summary>
-    public double? Temperature { get; init; }
+    public double? Temperature { get; init; } = 0.3;
 
     /// <summary>Nucleus sampling probability; default 0.95. Values &gt;=1 disable nucleus filtering.</summary>
-    public double? TopP { get; init; }
+    public double? TopP { get; init; } = 0.95;
 
     /// <summary>Repetition penalty applied to the LM head; default 1.2. Must be positive; values below 1 are accepted.</summary>
-    public double? RepetitionPenalty { get; init; }
+    public double? RepetitionPenalty { get; init; } = 1.2;
 
     /// <summary>Additive bias on the EOS token logit during generation. Positive values make the model stop sooner when speech ends (mitigating runaway generations that hit max_tokens); negative values encourage longer utterances. Default 0 disables the adjustment.</summary>
-    public double? EosBias { get; init; }
+    public double? EosBias { get; init; } = 0;
 
     /// <summary>Autoregressive sampling seed; omitted requests choose a random seed.</summary>
     public string? Seed { get; init; }

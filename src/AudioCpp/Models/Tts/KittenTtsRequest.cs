@@ -10,19 +10,19 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record KittenTtsRequest : TtsRequest
 {
     /// <summary>Built-in voice ID or package alias; structured voice input (CLI --voice-id) takes precedence.</summary>
-    public new KittenTtsVoiceId? VoiceId { get; init; }
+    public new KittenTtsVoiceId? VoiceId { get; init; } = KittenTtsVoiceId.ExprVoice5M;
 
     /// <summary>Speech speed multiplier; larger values produce faster speech. Must be finite and positive.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Decoder noise seed for the current request; omitted requests choose a fresh random seed.</summary>
     public string? Seed { get; init; }
 
     /// <summary>Long-form text chunking mode.</summary>
-    public KittenTtsTextChunkMode? TextChunkMode { get; init; }
+    public KittenTtsTextChunkMode? TextChunkMode { get; init; } = KittenTtsTextChunkMode.Default;
 
     /// <summary>Maximum Unicode codepoints per long-form chunk.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 400;
 
     /// <inheritdoc />
     public override void Validate()

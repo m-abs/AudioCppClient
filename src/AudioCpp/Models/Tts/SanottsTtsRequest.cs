@@ -10,16 +10,16 @@ namespace Mabs.AudioCpp.Models.Tts;
 public sealed record SanottsTtsRequest : TtsRequest
 {
     /// <summary>Speech speed multiplier; larger is faster. Its reciprocal scales the voice's tuned length scale before the per-token clamp.</summary>
-    public double? Speed { get; init; }
+    public double? Speed { get; init; } = 1;
 
     /// <summary>Decoder noise seed. The decoder is noise-fed, so a given seed picks one of many valid renderings; 0 derives it from the text as sha256(text)[:8], which is what the reference implementations do. Piperlite voices are deterministic and ignore the seed.</summary>
-    public string? Seed { get; init; }
+    public string? Seed { get; init; } = "0";
 
     /// <summary>Long-form text chunking mode.</summary>
-    public SanottsTextChunkMode? TextChunkMode { get; init; }
+    public SanottsTextChunkMode? TextChunkMode { get; init; } = SanottsTextChunkMode.WordBudget;
 
     /// <summary>Maximum Unicode codepoints per long-form text chunk; default 280.</summary>
-    public long? TextChunkSize { get; init; }
+    public long? TextChunkSize { get; init; } = 280;
 
     /// <inheritdoc />
     public override void Validate()
