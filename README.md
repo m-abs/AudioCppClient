@@ -173,5 +173,5 @@ when passing flags, since `dotnet run` option parsing can eat app arguments.
 ```
 dotnet build AudioCpp.slnx
 dotnet test tests/AudioCpp.Tests        # 296 tests, fake handler, no network
-dotnet pack src/AudioCpp -c Release     # produces Mabs.AudioCppClient.0.0.3.nupkg
+dotnet pack src/AudioCpp -c Release     # produces Mabs.AudioCppClient.0.1.0.nupkg
 ```

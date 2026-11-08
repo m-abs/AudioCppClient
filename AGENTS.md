@@ -11,7 +11,7 @@ directly; there is **no OpenAI dependency**. Namespaces: `Mabs.AudioCpp`,
 `Mabs.AudioCppClient`).
 
 Target frameworks: `net10.0`. No library dependencies — `System.Text.Json` is in-box on
-`net10.0`. Current package version `0.0.3`.
+`net10.0`. Current package version `0.1.0`.
 
 ## Layout
 
