@@ -19,6 +19,10 @@ indent_size = 2
 [*.json]
 indent_size = 2
 
+# Generated enums mirror wire values, including CJK identifiers (SA1317 cannot be satisfied).
+[src/AudioCpp/Enums/*.cs]
+dotnet_diagnostic.SA1317.severity = none
+
 # C# files
 [*.cs]
 

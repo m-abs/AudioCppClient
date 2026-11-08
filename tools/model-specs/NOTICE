@@ -1,0 +1,13 @@
+Vendored model spec data
+========================
+The JSON files in this directory are unmodified copies of model_specs/*.json
+and webui/configs/model_params.json from the audio.cpp repository
+(https://github.com/0xShug0/audio.cpp), tag v0.9.4 (git f7ac446f).
+
+Copyright 2026 ShugoAI LLC. Licensed under the Apache License, Version 2.0
+(see the LICENSE file in this directory).
+
+The generated C# sources derived from this data (src/AudioCpp/Enums/, the
+per-family records under src/AudioCpp/Models/{Tts,Clone,Design}/, and the
+convenience tests) are produced by tools/generate-convenience.py from these
+files; on version bumps, re-fetch under the same license.

@@ -12,6 +12,8 @@
   href: alignment.md
 - name: Tasks
   href: tasks.md
+- name: Convenience Clients
+  href: convenience.md
 - name: Recipes
   href: recipes.md
 - name: Error Handling

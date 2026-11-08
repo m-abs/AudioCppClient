@@ -491,3 +491,4 @@ $RECYCLE.BIN/
 *.asc
 .devcontainer/nuget-packages/
 tests/AudioCpp.Tests/coverage/
+0xShug0

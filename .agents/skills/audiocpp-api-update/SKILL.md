@@ -135,6 +135,21 @@ Run the test TFM: `net10.0`.
   client now encodes that differs from older docs (status codes, field names, key order). The
   live server wins; say what you found rather than silently reconciling to the doc.
 
+## Phase 6 — convenience layer (generated code)
+
+The generated convenience layer (`tools/generate-convenience.py` reading `tools/model-specs/`)
+refreshes on every version bump, in the same pass as the manual phases:
+
+1. Re-fetch `model_specs/*.json` and `webui/configs/model_params.json` for the new tag into
+   `tools/model-specs/` — the vendored copy is what the generator reads; never hand-edit
+   generated `.cs` files.
+2. Re-run `python3 tools/generate-convenience.py` and diff the generated files. The generator
+   is deterministic and idempotent, so any diff is real spec drift (new families, new options,
+   changed defaults or capabilities) — report it.
+3. Rebuild and run the tests. The golden serialization and `Validate()` tests are generated per
+   family-task pair, so they re-encode the new wire shape automatically. The `.editorconfig`
+   formatting rules apply to generated code: the bar is 0 warnings for generated files too.
+
 ## Shortcuts with known limits
 
 - `shortcut:` v0.9.3 source snapshots at `/tmp` are for convenience; on a version bump, re-fetch

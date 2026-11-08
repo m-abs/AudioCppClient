@@ -94,6 +94,27 @@ callers without `await foreach` language support.
 | Task stream | POST | `/v1/tasks/stream` | `Tasks.StreamAsync(...)` (`StreamFormat = "sse"` streams; `null` uses the buffered JSON envelope) |
 | Task batch | POST (SSE) | `/v1/tasks/batch` | `Tasks.BatchAsync(...)` |
 
+## Convenience clients
+
+Generated per family-task pair from the vendored model specs (106 pairs across `tts`,
+`clone`, `design`): typed properties with web-ui defaults, enum value sets, and capability
+validation, riding `Tasks.RunAsync` through `ITtsClient`/`ICloneClient`/`IDesignClient`.
+Values equal to the resolved default are omitted on the wire.
+
+```csharp
+using Mabs.AudioCpp;
+using Mabs.AudioCpp.Enums;
+using Mabs.AudioCpp.Tts;
+
+AudioCppClient client = new AudioCppClient("http://127.0.0.1:8080");
+
+PlapreTtsClient plapre = new PlapreTtsClient(client);
+TaskResult result = await plapre.SpeakAsync(new PlapreTtsRequest { Text = "Hej", VoiceId = PlapreVoiceId.Ida });
+// Wire body: {"model":"plapre_3_bf16","request":{"text":"Hej","options":{"voice_id":"ida"}}}
+```
+
+Naming rules and the regeneration procedure are in [docs/convenience.md](docs/convenience.md).
+
 ## Notes and caveats
 
 - **Live routes are duplex.** `SpeakLiveAsync`/`TranscribeLiveAsync` POST raw PCM
@@ -139,7 +160,8 @@ dotnet run --project examples/AudioCpp.Demo -- speech-stream http://127.0.0.1:80
 dotnet run --project examples/AudioCpp.Demo -- transcribe http://127.0.0.1:8080 parakeet /tmp/speech.wav --multipart
 ```
 
-Also available: `models`, `voices`, `load`, `unload`, `recipes`, `transcribe-details`, and the
+Also available: `models`, `voices`, `load`, `unload`, `recipes`, `transcribe-details`,
+`convenience` (convenience-client round trip against a configured TTS model), and the
 error-shape probes (`speech-error`, `speech-stream-error`, `tasks-run-error`, `recipe-run-error`).
 Run the built dll directly (`dotnet examples/AudioCpp.Demo/bin/Debug/net10.0/AudioCpp.Demo.dll …`)
 when passing flags, since `dotnet run` option parsing can eat app arguments.
@@ -148,6 +170,6 @@ when passing flags, since `dotnet run` option parsing can eat app arguments.
 
 ```
 dotnet build AudioCpp.slnx
-dotnet test tests/AudioCpp.Tests        # 75 tests, fake handler, no network
+dotnet test tests/AudioCpp.Tests        # 296 tests, fake handler, no network
 dotnet pack src/AudioCpp -c Release     # produces Mabs.AudioCppClient.0.0.3.nupkg
 ```

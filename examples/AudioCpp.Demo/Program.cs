@@ -13,6 +13,8 @@ using Mabs.AudioCpp.Models.Recipes;
 using Mabs.AudioCpp.Models.Speech;
 using Mabs.AudioCpp.Models.Tasks;
 using Mabs.AudioCpp.Models.Transcription;
+using Mabs.AudioCpp.Models.Tts;
+using Mabs.AudioCpp.Tts;
 
 // Demo CLI proving the client library against a real audio.cpp server.
 // Every command exits non-zero when its expected observable does not hold.
@@ -21,7 +23,7 @@ if (args.Length < 2)
     Console.Error.WriteLine("usage: demo <command> <baseUrl> [args…]");
     Console.Error.WriteLine("commands: health | voices | models | unload | load | load-package-error | recipes |");
     Console.Error.WriteLine("          speech | transcribe | transcribe-details |");
-    Console.Error.WriteLine("          speech-error | speech-stream-error | tasks-run-error | recipe-run-error");
+    Console.Error.WriteLine("          speech-error | speech-stream-error | tasks-run-error | recipe-run-error | convenience");
     return 2;
 }
 
@@ -51,6 +53,7 @@ try
         "speech-stream-error" => await SpeechStreamErrorAsync(),
         "tasks-run-error" => await TasksRunErrorAsync(),
         "recipe-run-error" => await RecipeRunErrorAsync(),
+        "convenience" => await ConvenienceAsync(),
         _ => Fail("unknown command: " + command),
     };
 }
@@ -349,6 +352,25 @@ async Task<int> RecipeRunErrorAsync()
         Console.WriteLine($"ok: status={ex.StatusCode} message={ex.Message}");
         return ex.Message.Contains("unknown recipe") ? 0 : Fail("unexpected message");
     }
+}
+
+async Task<int> ConvenienceAsync()
+{
+    // Model must be the live config entry id, not the spec default package name.
+    KokoroTtsClient tts = new(client) { Model = "kokoro" };
+    TaskResult result = await tts.SpeakAsync(new TtsRequest { Text = "Hello world" });
+    if (result.Audio == null || result.Audio.Length == 0)
+    {
+        return Fail("convenience: empty audio");
+    }
+
+    if (result.Timing == null)
+    {
+        return Fail("convenience: no timing");
+    }
+
+    Console.WriteLine($"convenience: audio={result.Audio.Length} bytes wall_ms={result.Timing.WallMs} audio_duration_ms={result.Timing.AudioDurationMs} rtf={result.Timing.Rtf}");
+    return 0;
 }
 
 int Fail(string message)
