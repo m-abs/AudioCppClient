@@ -149,6 +149,16 @@ public class SseReaderTests
         Assert.Equal(42.0, done.Result!.Timing!.TtftMs);
     }
 
+    /// <summary>A done event without a result payload falls back to an empty result instead of throwing.</summary>
+    [Fact]
+    public void TaskStreamDoneWithoutResultYieldsEmptyResult()
+    {
+        TaskStreamEvent done = TaskStreamEvent.ParseSse("{\"type\":\"task.stream.done\",\"result\":null}");
+        Assert.Equal(TaskStreamEventKind.Done, done.Kind);
+        Assert.NotNull(done.Result);
+        Assert.Null(done.Result!.Text);
+    }
+
     /// <summary>With include_artifacts events carry an artifacts array (id, kind, payload, meta) as the server writes it.</summary>
     /// <returns>Completes after the assertions pass.</returns>
     [Fact]

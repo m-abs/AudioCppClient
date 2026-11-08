@@ -158,7 +158,7 @@ public class SpeechRequestSerializationTests
         {
             Model = "m",
             Input = "t",
-            ResponseFormat = ResponseFormat.Pcm,
+            ResponseFormat = WireString.PCM,
             BusyTimeoutMs = 5000,
         };
         string json = Serialize(request);
@@ -183,8 +183,8 @@ public class SpeechRequestSerializationTests
     {
         SpeechStreamRequest request = new()
         {
-            Request = new SpeechRequest { Model = "m", Input = "t", ResponseFormat = ResponseFormat.Pcm },
-            StreamFormat = StreamFormat.Sse,
+            Request = new SpeechRequest { Model = "m", Input = "t", ResponseFormat = WireString.PCM },
+            StreamFormat = WireString.SSE,
             ReturnText = true,
         };
         string json = Json.Serialize(request);
@@ -198,7 +198,7 @@ public class SpeechRequestSerializationTests
         SpeechStreamRequest request = new()
         {
             Request = new SpeechRequest { Model = "m", Input = "t" },
-            StreamFormat = StreamFormat.Audio,
+            StreamFormat = WireString.Audio,
             ReturnText = true,
         };
         Assert.Throws<ArgumentException>(() => request.Validate());
@@ -230,6 +230,14 @@ public class SpeechRequestSerializationTests
         Assert.Throws<ArgumentException>(() => new LiveSpeechRequest { Model = "m", SampleRate = 100 }.BuildQueryString());
         Assert.Throws<ArgumentException>(() => new LiveSpeechRequest { Model = "m", Channels = 17 }.BuildQueryString());
         Assert.Throws<ArgumentException>(() => new LiveSpeechRequest { Input = "x" }.BuildQueryString());
+    }
+
+    /// <summary>A live query key colliding with a set typed field throws instead of being sent twice.</summary>
+    [Fact]
+    public void LiveSpeechQueryRejectsOptionCollision()
+    {
+        LiveSpeechRequest speech = new() { Model = "m", Seed = "1", Options = new Dictionary<string, string> { ["seed"] = "2" } };
+        Assert.Throws<ArgumentException>(() => speech.BuildQueryString());
     }
 
     /// <summary>Supplying both audio path and audio base64 fails validation.</summary>
@@ -269,12 +277,12 @@ public class SpeechRequestSerializationTests
             json);
     }
 
-    /// <summary>An unknown artifact kind or a payload combined with a path fails validation.</summary>
+    /// <summary>An unknown artifact kind or a payload combined with a path fails validation through the client request path.</summary>
     [Fact]
     public void ArtifactRejectsUnknownKindAndBothPayloadPath()
     {
-        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = "tokens", Path = "/x" }.Validate());
-        Assert.Throws<ArgumentException>(() => new AudioArtifactInput { Id = "a", Kind = ArtifactKind.Custom, Payload = [1], Path = "/x" }.Validate());
+        Assert.Throws<ArgumentException>(() => new TaskRunRequest { Model = "m", Request = new TaskRequestBody { Artifacts = new List<AudioArtifactInput> { new() { Id = "a", Kind = "tokens", Path = "/x" } } } }.Validate());
+        Assert.Throws<ArgumentException>(() => new TaskRunRequest { Model = "m", Request = new TaskRequestBody { Artifacts = new List<AudioArtifactInput> { new() { Id = "a", Kind = ArtifactKind.Custom, Payload = [1], Path = "/x" } } } }.Validate());
     }
 
     /// <summary>Recipe name, stream flags, model map, and inner request serialize in order.</summary>

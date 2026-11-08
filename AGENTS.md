@@ -34,6 +34,12 @@ Public entry surface: `AudioCppClient` (sub-clients `Speech`, `Transcriptions`, 
 internal `SseReader`/`SseParsers` helpers. The test assembly sees `internal`s via
 `InternalsVisibleTo("AudioCpp.Tests")`.
 
+## Agent files
+
+Agent-authored work (plans, audits, reviews) lives under `.agents/`; completed ones go in
+`.agents/history/` named `YYYY-MM-DD-<topic>.md`. `docs/` is public documentation only — never
+put agent files there.
+
 ## Build / test / pack
 
 ```

@@ -90,7 +90,7 @@ public sealed record SpeechRequest
 
     /// <summary><c>wav</c> (default), <c>json</c>, <c>pcm</c>, <c>mp3</c> where the frontend is compiled.</summary>
     [JsonPropertyName("response_format")]
-    public ResponseFormat? ResponseFormat { get; set; }
+    public WireString? ResponseFormat { get; set; }
 
     /// <summary>Upper bound on waiting for a busy model, in milliseconds.</summary>
     [JsonPropertyName("busy_timeout_ms")]

@@ -15,7 +15,7 @@ public sealed record SpeechStreamRequest
 
     /// <summary><c>sse</c> for event framing; <c>audio</c> for raw chunked PCM.</summary>
     [JsonPropertyName("stream_format")]
-    public StreamFormat StreamFormat { get; set; } = StreamFormat.Sse;
+    public WireString StreamFormat { get; set; } = WireString.SSE;
 
     /// <summary>
     /// Ask the server to also stream the text a speech-to-speech model writes while
@@ -33,7 +33,7 @@ public sealed record SpeechStreamRequest
     public void Validate()
     {
         Request.Validate();
-        if (ReturnText == true && StreamFormat != StreamFormat.Sse)
+        if (ReturnText == true && StreamFormat != WireString.SSE)
         {
             throw new ArgumentException("return_text needs stream_format=sse");
         }

@@ -28,7 +28,7 @@ and has the appropriate scopes configured.
 The token is missing the `read:packages` scope. Grant it with the GitHub CLI:
 
 ```bash
-gh auth login --scope read:packages
+gh auth refresh-token -s read:packages
 ```
 
 Then re-run the `dotnet nuget add source` command above — the password stored in the
@@ -45,7 +45,7 @@ AudioCppClient client = new("http://127.0.0.1:8080");
 The audio.cpp server default listening port is **8080** (`--port`); the examples assume a
 server on that port. Pass your own `HttpClient` to control proxies, timeouts or TLS; for the live routes it must
 be backed by a handler with full-duplex HTTP/1.1 support (the default handler on .NET Core
-qualifies; browser/WASM handlers do not). `apiKey` is sent as a bearer token on every
+qualifies). `apiKey` is sent as a bearer token on every
 request — the server ignores it today, frontends in front of it may require it.
 
 ## Check the server

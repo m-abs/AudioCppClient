@@ -55,7 +55,7 @@ public sealed record TaskRequestBody
         return Options != null && Options.Count > 0;
     }
 
-    /// <summary>Validates the one-of audio rule and the voice-ref type.</summary>
+    /// <summary>Validates the one-of audio rule, the voice-ref type, and each artifact.</summary>
     public void Validate()
     {
         if (AudioPath != null && AudioBase64 != null)
@@ -66,6 +66,14 @@ public sealed record TaskRequestBody
         if (VoiceRef != null && VoiceRef is not string && VoiceRef is not VoiceRefObject)
         {
             throw new ArgumentException("VoiceRef must be a string path or a VoiceRefObject", nameof(VoiceRef));
+        }
+
+        if (Artifacts != null)
+        {
+            foreach (AudioArtifactInput artifact in Artifacts)
+            {
+                artifact.Validate();
+            }
         }
     }
 }

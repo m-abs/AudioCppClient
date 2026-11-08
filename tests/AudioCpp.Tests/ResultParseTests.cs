@@ -24,6 +24,14 @@ public class ResultParseTests
         Assert.Equal(0.12, result.Timing!.Rtf);
     }
 
+    /// <summary>A null body or a JSON null root throws instead of returning null.</summary>
+    [Fact]
+    public void ParseObjectRejectsNullRoot()
+    {
+        Assert.Throws<JsonException>(() => AlignmentResult.Parse(null));
+        Assert.Throws<JsonException>(() => AlignmentResult.Parse("null"));
+    }
+
     /// <summary>Transcription result and details result rebuild, keeping the detail arrays.</summary>
     [Fact]
     public void TranscriptionAndDetailsRebuildFromCachedJson()

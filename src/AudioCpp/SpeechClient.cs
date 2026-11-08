@@ -65,7 +65,7 @@ public sealed class SpeechClient
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        request.ResponseFormat = ResponseFormat.Json;
+        request.ResponseFormat = WireString.JSON;
         request.Validate();
         using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
         httpRequest.Content = AudioCppClient.CreateJsonContent(request);
@@ -122,8 +122,8 @@ public sealed class SpeechClient
     {
         ArgumentNullException.ThrowIfNull(request);
 
-        request.StreamFormat = StreamFormat.Audio;
-        request.Request.ResponseFormat = ResponseFormat.Pcm;
+        request.StreamFormat = WireString.Audio;
+        request.Request.ResponseFormat = WireString.PCM;
         request.Validate();
         using HttpRequestMessage httpRequest = _client.NewRequest(HttpMethod.Post, "v1/audio/speech");
         httpRequest.Content = AudioCppClient.CreateJsonContent(request);
@@ -135,8 +135,8 @@ public sealed class SpeechClient
     /// Live speech-to-speech: the request body is raw PCM pulled from
     /// <paramref name="pcmInput"/> as it produces data (chunked transfer), and the response
     /// streams events on the same connection. Consuming events before
-    /// <paramref name="pcmInput"/> ends requires full-duplex HTTP; on platforms without it
-    /// (browser/WASM) a <see cref="PlatformNotSupportedException"/> is thrown. The request
+    /// <paramref name="pcmInput"/> ends requires full-duplex HTTP; a
+    /// <see cref="PlatformNotSupportedException"/> is thrown on platforms without it. The request
     /// ends — and the model treats it as end-of-speech — when <paramref name="pcmInput"/>
     /// reaches EOF; closing the connection without that is a server error, by contract.
     /// </summary>
@@ -190,7 +190,7 @@ public sealed class SpeechClient
     /// <exception cref="AudioCppException">The response failed.</exception>
     private async Task<SseReader> OpenSpeechStreamAsync(SpeechStreamRequest request, CancellationToken cancellationToken)
     {
-        if (request.StreamFormat != StreamFormat.Sse)
+        if (request.StreamFormat != WireString.SSE)
         {
             throw new ArgumentException("StreamAsync emits SSE events; use StreamPcmAsync for stream_format=audio");
         }
@@ -198,9 +198,9 @@ public sealed class SpeechClient
         if (request.Request.ResponseFormat == null)
         {
             // Streaming speech only supports PCM output; set it so the server does not 400.
-            request.Request.ResponseFormat = ResponseFormat.Pcm;
+            request.Request.ResponseFormat = WireString.PCM;
         }
-        else if (request.Request.ResponseFormat.Value != ResponseFormat.Pcm)
+        else if (request.Request.ResponseFormat.Value != WireString.PCM)
         {
             throw new ArgumentException("streaming speech only supports response_format=pcm");
         }

@@ -132,7 +132,7 @@ public sealed class TranscriptionClient
     /// Live capture: raw PCM pulled from <paramref name="pcmInput"/> as it produces data
     /// (chunked request body), transcript events on the same connection. Requires
     /// full-duplex HTTP; throws <see cref="PlatformNotSupportedException"/> on platforms
-    /// that cannot stream a request body while reading the response (browser/WASM). The
+    /// that cannot stream a request body while reading the response. The
     /// request ends — the model's end-of-speech signal — when <paramref name="pcmInput"/>
     /// reaches EOF.
     /// </summary>

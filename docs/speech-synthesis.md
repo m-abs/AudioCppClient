@@ -100,8 +100,8 @@ Requires a model configured with `mode: "streaming"` and only supports
 ```csharp
 SpeechStreamRequest stream = new()
 {
-    Request = new SpeechRequest { Model = "kokoro-stream", Input = "Hello.", ResponseFormat = ResponseFormat.Pcm },
-    StreamFormat = StreamFormat.Sse,
+    Request = new SpeechRequest { Model = "kokoro-stream", Input = "Hello.", ResponseFormat = WireString.Pcm },
+    StreamFormat = WireString.Sse,
     ReturnText = true, // speech-to-speech models can stream their text too
 };
 
@@ -148,8 +148,8 @@ await client.Speech.StreamAsync(stream, async evt =>
 
 `/v1/audio/speech/live` uploads raw PCM as a chunked request body and streams events on the
 same connection; all parameters travel as query string. EOF on the input stream is the
-model's end-of-speech signal. Requires full-duplex HTTP/1.1 — browser/WASM handlers throw
-`PlatformNotSupportedException`.
+model's end-of-speech signal. Requires full-duplex HTTP/1.1; handlers that cannot stream the
+request body while reading the response throw `PlatformNotSupportedException`.
 
 ```csharp
 LiveSpeechRequest live = new()

@@ -37,7 +37,7 @@ public sealed class AudioCppClient
     /// Optional transport. When omitted, a default <see cref="HttpClient"/> is created; pass
     /// your own to control proxies, timeouts or TLS. For the live routes it must be backed by
     /// a handler with full-duplex HTTP/1.1 support (the default handler on .NET Core and
-    /// .NET Framework's WinHttpClient qualify; browser/WASM handlers do not).
+    /// .NET Framework's WinHttpClient qualify).
     /// </param>
     /// <param name="apiKey">
     /// Optional bearer token sent as <c>Authorization: Bearer &lt;key&gt;</c> on every request.
@@ -442,7 +442,7 @@ public sealed class AudioCppClient
             }
             catch (PlatformNotSupportedException ex)
             {
-                // Surfaced on platforms without full-duplex request streaming (browser/WASM).
+                // Surfaced on platforms whose HTTP stack cannot stream a request body while reading the response.
                 throw new PlatformNotSupportedException(
                     "The audio.cpp live routes stream the request body and response on one connection; this platform's HTTP stack cannot do that. Use a native client runtime.",
                     ex);

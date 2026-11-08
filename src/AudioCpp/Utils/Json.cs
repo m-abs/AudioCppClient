@@ -40,6 +40,7 @@ internal static class Json
             throw new JsonException("The cached JSON body is null.");
         }
 
-        return Deserialize<T>(json);
+        T? value = JsonSerializer.Deserialize<T>(json, SerializerOptions);
+        return value ?? throw new JsonException("The cached JSON body is not a JSON object.");
     }
 }

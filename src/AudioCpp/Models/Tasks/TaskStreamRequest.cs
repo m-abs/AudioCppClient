@@ -16,7 +16,7 @@ public sealed record TaskStreamRequest
     /// it and replays it as the same event sequence). Any other string is a server 400.
     /// </summary>
     [JsonPropertyName("stream_format")]
-    public string? StreamFormat { get; set; } = Models.StreamFormat.Sse.Value;
+    public string? StreamFormat { get; set; } = WireString.SSE.Value;
 
     /// <summary>Ask the server to include streamed artifacts (forwarded; builds without artifact streaming ignore it).</summary>
     [JsonPropertyName("include_artifacts")]

@@ -37,7 +37,7 @@ public sealed class LiveSpeechRequest
     public string? SampleFormat { get; set; }
 
     /// <summary><c>sse</c> (default) or <c>audio</c>. The route only supports <c>response_format=pcm</c>.</summary>
-    public StreamFormat StreamFormat { get; set; } = StreamFormat.Sse;
+    public WireString StreamFormat { get; set; } = WireString.SSE;
 
     /// <summary>Stream the text the model writes as it speaks; requires <see cref="StreamFormat"/> = <c>sse</c>.</summary>
     public bool? ReturnText { get; set; }
@@ -77,10 +77,30 @@ public sealed class LiveSpeechRequest
             throw new ArgumentException("channels must be between 1 and 16");
         }
 
-        if (ReturnText == true && StreamFormat != StreamFormat.Sse)
+        if (ReturnText == true && StreamFormat != WireString.SSE)
         {
             throw new ArgumentException("return_text needs stream_format=sse");
         }
+
+        void CheckCollision(string key, object? value)
+        {
+            if (value != null)
+            {
+                RequestJson.ThrowOnOptionCollision(Options, key);
+            }
+        }
+
+        CheckCollision("model", Model);
+        CheckCollision("input", Input);
+        CheckCollision("language", Language);
+        CheckCollision("voice", Voice);
+        CheckCollision("sample_rate", SampleRate);
+        CheckCollision("channels", Channels);
+        CheckCollision("sample_format", SampleFormat);
+        CheckCollision("stream_format", StreamFormat.Value);
+        CheckCollision("return_text", ReturnText);
+        CheckCollision("busy_timeout_ms", BusyTimeoutMs);
+        CheckCollision("seed", Seed);
 
         QueryBuilder query = new();
         query.Add("model", Model);
